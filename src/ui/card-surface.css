@@ -1,0 +1,89 @@
+/* External card rules formerly misplaced in reader-base.css. */
+body.ad-reader-active #adirector-cg-dock { visibility: hidden !important; pointer-events: none !important; }
+#adirector-cg-dock#adirector-cg-dock #ad-card-registration { background: rgb(244, 239, 223) !important; color: rgb(57, 43, 34) !important; border-width: 1px 1px 1px 3px !important; border-style: solid !important; border-color: rgb(185, 171, 151) rgb(185, 171, 151) rgb(185, 171, 151) rgb(139, 35, 55) !important; border-image: none !important; box-shadow: none !important; transform: none !important; border-radius: 1px !important; font-size: 12px !important; }
+#adirector-cg-dock#adirector-cg-dock .az-cover-image-notice { background: rgba(24, 21, 19, 0.93) !important; border: 1px solid rgb(139, 35, 55) !important; color: rgb(255, 248, 233) !important; border-radius: 1px !important; box-shadow: none !important; }
+#adirector-cg-dock#adirector-cg-dock #addock-story-state { color: rgb(229, 213, 192) !important; }
+#adirector-cg-dock#adirector-cg-dock #addock-story-state::before { background: rgb(139, 35, 55) !important; }
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock[data-director-pixels="false"] { background: rgb(21, 19, 17) !important; }
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock[data-director-pixels="false"] .addock-stage { background: rgb(21, 19, 17) !important; }
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock .addock-head { background: rgba(21, 19, 17, 0.85) !important; }
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock { --az-bg: #151311; --az-panel: #201a15; background: rgb(21, 19, 17) !important; border-color: rgb(71, 59, 46) !important; }
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock .addock-head, #adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock .addock-media { background: rgb(21, 19, 17) !important; }
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock[data-view="current"] .addock-head { background: transparent !important; box-shadow: none !important; }
+/* The image-overlay controls use independent slanted backplates. */
+:is(#adirector-cg-dock, #ad-reader) {
+  --ad-photo-icon-fill: rgba(23, 22, 25, .24);
+  --ad-photo-icon-hover: rgba(40, 38, 43, .43);
+  --ad-photo-icon-border: rgba(255, 255, 255, .16);
+  --ad-photo-icon-shape: polygon(17% 0, 100% 0, 83% 100%, 0 100%);
+}
+#adirector-cg-dock { --ad-card-icon-size: 34px; }
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock[data-view="current"] .addock-actions {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock:is([data-view="current"],[data-view="detail"]) :is(.addock-head, .addock-actions) .addock-btn:has(svg) {
+  box-sizing: border-box !important;
+  flex: 0 0 var(--ad-card-icon-size) !important;
+  width: var(--ad-card-icon-size) !important;
+  height: var(--ad-card-icon-size) !important;
+  min-width: var(--ad-card-icon-size) !important;
+  min-height: var(--ad-card-icon-size) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  clip-path: var(--ad-photo-icon-shape) !important;
+  background: var(--ad-photo-icon-fill) !important;
+  box-shadow: none !important;
+}
+@media (max-width: 480px) {
+  #adirector-cg-dock { --ad-card-icon-size: 30px; }
+}
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock:is([data-view="current"],[data-view="detail"]) :is(.addock-head, .addock-actions) .addock-btn:has(svg):is(:hover, :active) { background: var(--ad-photo-icon-hover) !important; }
+
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock[data-view="current"] .addock-stage-nav {
+  box-sizing: border-box !important;
+  width: var(--ad-card-icon-size) !important;
+  height: var(--ad-card-icon-size) !important;
+  min-width: var(--ad-card-icon-size) !important;
+  min-height: var(--ad-card-icon-size) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  clip-path: var(--ad-photo-icon-shape) !important;
+  background: var(--ad-photo-icon-fill) !important;
+  box-shadow: none !important;
+}
+
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock :is(.addock-btn:has(svg), .addock-stage-nav):focus-visible {
+  background: var(--ad-photo-icon-hover) !important;
+  box-shadow: inset 0 0 0 2px var(--ad-photo-icon-border) !important;
+}
+
+/* Keep the accessible caption out of the icon-only button's grid tracks. */
+#adirector-cg-dock:is([data-view="current"],[data-view="detail"]) .addock-actions .addock-action-caption {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  pointer-events: none !important;
+}
+
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock:is([data-view="current"],[data-view="detail"]) .addock-actions .addock-btn:has(svg):where(:not([hidden])) {
+  display: grid !important;
+  place-items: center !important;
+  position: relative !important;
+}
+#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock#adirector-cg-dock .addock-actions .addock-btn[data-motion-origin="true"] {
+  display: none !important;
+}
+#adirector-cg-dock:is([data-view="current"],[data-view="detail"]) .addock-actions .addock-btn > svg {
+  position: absolute !important;
+  inset: 50% auto auto 50% !important;
+  margin: 0 !important;
+  transform: translate(-50%, -50%) !important;
+}
+#adirector-cg-dock #addock-stage{touch-action:pan-y pinch-zoom}
+#adirector-cg-dock #addock-stage img{-webkit-user-drag:none;user-select:none}

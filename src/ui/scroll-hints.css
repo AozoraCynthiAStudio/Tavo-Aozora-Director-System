@@ -1,0 +1,9 @@
+/* Native scrollbar fallback, plus a subtle visible thumb in mobile WebViews. */
+:where(.pp-ui,.ph-pop-card,#ad-reader) :is(textarea,[data-ad-scroll-managed]){scrollbar-width:thin;scrollbar-color:rgba(126,83,58,.2) transparent}
+[data-ad-scroll-managed]{scrollbar-width:none!important}
+[data-ad-scroll-managed]::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+.ad-scroll-hint{position:absolute;z-index:30;display:block;width:3px;pointer-events:none;overflow:hidden;background:transparent;border:0;border-radius:3px}
+.ad-scroll-hint .ad-scroll-thumb{position:absolute;top:0;left:0;display:block;width:3px;min-height:18px;background:rgba(126,83,58,.2);border-radius:3px;transition:background-color .16s ease}
+.ad-scroll-hint.is-scrolling .ad-scroll-thumb{background:rgba(126,83,58,.38)}
+.ad-scroll-hint[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){.ad-scroll-hint .ad-scroll-thumb{transition:none}}

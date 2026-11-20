@@ -1,0 +1,49 @@
+/* Current status presentation. Owns this surface; no historical skins. */
+
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state):where(:not([hidden])){position:absolute!important;z-index:6!important;inset:50% 18px auto!important;display:block!important;width:auto!important;height:auto!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;transform:translateY(-50%)!important;clip-path:none!important;background:none!important;box-shadow:none!important;text-align:center!important;pointer-events:none!important;color:#e6d2b0!important;font-family:"Microsoft YaHei",sans-serif!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)::before{display:none!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)::after{display:none!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-status-mark:where(:not([hidden])){display:block!important;width:52px!important;height:52px!important;margin:0 auto 12px!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;color:#bc9870!important;filter:drop-shadow(0 3px 4px #0003)!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-status-mark svg:where(:not([hidden])){display:block!important;width:100%!important;height:100%!important;fill:none!important;stroke:none!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-status-sign:where(:not([hidden])){position:relative!important;display:inline-flex!important;align-items:center!important;gap:6px!important;max-width:100%!important;margin:0!important;padding:7px 17px!important;inset:auto!important;transform:none!important;border:0!important;border-radius:0!important;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)!important;background:linear-gradient(135deg,#2c1b27f2,#19121df0)!important;box-shadow:0 3px 9px #0002!important;text-align:left!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-status-sign:where(:not([hidden]))::before{content:""!important;position:absolute!important;display:block!important;inset:0 auto auto 8px!important;width:17px!important;height:1px!important;background:#c7a57280!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-status-sign:where(:not([hidden]))::after{content:""!important;position:absolute!important;display:block!important;inset:auto 6px 0 auto!important;width:24px!important;height:2px!important;background:#a7324b!important;animation:none!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-phase-label:where(:not([hidden])){position:static!important;display:block!important;margin:0!important;padding:0!important;font:italic 700 13px/1.5 "Microsoft YaHei"!important;letter-spacing:.035em!important;color:#e6d2b0!important;text-shadow:none!important;background:none!important;transform:none!important;border:0!important;clip-path:none!important;overflow-wrap:anywhere!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-phase-hint:where(:not([hidden])){position:static!important;display:block!important;max-width:220px!important;margin:10px auto 0!important;padding:0!important;font:11px/1.85 "Microsoft YaHei"!important;color:#a98d76!important;text-shadow:none!important;background:none!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-phase-hint:empty{display:none!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-status-glyph{display:none!important;width:11px!important;height:11px!important;flex:0 0 11px!important;font:800 10px/1 Arial!important;color:#cfad7a!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state):is([data-phase=preparing],[data-phase=prompt-ready],[data-phase=queued],[data-phase=generating],[data-phase=saving],[data-phase=loading]) .ad-status-glyph:where(:not([hidden])){display:block!important;border:1px solid #c7a1724d!important;border-top-color:#e8cd9b!important;border-radius:50%!important;animation:ad-status-turn 2s linear infinite!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state):is([data-phase=preparing],[data-phase=prompt-ready],[data-phase=queued],[data-phase=generating],[data-phase=saving],[data-phase=loading]) .phantom-hat{animation:ad-hat-lift 4.4s ease-in-out infinite!important;transform-origin:30px 36px!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state):is([data-phase=preparing],[data-phase=prompt-ready],[data-phase=queued],[data-phase=generating],[data-phase=saving],[data-phase=loading]) .phantom-hat-star{animation:ad-hat-star 3.2s ease-in-out infinite!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-phase=failed] .ad-phase-label{color:#e9a0b1!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-phase=uncertain] .ad-phase-label{color:#e5c38d!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-phase=failed] .ad-status-sign::after{background:#ca4d68!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-phase=uncertain] .ad-status-sign::after{background:#be945b!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-pixels=true]{inset:auto auto 10px 10px!important;max-width:calc(100% - 130px)!important;width:max-content!important;height:auto!important;transform:none!important;text-align:left!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-pixels=true] .ad-status-mark{display:none!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-pixels=true] .ad-phase-hint{display:none!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-pixels=true] .ad-status-sign{padding:6px 13px 6px 10px!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-pixels=true] .ad-phase-label{font-size:11px!important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .phantom-hat{animation:none!important}:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .phantom-hat-star{animation:none!important}:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-status-glyph{animation:none!important}}
+#ad-card-state[data-pixels=true]{bottom:8px!important;max-width:calc(100% - 130px)!important}
+#ar-image-state[data-pixels=true]{bottom:8px!important;max-width:calc(100% - 130px)!important}
+#ad-fullview-state[data-pixels=true]{bottom:94px!important;max-width:calc(100% - 20px)!important}
+#ad-fullview-state[data-pixels=true][data-notice=true]{inset:50% 18px auto!important;width:auto!important;max-width:calc(100% - 36px)!important;transform:translateY(-50%)!important;text-align:center!important}
+#ad-fullview-state[data-pixels=true][data-notice=true] .ad-status-sign{padding:6px 12px!important;border:1px solid #c7a57275!important;background:linear-gradient(135deg,#241820ed,#19121deb)!important;box-shadow:0 3px 12px #0005!important}
+
+
+#adirector-cg-dock #ad-card-registration:where(:not([hidden])){padding:6px 13px 6px 10px!important;border:0!important;border-radius:0!important;background:linear-gradient(135deg,#2c1b27f2,#19121df0)!important;color:#e6d2b0!important;font:italic 700 11px/1.5 'Microsoft YaHei'!important;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)!important;box-shadow:none!important}
+#ad-card-registration::after{content:'';position:absolute;right:6px;bottom:0;width:24px;height:2px;background:#a7324b}
+@keyframes ad-status-turn{to{transform:rotate(360deg)}}
+@keyframes ad-hat-lift{0%,100%{transform:rotate(-9deg) translateY(0)}50%{transform:rotate(-6deg) translateY(-1.5px)}}
+@keyframes ad-hat-star{0%,100%{opacity:.3}50%{opacity:.9}}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-phase-label::before{content:none !important;display:none !important}
+:is(#ad-card-state,#ar-image-state,#ad-fullview-state) .ad-phase-label::after{content:none !important;display:none !important}
+
+@media(prefers-reduced-motion:reduce){:is(#ad-card-state,#ar-image-state,#ad-fullview-state)[data-phase] :is(.ad-status-glyph,.phantom-hat,.phantom-hat-star){animation:none!important}}
+
+#ad-card-state[data-pixels=true][data-notice=true]{inset:50% 12px auto!important;width:max-content!important;max-width:calc(100% - 24px)!important;margin-inline:auto!important;padding:8px 14px!important;transform:translateY(-50%)!important;text-align:center!important;border-radius:8px!important;background:#19121deb!important;box-shadow:0 4px 16px #0008!important;box-sizing:border-box!important}
+#ad-card-state[data-pixels=true][data-notice=true] .ad-status-sign{padding:0!important;clip-path:none!important;background:none!important;box-shadow:none!important;text-align:center!important}
+#ad-card-state[data-pixels=true][data-notice=true] .ad-status-sign::before,#ad-card-state[data-pixels=true][data-notice=true] .ad-status-sign::after{display:none!important}
+#ad-card-state[data-pixels=true][data-notice=true] .ad-phase-hint:not(:empty){display:block!important;margin:2px auto 0!important;color:#ead5bc!important}

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "meekohopanes_ru_zhai",
+    "name": "日系半写实游戏 CG",
+    "positive": "0.8::artist:meekohopanes::, 0.5::artist:ru zhai::, game cg, [[shiny skin]], soft body, soft lineart, official art,beautiful lighting,novel illustration,-7::artist collaboration::",
+    "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
+    "useNegative": true,
+    "basis": "NAI 4.5",
+    "format": "nai45"
+  },
+  {
+    "id": "mignon_allenes",
+    "name": "动漫游戏 CG",
+    "positive": "artist:cc lin,0.1::artist:kidmo::,0.1::artist:akkijin::,2::game cg::,official art",
+    "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
+    "useNegative": true,
+    "basis": "NAI 4.5",
+    "format": "nai45"
+  },
+  {
+    "id": "kittew",
+    "name": "欧美动漫 CG",
+    "positive": "artist:kittew, game cg",
+    "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
+    "useNegative": true,
+    "basis": "NAI 4.5",
+    "format": "nai45"
+  },
+  {
+    "id": "meekohopanes",
+    "name": "欧美半写实 CG",
+    "positive": "artist:meekohopanes, game cg",
+    "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
+    "useNegative": true,
+    "basis": "NAI 4.5",
+    "format": "nai45"
+  },
+  {
+    "id": "generic_quality",
+    "name": "通用基础",
+    "format": "generic",
+    "basis": "通用",
+    "positive": "clear image, well-defined details",
+    "negative": "low resolution, blurry, compression artifacts, watermark",
+    "useNegative": false
+  }
+]

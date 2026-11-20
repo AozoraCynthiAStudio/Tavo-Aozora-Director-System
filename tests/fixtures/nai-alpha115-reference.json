@@ -1,0 +1,69 @@
+{
+  "prompt": "At a cafe, A on the left passes a cup to B on the right. The camera shows both hands., artist:test | A is an adult woman with black hair and green eyes, cream cardigan, white blouse, navy skirt, beige pantyhose, black shoes, A holds the cup with her right hand | B is an adult man with brown hair, blue shirt, black trousers, brown shoes, B reaches for the cup with his left hand",
+  "options": {
+    "negativePrompt": "blur",
+    "extraBody": {
+      "seed": 0
+    }
+  },
+  "budgetAudit": {
+    "before": {
+      "words": 75,
+      "estimate": 120,
+      "method": "whitespace-times-1.60-not-exact-t5"
+    },
+    "after": {
+      "words": 75,
+      "estimate": 120,
+      "method": "whitespace-times-1.60-not-exact-t5"
+    },
+    "soft": 420,
+    "warningThreshold": 450,
+    "removed": [],
+    "exactTokenizer": false,
+    "risk": false,
+    "mode": "audited",
+    "warning": ""
+  },
+  "requestedSeed": 0,
+  "fixedSeed": true,
+  "characters": [
+    {
+      "name": "A",
+      "form": "内部形态名",
+      "identity": "A is an adult woman with black hair and green eyes",
+      "outfit": "cream cardigan, white blouse, navy skirt, beige pantyhose, black shoes",
+      "action": "A holds the cup with her right hand"
+    },
+    {
+      "name": "B",
+      "form": "默认形态",
+      "identity": "B is an adult man with brown hair",
+      "outfit": "blue shirt, black trousers, brown shoes",
+      "action": "B reaches for the cup with his left hand"
+    }
+  ],
+  "sections": {
+    "base": "At a cafe, A on the left passes a cup to B on the right. The camera shows both hands., artist:test",
+    "characters": [
+      {
+        "name": "A",
+        "form": "内部形态名",
+        "identity": "A is an adult woman with black hair and green eyes",
+        "outfit": "cream cardigan, white blouse, navy skirt, beige pantyhose, black shoes",
+        "action": "A holds the cup with her right hand",
+        "prompt": "A is an adult woman with black hair and green eyes, cream cardigan, white blouse, navy skirt, beige pantyhose, black shoes, A holds the cup with her right hand"
+      },
+      {
+        "name": "B",
+        "form": "默认形态",
+        "identity": "B is an adult man with brown hair",
+        "outfit": "blue shirt, black trousers, brown shoes",
+        "action": "B reaches for the cup with his left hand",
+        "prompt": "B is an adult man with brown hair, blue shirt, black trousers, brown shoes, B reaches for the cup with his left hand"
+      }
+    ]
+  },
+  "syntax": "nai45-pipe",
+  "format": "nai45"
+}

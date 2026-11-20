@@ -1,0 +1,236 @@
+{
+  "sourceFile": "Tavo_Aozora-generation-record-image_mw1vogly_bkm.txt",
+  "messageId": 4313,
+  "imageId": "image_mw1vogly_bkm2oawr",
+  "original": true,
+  "plan": {
+    "scene": "medium close-up. 1boy, 1girl. Dim old-school BBQ restaurant, warm hanging bulbs, thin drifting grill smoke. The two sit close together on low worn stools at a small greasy table, side by side, bottles and skewers on oiled paper in the foreground. Side angle at seat height: both upper bodies in frame, and beneath the table edge the female character's bare long leg rests against the male character's small leg. Blurred background of other tables and the grill. Shallow depth of field, warm amber light, faces and hands kept in mid-tone.",
+    "characters": [
+      {
+        "name": "小轩",
+        "form": "默认形态",
+        "equipmentVersion": 2,
+        "equipment": {
+          "HEAD": null,
+          "TOP": [
+            {
+              "name": "dark short-sleeve t-shirt",
+              "state": "worn",
+              "visible": true
+            }
+          ],
+          "LOWER": [
+            {
+              "name": "loose casual trousers",
+              "state": "worn",
+              "visible": false
+            }
+          ],
+          "FULL": null,
+          "LEGWEAR": null,
+          "FOOTWEAR": [
+            {
+              "name": "slip-on sandals",
+              "state": "worn",
+              "visible": false
+            }
+          ],
+          "HAND": null,
+          "ACCESSORIES": null
+        },
+        "identity": "1boy, adult man, 22 years old, fair skin, clean, black short fluffy hair, messy layered fringe, slightly upturned tips, slightly long soft-shaped eyes, narrow face, soft jawline, small chin, thin soft lips, delicate nose bridge, slender delicate build, small frame, 120 cm tall",
+        "action": "sitting on a low stool, bottle raised in one hand, head tilted up toward her, slight flush on his cheeks, his small leg touching her long leg under the table"
+      },
+      {
+        "name": "曲曼",
+        "form": "默认形态",
+        "equipmentVersion": 2,
+        "equipment": {
+          "HEAD": null,
+          "TOP": [
+            {
+              "name": "loose grey short-sleeve home top",
+              "state": "worn",
+              "visible": true
+            },
+            {
+              "name": "casual jacket",
+              "state": "worn open, sleeves rolled up",
+              "visible": true
+            }
+          ],
+          "LOWER": [
+            {
+              "name": "casual shorts",
+              "state": "worn",
+              "visible": false
+            }
+          ],
+          "FULL": null,
+          "LEGWEAR": null,
+          "FOOTWEAR": [
+            {
+              "name": "worn sneakers",
+              "state": "worn",
+              "visible": false
+            }
+          ],
+          "HAND": null,
+          "ACCESSORIES": [
+            {
+              "name": "hair tie",
+              "state": "worn",
+              "visible": true
+            }
+          ]
+        },
+        "identity": "1girl, adult woman, 29 years old, tall female, sun-tanned skin, healthy glossy texture, black hair, high ponytail with loose strands, dark narrow bright eyes, broad face, strong jawline, tall muscular voluptuous build, broad shoulders, thick back, large bust, E cup, wide hips, thick powerful thighs, visible single canine tooth, 188 cm tall",
+        "action": "seated and leaning toward him, bottle held loosely in one hand, flushed cheeks spreading to her ears and neck, smiling with one canine showing, looking down at him, her bare long leg stretched out and resting against his leg under the table; even seated her head and shoulders sit much higher than his, the female character is much taller than the male character"
+      }
+    ],
+    "description": "油腻的小桌旁，两人挨着坐在矮凳上，一个举着酒瓶仰头，一个微微侧身低头看他。桌下两条腿挨在一起，她那条长腿随意伸着，压在他小腿边上。灯光昏黄，烤串的油光在纸上反着亮。"
+  },
+  "style": {
+    "id": "meekohopanes_ru_zhai",
+    "name": "东方半写实 CG",
+    "positive": "{artist:meekohopanes}, {artist:ru zhai}, [artist:liang xing], [[artist:ciloranko]], 0.4::artist:kittew::, game cg, [[shiny skin]], soft body, soft lineart",
+    "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
+    "useNegative": true,
+    "basis": "NAI 4.5",
+    "format": "nai45"
+  },
+  "config": {
+    "format": "nai45",
+    "maxActors": 2,
+    "shot": "near",
+    "ratio": "api",
+    "styleId": "meekohopanes_ru_zhai",
+    "seedFixed": false,
+    "seedValue": "",
+    "autoGenerate": true,
+    "autoExpand": false,
+    "imageService": "nai45",
+    "styleIds": {
+      "nai45": "meekohopanes_ru_zhai",
+      "generic": "generic_quality"
+    },
+    "width": 1216,
+    "height": 832,
+    "generationParameters": {
+      "model": "nai-diffusion-4-5-full",
+      "sizeMode": "custom",
+      "width": 1216,
+      "height": 832,
+      "steps": 28,
+      "scale": 5.5,
+      "sampler": "k_dpmpp_2m",
+      "noiseSchedule": "exponential",
+      "strength": 0.65,
+      "noise": 0,
+      "seedMode": "random",
+      "seedValue": "",
+      "apiFormat": "auto"
+    },
+    "generationModel": "nai-diffusion-4-5-full"
+  },
+  "prompt": "medium close-up. 1boy, 1girl. Dim old-school BBQ restaurant, warm hanging bulbs, thin drifting grill smoke. The two sit close together on low worn stools at a small greasy table, side by side, bottles and skewers on oiled paper in the foreground. Side angle at seat height: both upper bodies in frame, and beneath the table edge the female character's bare long leg rests against the male character's small leg. Blurred background of other tables and the grill. Shallow depth of field, warm amber light, faces and hands kept in mid-tone., height difference, the female character is much taller than the male character, {artist:meekohopanes}, {artist:ru zhai}, [artist:liang xing], [[artist:ciloranko]], 0.4::artist:kittew::, game cg, [[shiny skin]], soft body, soft lineart | boy, adult man, 22 years old, fair skin, clean, black short fluffy hair, messy layered fringe, slightly upturned tips, slightly long soft-shaped eyes, narrow face, soft jawline, small chin, thin soft lips, delicate nose bridge, slender delicate build, small frame, 120 cm tall, dark short-sleeve t-shirt, worn, sitting on a low stool, bottle raised in one hand, head tilted up toward her, slight flush on his cheeks, his small leg touching her long leg under the table | girl, adult woman, 29 years old, tall female, sun-tanned skin, healthy glossy texture, black hair, high ponytail with loose strands, dark narrow bright eyes, broad face, strong jawline, tall muscular voluptuous build, broad shoulders, thick back, large bust, E cup, wide hips, thick powerful thighs, visible single canine tooth, 188 cm tall, loose grey short-sleeve home top, worn, casual jacket, worn open, sleeves rolled up, hair tie, seated and leaning toward him, bottle held loosely in one hand, flushed cheeks spreading to her ears and neck, smiling with one canine showing, looking down at him, her bare long leg stretched out and resting against his leg under the table, even seated her head and shoulders sit much higher than his, the female character is much taller than the male character",
+  "budgetAudit": {
+    "before": {
+      "words": 315,
+      "estimate": 504,
+      "method": "whitespace-times-1.60-not-exact-t5"
+    },
+    "after": {
+      "words": 326,
+      "estimate": 522,
+      "method": "whitespace-times-1.60-not-exact-t5"
+    },
+    "soft": 420,
+    "target": 480,
+    "warningThreshold": 480,
+    "removed": [
+      {
+        "name": "小轩",
+        "field": "equipment",
+        "slot": "LOWER",
+        "reason": "outside-selected-frame"
+      },
+      {
+        "name": "小轩",
+        "field": "equipment",
+        "slot": "FOOTWEAR",
+        "reason": "outside-selected-frame"
+      },
+      {
+        "name": "曲曼",
+        "field": "action",
+        "text": "seated and leaning toward him, bottle held loosely in one hand, flushed cheeks spreading to her ears and neck, smiling with one canine showing, looking down at him, her bare long leg stretched out and resting against his leg under the table; even seated her head and shoulders sit much higher than his, the female character is much taller than the male character",
+        "rendered": "seated and leaning toward him, bottle held loosely in one hand, flushed cheeks spreading to her ears and neck, smiling with one canine showing, looking down at him, her bare long leg stretched out and resting against his leg under the table, even seated her head and shoulders sit much higher than his, the female character is much taller than the male character",
+        "reason": "incidental-off-frame-pose"
+      },
+      {
+        "name": "曲曼",
+        "field": "equipment",
+        "slot": "LOWER",
+        "reason": "outside-selected-frame"
+      },
+      {
+        "name": "曲曼",
+        "field": "equipment",
+        "slot": "FOOTWEAR",
+        "reason": "outside-selected-frame"
+      },
+      {
+        "field": "outfit",
+        "text": "worn",
+        "reason": "duplicate-outfit"
+      }
+    ],
+    "adjusted": [
+      {
+        "name": "曲曼",
+        "field": "outfit",
+        "before": "loose grey short-sleeve home top, worn, casual jacket, worn open, sleeves rolled up, hair tie, worn",
+        "after": "loose grey short-sleeve home top, worn, casual jacket, worn open, sleeves rolled up, hair tie",
+        "reason": "same-field-duplicate"
+      }
+    ],
+    "exactTokenizer": false,
+    "cameraFallback": "none",
+    "submittedDespiteOverBudget": true,
+    "estimateBefore": 504,
+    "estimateAfter": 522,
+    "method": "whitespace-times-1.60-not-exact-t5",
+    "overBudget": true,
+    "risk": true,
+    "mode": "safely-converged",
+    "warning": "提示词估算超出 480，图片已生成；可在生成记录中查看详情。（近似估算 522，不是精确 T5 计数）",
+    "compilerBefore": {
+      "words": 327,
+      "estimate": 523,
+      "method": "whitespace-times-1.60-not-exact-t5"
+    },
+    "prompt": "medium close-up. 1boy, 1girl. Dim old-school BBQ restaurant, warm hanging bulbs, thin drifting grill smoke. The two sit close together on low worn stools at a small greasy table, side by side, bottles and skewers on oiled paper in the foreground. Side angle at seat height: both upper bodies in frame, and beneath the table edge the female character's bare long leg rests against the male character's small leg. Blurred background of other tables and the grill. Shallow depth of field, warm amber light, faces and hands kept in mid-tone., height difference, the female character is much taller than the male character, {artist:meekohopanes}, {artist:ru zhai}, [artist:liang xing], [[artist:ciloranko]], 0.4::artist:kittew::, game cg, [[shiny skin]], soft body, soft lineart | boy, adult man, 22 years old, fair skin, clean, black short fluffy hair, messy layered fringe, slightly upturned tips, slightly long soft-shaped eyes, narrow face, soft jawline, small chin, thin soft lips, delicate nose bridge, slender delicate build, small frame, 120 cm tall, dark short-sleeve t-shirt, worn, sitting on a low stool, bottle raised in one hand, head tilted up toward her, slight flush on his cheeks, his small leg touching her long leg under the table | girl, adult woman, 29 years old, tall female, sun-tanned skin, healthy glossy texture, black hair, high ponytail with loose strands, dark narrow bright eyes, broad face, strong jawline, tall muscular voluptuous build, broad shoulders, thick back, large bust, E cup, wide hips, thick powerful thighs, visible single canine tooth, 188 cm tall, loose grey short-sleeve home top, worn, casual jacket, worn open, sleeves rolled up, hair tie, seated and leaning toward him, bottle held loosely in one hand, flushed cheeks spreading to her ears and neck, smiling with one canine showing, looking down at him, her bare long leg stretched out and resting against his leg under the table, even seated her head and shoulders sit much higher than his, the female character is much taller than the male character",
+    "sections": {
+      "base": "medium close-up. 1boy, 1girl. Dim old-school BBQ restaurant, warm hanging bulbs, thin drifting grill smoke. The two sit close together on low worn stools at a small greasy table, side by side, bottles and skewers on oiled paper in the foreground. Side angle at seat height: both upper bodies in frame, and beneath the table edge the female character's bare long leg rests against the male character's small leg. Blurred background of other tables and the grill. Shallow depth of field, warm amber light, faces and hands kept in mid-tone., height difference, the female character is much taller than the male character, {artist:meekohopanes}, {artist:ru zhai}, [artist:liang xing], [[artist:ciloranko]], 0.4::artist:kittew::, game cg, [[shiny skin]], soft body, soft lineart",
+      "characters": [
+        {
+          "name": "小轩",
+          "form": "默认形态",
+          "identity": "boy, adult man, 22 years old, fair skin, clean, black short fluffy hair, messy layered fringe, slightly upturned tips, slightly long soft-shaped eyes, narrow face, soft jawline, small chin, thin soft lips, delicate nose bridge, slender delicate build, small frame, 120 cm tall",
+          "outfit": "dark short-sleeve t-shirt, worn",
+          "action": "sitting on a low stool, bottle raised in one hand, head tilted up toward her, slight flush on his cheeks, his small leg touching her long leg under the table",
+          "prompt": "boy, adult man, 22 years old, fair skin, clean, black short fluffy hair, messy layered fringe, slightly upturned tips, slightly long soft-shaped eyes, narrow face, soft jawline, small chin, thin soft lips, delicate nose bridge, slender delicate build, small frame, 120 cm tall, dark short-sleeve t-shirt, worn, sitting on a low stool, bottle raised in one hand, head tilted up toward her, slight flush on his cheeks, his small leg touching her long leg under the table"
+        },
+        {
+          "name": "曲曼",
+          "form": "默认形态",
+          "identity": "girl, adult woman, 29 years old, tall female, sun-tanned skin, healthy glossy texture, black hair, high ponytail with loose strands, dark narrow bright eyes, broad face, strong jawline, tall muscular voluptuous build, broad shoulders, thick back, large bust, E cup, wide hips, thick powerful thighs, visible single canine tooth, 188 cm tall",
+          "outfit": "loose grey short-sleeve home top, worn, casual jacket, worn open, sleeves rolled up, hair tie",
+          "action": "seated and leaning toward him, bottle held loosely in one hand, flushed cheeks spreading to her ears and neck, smiling with one canine showing, looking down at him, her bare long leg stretched out and resting against his leg under the table, even seated her head and shoulders sit much higher than his, the female character is much taller than the male character",
+          "prompt": "girl, adult woman, 29 years old, tall female, sun-tanned skin, healthy glossy texture, black hair, high ponytail with loose strands, dark narrow bright eyes, broad face, strong jawline, tall muscular voluptuous build, broad shoulders, thick back, large bust, E cup, wide hips, thick powerful thighs, visible single canine tooth, 188 cm tall, loose grey short-sleeve home top, worn, casual jacket, worn open, sleeves rolled up, hair tie, seated and leaning toward him, bottle held loosely in one hand, flushed cheeks spreading to her ears and neck, smiling with one canine showing, looking down at him, her bare long leg stretched out and resting against his leg under the table, even seated her head and shoulders sit much higher than his, the female character is much taller than the male character"
+        }
+      ]
+    }
+  }
+}

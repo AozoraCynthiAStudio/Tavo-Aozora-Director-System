@@ -1,0 +1,11 @@
+from pathlib import Path
+p=Path(r"Y:/Workspace/Tavo/测试版/Aozora-PhantomPop-alpha207-phone-20261110")
+f=p/"scripts/read-ui-source.cjs";s=f.read_text(encoding="utf-8")
+s=s.replace("['src/ui/phantom.css','src/ui/phantom-surfaces.css']","['src/ui/phantom.css','src/ui/phantom-surfaces.css','src/ui/phone-surfaces.css']")
+f.write_text(s,encoding="utf-8")
+f=p/"scripts/build.cjs";s=f.read_text(encoding="utf-8")
+s=s.replace("read('src/ui/workbench.css')+","read('src/ui/workbench.css')+'\\n'+read('src/ui/phone-surfaces.css')+")
+f.write_text(s,encoding="utf-8")
+f=p/"scripts/export-studio-preview.cjs";s=f.read_text(encoding="utf-8")
+s=s.replace("'phantom-surfaces','workbench']","'phantom-surfaces','workbench','phone-surfaces']")
+f.write_text(s,encoding="utf-8")

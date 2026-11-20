@@ -1,0 +1,168 @@
+{
+  "source": "Y:\\Workspace\\Tavo\\发布\\v1.0.0\\Aozora_Chat_CG_System_v1.0.0_源码\\plugin",
+  "sourcePanelSha256": "f33821da6064488fbf88901216b4319eb20b5ec1420fc2ff005b2856bb27d657",
+  "sourceEntrySha256": "2261f06fabcd9510d9ffeab237a2fc0016a5d162a33754892b32d92d69fe4230",
+  "stage": "Same DOM and responsive CSS, IDs isolated; no old execution scripts",
+  "rules": "src/assets/director-rules.json",
+  "upstream": "渡鸦 / Raven image core; Aozora CG evolution. See project attribution.",
+  "managementUI": {
+    "source": "ui/panel.html navigation and ui/internal-pages.css",
+    "sourceCssSha256": "bb1d418a062ec5596d7d45a9eb5d5426c68385c90d7a35f58ea24ac6aa70d028",
+    "adaptation": "Original Aozora navy/lavender tokens, grouped navigation and resource card layout adapted to scoped Director dialogs; no legacy API controls or execution code."
+  },
+  "statusUI": {
+    "source": "ui/panel.html: aozoraDockVisualPhaseV381, paintCardStatusV3138, setOpenerStatus",
+    "adaptation": "Reuse separate prompt/image stage semantics and linked card/viewer/opener feedback; independent pure status tracker and real event wiring. New inline camera icon and lightweight CSS motion; no legacy execution pipeline.",
+    "visualSource": {
+      "path": "Y:\\Workspace\\Tavo\\发布\\v1.0.1\\Aozora_Chat_CG_System_v1.0.1_源码\\plugin\\ui\\panel.html",
+      "sha256": "7b33bc4a90a7d77365049215e2970ddc64f73fa187e4bfad15f8ae7128e58fa0",
+      "blocks": [
+        "aozora-card-states-3138",
+        "aozora-launcher-states-3141"
+      ],
+      "adaptation": "Centered empty-stage artwork, bottom gradient captions, soft progress line. Director camera launcher remains independent; phase wording is media-neutral."
+    }
+  },
+  "cameraPolicyReview": {
+    "source": "Y:\\Workspace\\Tavo\\测试版\\CG_v1.0.2-alpha.1\\源码\\plugin",
+    "baseline": "v1.0.1",
+    "adaptation": "Use one fixed-frame Scene with separate DNA and wardrobe; projection preserves the director-selected camera."
+  },
+  "workspaceUI": {
+    "implementation": "src/ui/menu.html + src/ui/studio.css",
+    "origin": "User-approved three design boards; original alpha.158 behavior retained",
+    "palette": {
+      "ink": "#141414",
+      "paper": "#f4efdf",
+      "wine": "#8b2337"
+    },
+    "assets": [
+      {
+        "file": "src/assets/studio-cover-web.jpg",
+        "origin": "Built-in ImageGen complete homepage cover, optimized 780px JPEG",
+        "bytes": 107009
+      },
+      {
+        "file": "src/assets/studio-page-header-web.jpg",
+        "origin": "Built-in ImageGen compact secondary-page artwork, optimized 780px JPEG",
+        "bytes": 40617
+      },
+      {
+        "file": "src/assets/studio-button-wine-web.png",
+        "origin": "Built-in ImageGen recoloring of paper plate to dark burgundy, 320px RGBA PNG",
+        "bytes": 43636
+      },
+      {
+        "file": "src/assets/studio-button-ivory-web.png",
+        "origin": "Built-in ImageGen ivory plate, 320px RGBA PNG",
+        "bytes": 38345
+      },
+      {
+        "file": "src/assets/studio-footer-web.jpg",
+        "origin": "Built-in ImageGen irregular paper/ink footer, optimized 780px JPEG",
+        "bytes": 25886
+      },
+      {
+        "file": "src/assets/studio-logo-web.png",
+        "origin": "Built-in ImageGen logo extraction, 360px transparent PNG",
+        "bytes": 35276
+      },
+      {
+        "file": "src/assets/style-cover-acg.jpg",
+        "origin": "Generated distinct adult ACG character calibrated to previous video style reference; ui.9 re-exported from original 1774x887 sheet, native crop, JPEG quality 94",
+        "bytes": 117644,
+        "width": 887,
+        "height": 443,
+        "role": "decorative preset guide; not guaranteed model output"
+      },
+      {
+        "file": "src/assets/style-cover-east.jpg",
+        "origin": "Generated distinct adult East Asian semi-realistic character calibrated to previous video style reference; ui.9 re-exported from original 1774x887 sheet, native crop, JPEG quality 94",
+        "bytes": 96939,
+        "width": 887,
+        "height": 443,
+        "role": "decorative preset guide; not guaranteed model output"
+      },
+      {
+        "file": "src/assets/style-cover-westtoon.jpg",
+        "origin": "Generated distinct adult Western animation character calibrated to previous video style reference; ui.9 re-exported from original 1774x887 sheet, native crop, JPEG quality 94",
+        "bytes": 89657,
+        "width": 887,
+        "height": 443,
+        "role": "decorative preset guide; not guaranteed model output"
+      },
+      {
+        "file": "src/assets/style-cover-westreal.jpg",
+        "origin": "Generated distinct adult Western semi-realistic character calibrated to previous video style reference; ui.9 re-exported from original 1774x887 sheet, native crop, JPEG quality 94",
+        "bytes": 80785,
+        "width": 887,
+        "height": 443,
+        "role": "decorative preset guide; not guaranteed model output"
+      },
+      {
+        "file": "src/assets/studio-paper-emboss-web.jpg",
+        "origin": "Built-in ImageGen light embossed paper; user selected option B on 2026-11-02",
+        "bytes": 35875
+      }
+    ],
+    "coverPolicy": "Exact unchanged built-in presets only. New, copied or edited presets use text/geometric patterns. Seed has no image. Character portraits resolve actual registered image or show explicit missing state.",
+    "alphaVerified": [
+      "studio-button-wine-web.png",
+      "studio-button-ivory-web.png",
+      "studio-logo-web.png"
+    ],
+    "font": "Noto Sans SC if available, Microsoft YaHei/system fallback; no bundled font",
+    "masters": "High-resolution generated source assets excluded from installed plugin and source package; archived separately in UI preview materials.",
+    "hostValidation": "Browser mock only; not installed or tested in native mobile Tavo.",
+    "background": "One fixed continuous light embossed surface under scrolling content and masked footer; no portrait watermark."
+  },
+  "filmDesk": "Generated transparent artwork derived from the user-supplied mobile reference, cropped into seventeen independent UI assets.",
+  "visualUpgrade": {
+    "source": "2026-11-08 Aozora 视觉全面升级素材包及 Aozora-视觉升级预览",
+    "scope": "设置页、历史目录、正文、大图、弹窗及悬浮入口的本地素材与样式"
+  },
+  "phantomPop": {
+    "date": "2026-11-10",
+    "version": "0.1.0-alpha.205",
+    "reference": "User-approved Aozora UI concepts in the current session",
+    "assets": "src/assets/phantom; header, paper and footer extracted from the approved user reference, assistant artwork generated for this project",
+    "implementation": "Existing app/storage/provider and command handlers; scoped phantom.css and phantom.js integration",
+    "notIncluded": [
+      "interactive avatar cropping",
+      "automatic Chinese translation of registered DNA"
+    ],
+    "modelOrHostValidation": false
+  },
+  "phoneRevision": {
+    "version": "0.1.0-alpha.207",
+    "menuCanvas": [
+      390,
+      780
+    ],
+    "housingCanvas": [
+      398,
+      788
+    ],
+    "popupCanvasWidth": 360,
+    "phoneViewportChecked": [
+      428,
+      936
+    ],
+    "physicalPhoneVerified": false
+  },
+  "currentUiAssets": {
+    "map": "src/assets/ui-assets.json",
+    "audit": "docs/asset-audit217.json",
+    "method": "Transcoded from prior source assets; original design and attribution unchanged",
+    "quality": 95
+  },
+  "marketplaceBranding": {
+    "cover": {
+      "file": "src/assets/marketplace/cover.png",
+      "origin": "Built-in ImageGen square avatar-cover portrait with a simplified director viewfinder mark",
+      "bytes": 2462077,
+      "width": 1254,
+      "height": 1254
+    }
+  }
+}

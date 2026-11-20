@@ -1,0 +1,1 @@
+window.ADirectorFrameLayout={width:398,height:724,fit(root,canvas){const r=root.getBoundingClientRect();if(!r.width||!r.height)return 0;const scale=Math.max(.1,Math.min((r.width-20)/398,(r.height-84)/724,1.3));const value='scale('+scale+')';if(canvas.style.transform!==value)canvas.style.transform=value;window.ADirectorSettingsNotices?.reposition();return scale;}};

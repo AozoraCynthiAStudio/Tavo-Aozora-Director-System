@@ -1,0 +1,7 @@
+'use strict';
+const FRAME={width:90,height:126};
+function crop(value){if(!value||typeof value!=='object')throw Error('头像取景无效');const out={};for(const k of ['x','y','width','height']){const n=Number(value[k]);if(!Number.isFinite(n))throw Error('头像取景无效');out[k]=Math.round(n*1e7)/1e7;}if(out.x<0||out.y<0||out.width<=0||out.height<=0||out.x+out.width>1.000001||out.y+out.height>1.000001)throw Error('头像取景超出图片');return out;}
+function draft(value){if(value==null)return null;const dataUrl=String(value.dataUrl||'');if(dataUrl.length>240000||!/^data:image\/(?:webp|png|jpeg);base64,[A-Za-z0-9+/]+=*$/.test(dataUrl))throw Error('头像图片格式或大小无效');return {version:1,dataUrl,crop:crop(value.crop)};}
+function stored(value){if(!value)return null;const pointer=String(value.pointer||'');if(!/^files\/chat\/ad_avatar_[A-Za-z0-9_.-]+$/.test(pointer))throw Error('头像文件路径无效');return {version:1,pointer,crop:crop(value.crop)};}
+function layout(iw,ih,zoom=1,cx=.5,cy=.5,vw=270,vh=230){if(!(iw>0&&ih>0))throw Error('原图尺寸无效');const z=Math.max(1,Math.min(6,Number(zoom)||1)),scale=Math.max(FRAME.width/iw,FRAME.height/ih)*z,w=iw*scale,h=ih*scale,fx=(vw-FRAME.width)/2,fy=(vh-FRAME.height)/2;const left=Math.max(fx+FRAME.width-w,Math.min(fx,fx+FRAME.width/2-cx*w)),top=Math.max(fy+FRAME.height-h,Math.min(fy,fy+FRAME.height/2-cy*h));return {left,top,width:w,height:h,scale,zoom:z,cx:(fx+FRAME.width/2-left)/w,cy:(fy+FRAME.height/2-top)/h,crop:crop({x:(fx-left)/w,y:(fy-top)/h,width:FRAME.width/w,height:FRAME.height/h})};}
+module.exports={FRAME,crop,draft,stored,layout};

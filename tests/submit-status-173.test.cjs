@@ -1,0 +1,7 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {fixture,turn}=require('./helpers/equipment-fixture.cjs'),sample=require('./fixtures/shot4313.json');
+test('settings preparation failure clears queued activity without submitting image',async()=>{
+const f=fixture(),events=[];f.app.subscribe(e=>events.push(e));await f.app.load();const plan=structuredClone(sample.plan);
+{await f.app.saveConfig({imageService:'official'});const get=f.tavo.variable.get;f.tavo.variable.get=async(k,...a)=>{if(k==='aozora_direct_official_v1')throw Error('settings read failed');return get(k,...a);};}
+await assert.rejects(turn(f,{plan}));const rec=await f.app.readRecord(2);assert.equal(rec.status,'failed');assert(rec.error);const activity=events.filter(e=>e.type==='activity').at(-1).activity;assert.equal(activity.phase,'failed');assert.equal(activity.busy,false);assert.equal(f.calls,0);assert.equal(f.textCalls,0);
+});
+test('successful preparation and provider failure terminate without stale queued status',async()=>{for(const fail of [false,true]){const f=fixture(),events=[];f.app.subscribe(e=>events.push(e));await f.app.load();if(fail)f.provider.generate=async()=>{throw Error('image service failed')};if(fail)await assert.rejects(turn(f,{plan:sample.plan}));else await turn(f,{plan:sample.plan});assert.equal((await f.app.readRecord(2)).status,fail?'failed':'done');assert.equal(events.filter(e=>e.type==='activity').at(-1).activity.busy,false);}});

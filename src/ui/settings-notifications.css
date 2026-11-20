@@ -1,0 +1,81 @@
+/* Settings-only notifications. The shell notice follows the floating launcher caption. */
+#ad-settings-notification {
+  position: absolute !important;
+  z-index: 2147483606;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  min-width: 0;
+  height: 26px;
+  min-height: 26px;
+  max-height: 26px;
+  box-sizing: border-box;
+  padding: 4px 12px 4px 10px;
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);
+  background: linear-gradient(135deg,#2c1b27f2,#19121df0);
+  color: #e1cfaf;
+  box-shadow: none;
+  font: italic 650 10px/1.5 "Microsoft YaHei",system-ui,sans-serif;
+  letter-spacing: .035em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+#ad-settings-notification::before {
+  content: "";
+  position: absolute;
+  display: block;
+  left: 7px;
+  top: 1px;
+  width: 17px;
+  height: 1px;
+  background: #c7a57280;
+}
+#ad-settings-notification::after {
+  content: "";
+  position: absolute;
+  display: block;
+  right: 5px;
+  bottom: 0;
+  width: 24px;
+  height: 2px;
+  background: #a7324b;
+}
+#ad-settings-notification[hidden] { display: none !important; }
+#ad-settings-notification.is-leaving { opacity: 0; transform: translateY(3px); }
+#ad-settings-notification .ad-notice-glyph {
+  display: grid;
+  place-items: center;
+  flex: 0 0 11px;
+  width: 11px;
+  height: 11px;
+  color: #d8b675;
+}
+#ad-settings-notification .ad-notice-glyph svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#ad-settings-notification .ad-notice-text {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#ad-settings-notification[data-kind="warning"] .ad-notice-glyph { color: #e2ad62; }
+#ad-settings-notification[data-kind="error"] .ad-notice-glyph { color: #e58b91; }
+#ad-settings-notification[data-kind="info"] .ad-notice-glyph { color: #c9c4bb; }
+

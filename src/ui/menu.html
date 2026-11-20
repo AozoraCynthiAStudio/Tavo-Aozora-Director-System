@@ -1,0 +1,947 @@
+<button id="ad-launcher" data-ad-surface="launcher" type="button" aria-label="打开Aozora导演系统" title="Aozora导演系统" data-phase="idle">
+<span class="ad-camera-frame" aria-hidden="true">
+</span>
+<svg class="ad-camera-icon" viewBox="0 0 40 36" fill="none" aria-hidden="true"><g class="ad-cinema-reels"><circle cx="12" cy="9" r="6"/><circle cx="25" cy="8" r="7"/></g><path class="ad-cinema-body" d="M5 16 29 14v17L5 33Z"/><path class="ad-cinema-lens" d="m29 20 9-5v17l-9-5Z"/><path class="ad-cinema-detail" d="m9 21 12-1M9 25l8-1"/><circle class="ad-cinema-reel-hole" cx="12" cy="9" r="1.7"/><circle class="ad-cinema-reel-hole" cx="25" cy="8" r="2"/></svg>
+<span id="ad-launcher-badge" aria-hidden="true">
+</span>
+<span id="ad-launcher-caption" aria-hidden="true">
+</span>
+<span id="ad-launcher-live" class="ad-sr-only" aria-live="polite">
+</span>
+</button>
+<dialog id="ad-next" class="ad-modal ad-action-modal">
+<form method="dialog" id="ad-next-form">
+<div class="ad-dialog-body">
+<h3 id="ad-next-title">导演下一幕</h3>
+<label id="ad-target-row" hidden="">角色姓名<input id="ad-target" maxlength="80">
+</label>
+<label id="ad-form-row" hidden="">角色形态<input id="ad-form" value="默认形态" maxlength="80">
+</label>
+<label>
+<span id="ad-request-label">画面要求 · 可选</span>
+<textarea id="ad-request" rows="4" maxlength="1600" placeholder="留空由导演根据剧情决定">
+</textarea>
+<small id="ad-request-hint">可指定场景、动作或镜头；留空自动导演。</small>
+</label>
+<div class="ad-shot-field">
+<span class="ad-shot-title">镜头构图</span>
+<div class="ad-radio">
+<label>
+<input name="ad-shot" type="radio" value="near" checked="">
+<span>近景优先</span>
+</label>
+<label>
+<input name="ad-shot" type="radio" value="full">
+<span>全身优先</span>
+</label>
+</div>
+</div>
+<p id="ad-next-error" role="alert">
+</p>
+</div>
+<footer>
+<button type="button" id="ad-next-cancel">返回</button>
+<button type="submit">设定下一轮</button>
+</footer>
+</form>
+</dialog>
+<dialog id="ad-settings" class="ad-modal ad-workspace ad-studio">
+<header class="studio-topbar"><span class="phone-art phone-mast" aria-hidden="true"></span><span class="phone-art phone-clip" aria-hidden="true"></span><div class="film-brand" aria-hidden="true"><i>Aozora Director</i><span>青空导演系统</span></div>
+<button id="ad-settings-close" type="button" aria-label="关闭导演工作台">
+<svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m6 6 12 12M18 6 6 18">
+</path>
+</svg>
+</button>
+</header>
+<button id="studio-global-back" type="button" aria-label="返回上一级">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+<path d="m15 5-7 7 7 7">
+</path>
+</svg>
+<span class="film-return-label" aria-hidden="true">返回<small>RETURN</small></span></button>
+<nav id="studio-resources" hidden="" aria-label="创作资源">
+<button type="button" data-studio-resource="profiles">角色</button>
+<button type="button" data-studio-resource="styles">画风</button>
+<button type="button" data-studio-resource="seeds">种子</button>
+</nav>
+<main id="ad-workspace-content" class="studio-content">
+<span id="studio-feedback-live" class="ad-sr-only" role="status" aria-live="polite"></span><div class="film-title"><span class="phone-art phone-heading" aria-hidden="true"></span><h2 id="studio-page-title">导演工作台</h2><span class="city-title-caption" aria-hidden="true">DIRECTOR&#8217;S DESK</span><b class="film-title-ticket" aria-hidden="true">No.01</b></div><section data-ad-page="resources" hidden class="film-resources"><p>导演的创作档案</p><button type="button" data-studio-resource="profiles">人物档案 <span>›</span></button><button type="button" data-studio-resource="styles">画风管理 <span>›</span></button><button type="button" data-studio-resource="seeds">种子收藏 <span>›</span></button></section>
+<section data-ad-page="settings">
+<div id="local-director-main">
+<div id="studio-home" data-studio-panel="home"><div class="film-mode"><label>
+<span class="ad-field-heading">
+<span class="ad-field-title">当前模式</span>
+</span>
+<select id="ad-format">
+<option value="generic">通用 · Tavo</option>
+<option value="nai45">NAI 4.5 FULL</option>
+</select><button type="button" id="city-mode" aria-haspopup="dialog"></button>
+</label>
+<button type="button" id="studio-service" class="studio-entry">
+<span class="studio-entry-icon" aria-hidden="true">
+<svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m9 8 6-3 6 3v8l-6 3-6-3zM9 8l6 3 6-3m-6 3v8M3 7v10m-2-7 2-3 2 3m-4 4 2 3 2-3">
+</path>
+</svg>
+</span>
+<span>
+<strong>静态 API</strong>
+<small id="studio-service-summary">
+</small>
+</span>
+<b aria-hidden="true">
+<svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m9 5 7 7-7 7">
+</path>
+</svg>
+</b>
+</button>
+</div><div class="studio-home-style-rail"><span class="studio-home-style-index">当前画风 <b aria-hidden="true">●</b></span>
+<button type="button" id="studio-style" class="studio-style"><img id="city-home-style-cover" alt="" hidden>
+<span>
+<strong id="studio-style-name">选择画风</strong>
+</span>
+<b aria-hidden="true">
+<svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m9 5 7 7-7 7">
+</path>
+</svg>
+</b>
+</button>
+</div>
+
+<div class="studio-paper">
+<section id="studio-home-quick-size" class="studio-home-quick-size" aria-label="常用画面尺寸快捷切换">
+<div class="studio-quick-size-heading"><strong><em>01</em> 快捷小图比例</strong><small id="studio-quick-size-status" role="status" aria-live="polite">点选即保存</small><span class="city-ratio-note">快捷比例可能被 API 设置覆盖</span></div>
+<div class="studio-size-presets studio-size-presets-quick" aria-label="首页快捷尺寸">
+<button type="button" data-studio-size="1216,832" aria-pressed="false"><strong>横图</strong><small>1216 × 832</small></button>
+<button type="button" data-studio-size="832,1216" aria-pressed="false"><strong>竖图</strong><small>832 × 1216</small></button>
+<button type="button" data-studio-size="1024,1024" aria-pressed="false"><strong>方图</strong><small>1024 × 1024</small></button>
+</div>
+</section>
+<section class="studio-home-seed-panel" aria-label="固定随机种子">
+<div class="studio-home-group-title"><strong><em>03</em> 随机种子</strong><small>REPRODUCE</small></div>
+<div id="studio-seed" class="studio-field-group studio-setting-panel">
+<div class="ad-director-seed">
+<div class="film-seed-row"><label for="ad-director-seed">当前 Seed</label><div class="film-seed-value">
+<input id="ad-director-seed" readonly aria-label="导演设置 Seed" placeholder="—" aria-describedby="local-seed-hint">
+</div><button type="button" id="ad-director-seed-save">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z">
+</path>
+</svg>收藏</button>
+<label class="studio-seed-toggle">
+<input id="ad-director-seed-fixed" type="checkbox" aria-label="固定 Seed">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg><span id="city-seed-lock-label">锁定</span>
+<i class="studio-toggle" aria-hidden="true">
+</i>
+</label></div>
+<p id="ad-director-seed-error" role="alert" hidden="">
+</p>
+<small id="local-seed-hint">固定 Seed 可用于对比画风、尺寸与参数；请求完全相同时会自动阻止重复生成，避免重复扣费。</small>
+</div>
+</div>
+</section>
+<section class="studio-home-options" aria-label="生成行为">
+<div class="studio-home-group-title"><strong><em>04</em> 生成行为</strong><small>BEHAVIOR</small></div>
+<div id="studio-options">
+<div class="studio-option-list">
+<label class="studio-option-row">
+<input type="checkbox" id="ad-auto-generate" aria-label="自动生成">
+<span class="studio-option-icon" aria-hidden="true">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z">
+</path>
+</svg>
+</span>
+<span class="studio-option-label"><b>正文后自动生成图片</b><small>根据剧情自动请求</small></span>
+<span class="studio-toggle" aria-hidden="true">
+</span>
+</label>
+<label class="studio-option-row">
+<input type="checkbox" id="ad-auto-expand" aria-label="完成后展开">
+<span class="studio-option-icon" aria-hidden="true">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M3 3l6 6m12-6-6 6M3 21l6-6m12 6-6-6">
+</path>
+</svg>
+</span>
+<span class="studio-option-label"><b>完成后展开图片面板</b><small>生成后自动显示大图</small></span>
+<span class="studio-toggle" aria-hidden="true">
+</span>
+</label>
+</div>
+</div>
+</section>
+
+<div class="film-tools"><button type="button" id="studio-frame" class="studio-entry">
+<span class="studio-entry-icon" aria-hidden="true">
+<svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<rect x="3" y="5" width="18" height="14" rx="1">
+</rect>
+<path d="M3 9h18M7 5v4m4-4v4m4-4v4m4-4v4">
+</path>
+</svg>
+</span>
+<span>
+<strong>图片尺寸</strong>
+<small id="studio-frame-summary">
+</small>
+</span>
+<b aria-hidden="true">
+<svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m9 5 7 7-7 7">
+</path>
+</svg>
+</b>
+</button>
+<button type="button" class="studio-entry" id="film-params">生成参数 ›</button></div><div class="studio-home-foot" hidden>
+<span class="studio-save-hint">设置自动保存</span>
+<button id="studio-logs" type="button">运行记录 <span aria-hidden="true">↗</span>
+</button>
+</div>
+</div>
+</div>
+<div id="studio-frame-panel" data-studio-panel="frame" hidden="">
+<div id="studio-frame-size" class="studio-field-group studio-setting-panel">
+<div class="studio-group-heading">
+<h4>画面尺寸</h4>
+<small id="studio-size-status" role="status" aria-live="polite">自动保存</small>
+</div>
+<p class="city-size-hint">宽高支持 64–2048 px，按 64 px 递增。</p>
+<div class="studio-dimensions">
+<label class="studio-unit-label">宽度<div class="studio-unit-field" id="studio-width-slot">
+<input id="studio-width" type="number" min="64" max="2048" step="64">
+<span>px</span>
+</div>
+</label>
+<span class="studio-times" aria-hidden="true">×</span>
+<label class="studio-unit-label">高度<div class="studio-unit-field" id="studio-height-slot">
+<input id="studio-height" type="number" min="64" max="2048" step="64">
+<span>px</span>
+</div>
+</label>
+</div>
+<div class="studio-size-presets" aria-label="常用画面尺寸"><button type="button" data-studio-size="1216,832" aria-pressed="false"><strong>横图</strong><small>1216 × 832</small></button><button type="button" data-studio-size="832,1216" aria-pressed="false"><strong>竖图</strong><small>832 × 1216</small></button><button type="button" data-studio-size="1024,1024" aria-pressed="false"><strong>方图</strong><small>1024 × 1024</small></button></div>
+</div>
+<label id="local-ratio">
+<span class="ad-field-heading">
+<span class="ad-field-title">画面比例</span>
+<small>此设置会被 API 配置中的比例覆盖。</small>
+</span>
+<select id="ad-ratio">
+<option value="api">跟随 API</option>
+<option value="16:9">横图</option>
+<option value="1:1">方图</option>
+<option value="2:3">竖图</option>
+</select>
+</label>
+</div>
+<div id="studio-service-panel" data-studio-panel="service" hidden="">
+<div id="studio-service-fields">
+<div id="local-relay-entry" class="local-relay-entry" hidden="">
+<button type="button" id="local-open-relay">
+<span>
+<strong id="local-connection-title">NAI 4.5 Full API 配置</strong>
+<small>连接地址 · 画面尺寸 · 生成参数</small>
+</span>
+<span class="local-settings-icon">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+<path d="M4 7h7m4 0h5M4 17h3m4 0h9">
+</path>
+<circle cx="13" cy="7" r="2">
+</circle>
+<circle cx="9" cy="17" r="2">
+</circle>
+</svg>
+</span>
+</button>
+</div>
+</div>
+</div>
+<div id="studio-compatibility" hidden="">
+<label>
+<span class="ad-field-heading">
+<span class="ad-field-title">使用画风</span>
+<small>效果因模型而异。</small>
+</span>
+<select id="ad-active-style">
+</select>
+</label>
+<div id="local-official-size" class="local-official-size" hidden="">
+<div class="local-section-heading">
+<strong class="ad-field-title">画面分辨率</strong>
+<small>按填写的宽高请求生成。</small>
+</div>
+<div class="local-dimensions">
+<label>宽度<input id="local-width" type="number" min="64" max="2048" step="64" value="1216">
+</label>
+<span>×</span>
+<label>高度<input id="local-height" type="number" min="64" max="2048" step="64" value="832">
+</label>
+<small>px</small>
+</div>
+<div class="local-presets">
+<button type="button" data-local-size="1216,832">
+<strong>横图</strong>
+<span>1216 × 832</span>
+</button>
+<button type="button" data-local-size="1024,1024">
+<strong>方图</strong>
+<span>1024 × 1024</span>
+</button>
+<button type="button" data-local-size="832,1216">
+<strong>竖图</strong>
+<span>832 × 1216</span>
+</button>
+</div>
+<small class="local-size-note">常用小图 · 宽高按 64 像素递增</small>
+<small class="local-free-note">官方 Opus（25 美元/月）：NAI 4.5 Full、单张、≤28 步、总像素≤1024×1024且无底图，符合无限生图条件；中转另计。</small>
+</div>
+<nav id="ad-tabs" aria-label="导演工作区">
+<span class="ad-nav-label">工作区</span>
+<button data-page="settings" aria-label="导演设置">
+<span class="ad-nav-index" aria-hidden="true">01</span>
+<span class="ad-nav-title" data-short="导演">导演设置</span>
+</button>
+<button data-page="profiles" aria-label="角色档案">
+<span class="ad-nav-index" aria-hidden="true">02</span>
+<span class="ad-nav-title" data-short="角色">角色档案</span>
+</button>
+<span class="ad-nav-label">创作资源</span>
+<button data-page="styles" aria-label="画风预设">
+<span class="ad-nav-index" aria-hidden="true">03</span>
+<span class="ad-nav-title" data-short="画风">画风预设</span>
+</button>
+<button data-page="seeds" aria-label="种子收藏">
+<span class="ad-nav-index" aria-hidden="true">04</span>
+<span class="ad-nav-title" data-short="种子">种子收藏</span>
+</button>
+<span class="ad-nav-label">管理</span>
+<button data-page="logs" aria-label="运行记录">
+<span class="ad-nav-index" aria-hidden="true">05</span>
+<span class="ad-nav-title" data-short="记录">运行记录</span>
+</button>
+<button data-page="api" aria-label="动态设置" hidden>
+<span class="ad-nav-index" aria-hidden="true">06</span>
+<span class="ad-nav-title" data-short="动态">动态设置</span>
+</button>
+<small class="ad-nav-footnote">让故事成为画面</small>
+</nav>
+</div>
+</div>
+<div id="local-relay-page" hidden="">
+<p id="studio-generic-note" class="studio-note" hidden="">通用模式使用 Tavo 的生图配置。</p>
+<div id="studio-static-fields">
+
+<button type="button" class="local-back" id="local-relay-back" hidden="">← 返回</button>
+<div class="ad-card-heading" hidden="">
+<h3 class="ad-page-title" id="local-connection-heading">连接配置</h3>
+<span class="ad-pill">NAI 4.5 Full · 高画质</span>
+</div>
+<p class="local-lead" hidden="">用于静态图片生成与重抽。</p>
+<section class="city-static-connection" aria-labelledby="city-static-connection-title">
+<div class="city-setting-field-head static-api-summary">
+<svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a4 4 0 0 0 6 0l4-4a4 4 0 0 0-6-6l-2 2m2 6a4 4 0 0 0-6 0l-4 4a4 4 0 0 0 6 6l2-2"/></svg>
+<div><h3 id="city-static-connection-title">静态 API 连接</h3><p>用于 NAI 4.5 FULL 静态生图与重抽</p></div>
+<small id="studio-static-connection-state" role="status" data-state="empty">未配置</small>
+</div>
+<div class="city-setting-form">
+<div class="city-setting-field">
+<div class="city-setting-field-head"><label for="local-relay-url"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>API 地址</label><button type="button" id="local-use-official">填入官方地址</button></div>
+<input id="local-relay-url" type="url" autocomplete="off" spellcheck="false" placeholder="https://your-api.example">
+</div>
+<div class="city-setting-field">
+<div class="city-setting-field-head"><label for="local-relay-key"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4a6 6 0 0 0-5 9l-6 6v2h4l2-2v-2h2l2-2a6 6 0 1 0 1-11z"/><circle cx="16" cy="9" r="1"/></svg>API Key</label><div class="static-api-tools"><button type="button" id="static-api-reveal" aria-pressed="false">显示</button><button type="button" id="static-api-paste">粘贴</button></div></div>
+<input id="local-relay-key" type="password" autocomplete="off" placeholder="填写 API Key">
+<small id="static-api-paste-note" role="status"></small>
+</div>
+</div>
+<div class="static-api-notes">
+<strong><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>使用说明</strong>
+<ul><li>支持官方地址或兼容中转地址。</li><li>其他模型请切换通用模式，在 Tavo 中配置。</li></ul>
+</div>
+</section>
+<div class="local-relay-canvas" hidden="">
+<div class="local-section-heading">
+<strong class="ad-field-title">画面分辨率</strong>
+<small>直接填写宽高，画质默认高。</small>
+</div>
+<div class="local-dimensions">
+<label>宽度<input id="local-relay-width" type="number" min="64" max="2048" step="64" value="1216">
+</label>
+<span>×</span>
+<label>高度<input id="local-relay-height" type="number" min="64" max="2048" step="64" value="832">
+</label>
+<small>px</small>
+</div>
+<div class="local-presets">
+<button type="button" data-local-size="1216,832">
+<strong>横图</strong>
+<span>1216 × 832</span>
+</button>
+<button type="button" data-local-size="1024,1024">
+<strong>方图</strong>
+<span>1024 × 1024</span>
+</button>
+<button type="button" data-local-size="832,1216">
+<strong>竖图</strong>
+<span>832 × 1216</span>
+</button>
+</div>
+<small class="local-size-note">常用小图 · 宽高按 64 像素递增</small>
+</div>
+<details class="studio-advanced-group">
+<summary>高级生成参数</summary>
+<div class="local-generation-params" id="local-static-advanced">
+<div class="local-params-heading">
+<h3>静态图生成</h3>
+<p>用于生成与重抽。修改参数可能影响生成效果与费用。</p>
+</div>
+<div class="local-fold-body local-grid">
+<label>生成步数 <small class="city-range">28–50</small><input type="number" min="28" max="50" value="28">
+</label>
+<label>提示词强度 <small class="city-range">1–10</small><input type="number" min="1" max="10" step="0.5" value="5.5">
+</label>
+<label class="local-full">采样器<select>
+<option value="k_euler_ancestral">Euler Ancestral</option>
+<option value="k_euler">Euler</option>
+<option value="k_dpmpp_2s_ancestral">DPM++ 2S Ancestral</option>
+<option value="k_dpmpp_2m_sde">DPM++ 2M SDE</option>
+<option value="k_dpmpp_2m">DPM++ 2M</option>
+<option value="k_dpmpp_sde">DPM++ SDE</option>
+</select>
+</label>
+</div>
+</div>
+</details>
+<div class="local-actions">
+<button type="button" class="local-actions-back" id="local-relay-back-bottom" hidden="">返回</button>
+<button type="button" class="ad-primary" data-local-save=""><span class="film-save-connection">保存 API 设置</span><span class="film-save-params">保存生成参数</span></button>
+</div>
+<div class="studio-opus-note"><strong>官方 Opus 无限生图条件</strong><p>25 美元/月的有效 Opus 订阅 · NAI 4.5 Full · 每次 1 张 · 总像素 ≤ 1,048,576（1024 × 1024）· 步数 ≤ 28 · 不使用底图。</p><p>横图 1216 × 832、竖图 832 × 1216、方图 1024 × 1024 均在像素范围内。超过尺寸或步数、批量生成，以及图生图等操作可能消耗 Anlas。中转站按其自身规则计费。</p><a href="https://docs.novelai.net/en/subscription/" target="_blank" rel="noopener noreferrer">查看官方套餐说明 ↗</a></div>
+</div>
+</div>
+</section>
+<section data-ad-page="tutorial" hidden class="ad-tutorial-page">
+<div class="tutorial-page-top"><span>AOZORA · QUICK GUIDE</span><button type="button" data-tutorial-home>返回工作台</button></div>
+<header class="tutorial-hero">
+<span class="tutorial-kicker">从故事开始</span>
+<h3>把想看的画面，交给导演</h3>
+<p>设定目标，Aozora 会结合剧情与人物档案安排 CG。下面从最常用的几步开始。</p>
+</header>
+
+<section class="tutorial-chapter" id="tutorial-story">
+<header><small>01 · 开始生图</small><h3>只想看图，还是边聊边画？</h3></header>
+<p>点输入框旁的加号，选择「导演下一幕」或「设计人物外观」。前者画场景和人物互动，后者主要画你指定的人物。</p>
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/task-menu.png" alt="加号菜单里的导演下一幕和设计人物外观入口"><figcaption>选择要画一幕剧情，或聚焦设计一位人物。</figcaption></figure>
+<div class="tutorial-mode-grid">
+<article><h4>只想生成一张图</h4><p>填好画面要求，点「设定下一轮」，直接发送。输入框里只保留插件自动写入的任务提示，不用再写剧情。</p><p>这样只出图，不继续故事。</p></article>
+<article><h4>继续聊天，顺便出图</h4><p>点「设定下一轮」后，在输入框里照常写你要说的话或做的事，再发送。</p><p>比如：“我推开咖啡馆的门，向她挥手。”故事会接着写，也会为这一轮生成 CG。</p></article>
+</div>
+<p class="tutorial-note">两个入口都支持上面这两种用法。选「设计人物外观」时，即使同时推进剧情，图片也会重点画你填写的那位人物。</p>
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/next-turn.png" alt="导演下一幕的画面要求与镜头选项"><figcaption>设置完成后，发送消息才会开始本轮生成。</figcaption></figure>
+</section>
+
+<section class="tutorial-chapter" id="tutorial-character">
+<header><small>02 · 登记人物</small><h3>选一张满意的图，再登记</h3></header>
+<ol class="tutorial-steps">
+<li>用<strong>设计人物外观</strong>填写人物姓名和可选形态，再描述想看的外观。</li>
+<li>从生成结果中挑选候选。需要调整时，点卡片上的铅笔图标生成新候选；原图会保留。</li>
+<li>选定后点人物登记图标，确认姓名和形态，再选择头像。</li>
+<li>在裁切页拖动图片、调整缩放并确认。登记后，这份人物档案会用于后续 CG 的外观延续。</li>
+</ol>
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/design-character.png" alt="设计人物外观的填写界面"><figcaption>先描述希望设计的人物外观。</figcaption></figure>
+<div class="tutorial-pair">
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/tune-character.png" alt="微调人物候选的界面"><figcaption>微调会新增候选，不覆盖原图。</figcaption></figure>
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/register-character.png" alt="登记人物与选择头像界面"><figcaption>选择候选并填写登记信息。</figcaption></figure>
+</div>
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/avatar-crop.png" alt="拖动和缩放头像裁切界面"><figcaption>拖动、缩放并确认头像裁切。</figcaption></figure>
+<p class="tutorial-note"><strong>重新登记：</strong>同名、同形态再次登记时，会按这次选中的候选更新整份人物外貌档案。登记前先确认所选图片。</p>
+</section>
+
+<section class="tutorial-chapter" id="tutorial-cards">
+<header><small>03 · 图片卡片</small><h3>这些按钮怎么用？</h3></header>
+<figure class="tutorial-figure tutorial-card-shot"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/card-actions.png" alt="图片卡片及图标操作栏"><figcaption>图片卡片以图标作为主要操作入口。</figcaption></figure>
+<ul class="tutorial-icon-list">
+<li><span class="tutorial-action-icon" data-tutorial-icon="history" aria-hidden="true"></span><span><strong>历史记录</strong>回看每一轮的正文和图片。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="settings" aria-hidden="true"></span><span><strong>设置</strong>选择画风、调整生成设置，也能在这里打开教程。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="reroll" aria-hidden="true"></span><span><strong>重抽</strong>想画同一个场景，再试一次。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="add" aria-hidden="true"></span><span><strong>新增 / 补图</strong>已经设置过画面，就按原要求再画一张；之前没有设置画面的回复，会先弹窗让你填写补图要求。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="tune" aria-hidden="true"></span><span><strong>调整画面</strong>写下哪里想改。人物图可以继续微调，剧情图还可以选择新场景。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="register" aria-hidden="true"></span><span><strong>登记人物</strong>选中满意的人物图，保存这份外观，供后面出图使用。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="motion" aria-hidden="true"></span><span><strong>动态 CG</strong>给这张剧情图加一点动作变化。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="delete" aria-hidden="true"></span><span><strong>删除图片</strong>移除当前选中的这一张图。</span></li>
+</ul>
+<p class="tutorial-note"><strong>仅电脑端：</strong>卡片左下角的三颗菱形抓手可拖动卡片位置。手机端没有这个把手。</p>
+</section>
+
+<section class="tutorial-chapter" id="tutorial-history">
+<header><small>04 · 历史记录</small><h3>正文和图片，一起回看</h3></header>
+<p>点卡片上的时钟进入历史目录，选择任意一轮查看正文和对应 CG。隐藏的历史消息也能读取，可以按顺序把整段故事看完。</p>
+<div class="tutorial-pair">
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/history-index.png" alt="按轮查看的历史目录"><figcaption>按轮浏览历史记录。</figcaption></figure>
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/history-detail.png" alt="历史正文详情"><figcaption>查看这一轮的正文与 CG。</figcaption></figure>
+</div>
+<figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/large-viewer.png" alt="CG 大图查看界面"><figcaption>点开图片可进入大图查看。</figcaption></figure>
+<div class="tutorial-style-card"><span>STYLE / 画风</span><p>内置四套代表性画风，也可以自行创建、导出和导入，与社区交流分享。</p></div>
+</section>
+
+<button type="button" class="tutorial-motion-entry" data-tutorial-motion>
+<span><small>05 / MOTION CG</small><strong>看看动态 CG 示例</strong><em>从一张静态画面到循环动作</em></span><b aria-hidden="true">›</b>
+</button>
+</section>
+
+<section data-ad-page="tutorial-motion" hidden class="ad-tutorial-page ad-tutorial-motion-page">
+<div class="tutorial-page-top"><span>05 / MOTION CG</span><button type="button" data-tutorial-return>返回教程</button></div>
+<header class="tutorial-hero motion-hero">
+<span class="tutorial-kicker">STATIC → MOTION</span>
+<h3>让画面轻轻动起来</h3>
+<p>动态 CG 从一张剧情 CG 出发，为画面增加一处自然的动作变化。</p>
+</header>
+<figure class="tutorial-motion-demo">
+<img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/motion-loop.gif" alt="动态 CG 循环示例：人物眨眼并出现小爱心">
+<figcaption><strong>循环示例</strong><span>原图中的人物轻轻眨眼，出现一个小爱心。</span></figcaption>
+</figure>
+<details class="tutorial-source-image"><summary>查看这段动态使用的原图</summary><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/motion-source.png" alt="动态循环示例的原始静态 CG"></details>
+<section class="tutorial-chapter motion-steps">
+<header><small>操作步骤</small><h3>如何生成动态 CG</h3></header>
+<ol class="tutorial-steps">
+<li>找到一张剧情 CG，在卡片上点<strong>波形</strong>图标。</li>
+<li>写下想看到的动作变化，例如轻轻转头、眨眼或发梢随动作摆动。</li>
+<li>生成完成后，在卡片或大图中播放循环效果；在大图模式下可以下载 GIF。</li>
+</ol>
+<p class="tutorial-note"><strong>当前支持：</strong>图生图与动态 CG 目前仅支持 NAI 4.5 FULL 链路；四套内置画风也主要针对该模型优化。效果仍在持续迭代中，欢迎反馈体验。</p>
+</section>
+<button type="button" class="tutorial-back-link" data-tutorial-return>← 回到使用教程</button>
+</section>
+<section data-ad-page="api" hidden="">
+<div id="ad-motion-settings" class="ad-local-motion">
+<div class="local-service" hidden="" style="display:none">
+<label>
+<span class="ad-field-title">生成服务</span>
+<select id="local-motion-provider">
+<option value="official">NAI 4.5 Full 官方</option>
+<option value="relay">NAI 4.5 Full 中转API</option>
+</select>
+</label>
+<details id="local-official-connect" class="local-connect" open="">
+<summary>
+<span>官方 API 连接</span>
+<span class="local-fold-state">
+<span>连接配置</span>
+<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m5 8 5 5 5-5">
+</path>
+</svg>
+</span>
+</summary>
+<div class="local-fold-body">
+<label>API Key<input type="password" autocomplete="off" placeholder="填写 API Key">
+</label>
+<small>官方地址已内置，无需填写 URL。</small>
+</div>
+</details>
+<div id="local-official-link" class="local-relay-link">
+<p>使用导演设置中的官方连接</p>
+<button type="button" id="local-open-official-motion">官方 API 配置</button>
+</div>
+<div id="local-relay-connect" class="local-relay-link" hidden="">
+<p>使用导演设置中的中转连接</p>
+<button type="button" id="local-open-relay-motion">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+<path d="M4 7h7m4 0h5M4 17h3m4 0h9">
+</path>
+<circle cx="13" cy="7" r="2">
+</circle>
+<circle cx="9" cy="17" r="2">
+</circle>
+</svg>
+<span>连接设置</span>
+</button>
+</div>
+</div>
+<section class="city-static-connection" aria-labelledby="city-motion-connection-title">
+<div class="city-setting-field-head static-api-summary">
+<svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a4 4 0 0 0 6 0l4-4a4 4 0 0 0-6-6l-2 2m2 6a4 4 0 0 0-6 0l-4 4a4 4 0 0 0 6 6l2-2"/></svg>
+<div><h3 id="city-motion-connection-title">动态 API 连接</h3><p>用 NAI 4.5 FULL 为静态 CG 生成变化帧。</p></div>
+<small id="studio-motion-connection-state" role="status" data-state="empty">未配置</small>
+</div>
+<div id="local-motion-connection" class="city-setting-form">
+<div class="city-setting-field">
+<div class="city-setting-field-head"><label for="local-motion-url"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>API 地址</label><button type="button" id="local-motion-official">填入官方地址</button></div>
+<input id="local-motion-url" type="url" autocomplete="off" spellcheck="false" placeholder="https://your-api.example" aria-describedby="local-motion-url-hint">
+<small id="local-motion-url-hint">请按服务商文档填写图生图专用地址。</small>
+</div>
+<div class="city-setting-field">
+<div class="city-setting-field-head"><label for="local-motion-key"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4a6 6 0 0 0-5 9l-6 6v2h4l2-2v-2h2l2-2a6 6 0 1 0 1-11z"/><circle cx="16" cy="9" r="1"/></svg>API Key</label><div class="static-api-tools"><button type="button" id="motion-api-reveal" aria-pressed="false">显示</button><button type="button" id="motion-api-paste">粘贴</button></div></div>
+<input id="local-motion-key" type="password" autocomplete="off" placeholder="填写 API Key">
+<small class="motion-autosave-hint">API 地址与 Key 填写完整后，离开输入框自动保存。</small>
+<small id="motion-api-paste-note" role="status"></small>
+</div>
+</div>
+</section>
+<section id="local-motion-advanced" aria-labelledby="motion-advanced-title">
+<header class="motion-advanced-heading">
+<div><strong id="motion-advanced-title" class="ad-field-title">进阶参数</strong>
+<small class="city-motion-cost">修改后自动保存 · 调整参数可能影响生成费用</small></div>
+<button type="button" id="local-motion-reset" class="local-quiet">重置参数</button>
+</header>
+<div class="city-setting-form">
+
+<div class="city-motion-strength">
+<div class="city-setting-field-head"><label for="local-strength"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 13h7l-1 9 10-12h-7l1-8z"/></svg>变化强度</label>
+<div class="city-strength-control">
+<button type="button" data-strength-step="-1" aria-label="降低变化强度">−</button>
+<input id="local-strength" type="number" inputmode="decimal" min="0.25" max="0.90" step="0.01" value="0.85" aria-describedby="city-motion-strength-range">
+<button type="button" data-strength-step="1" aria-label="提高变化强度">+</button>
+</div>
+</div>
+<div class="city-motion-scale" id="city-motion-strength-range">
+<span>0.25 · 贴近原图</span>
+<span>0.90 · 变化更大</span>
+</div>
+</div>
+<div class="city-motion-options">
+<div class="city-setting-field"><label for="local-noise">附加噪声 <small class="city-range" aria-label="上限 0.5">≤0.5</small></label><input id="local-noise" type="number" min="0" max="0.5" step="0.01" value="0"></div>
+<div class="city-setting-field"><label for="local-schedule">噪声调度</label><select id="local-schedule">
+<option>Exponential</option>
+<option>Native</option>
+<option>Karras</option>
+<option>Polyexponential</option>
+</select>
+</div>
+</div>
+
+</div>
+</section>
+</div>
+</section>
+<section data-ad-page="styles" hidden="">
+<div id="ad-style-browse">
+<div class="studio-library-toolbar">
+<div class="ad-style-filter">
+<span id="city-style-scope-label">显示范围</span>
+<select id="ad-style-scope" aria-label="画风显示范围">
+<option value="current">当前格式</option>
+<option value="all">全部格式</option>
+</select>
+<small id="ad-style-current-format"></small>
+<button id="city-style-scope" type="button" aria-haspopup="dialog" aria-labelledby="city-style-scope-label city-style-scope">当前格式</button>
+</div>
+</div>
+<div id="ad-style-library-toolbar" class="ad-style-toolbar" aria-label="画风管理操作">
+<button id="ad-style-new" class="ad-primary" type="button" title="新建画风">
+<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg><span>新建</span>
+</button>
+<button id="ad-style-copy" type="button" title="复制当前选中画风">
+<span class="ad-tool-wide">复制</span><span class="ad-tool-short">复制</span>
+</button>
+<button id="ad-style-import" class="ad-quiet" type="button">导入</button>
+<button id="ad-style-export" class="ad-quiet" type="button" title="导出当前选中画风">导出</button>
+<button id="ad-style-restore" type="button" title="仅重置四款内置画风，保留自建画风">
+<span class="ad-tool-wide">重置</span><span class="ad-tool-short">重置</span>
+</button>
+</div>
+<div class="ad-style-page-heading" hidden="">
+<h3 class="ad-page-title">画风预设</h3>
+<small>点击使用 · 右上角编辑</small>
+</div>
+<input id="city-style-cover-file" type="file" accept="image/png,image/jpeg,image/webp" hidden><p id="city-style-cover-error" role="alert" hidden></p>
+<div id="ad-style-cards"></div>
+<p class="ad-style-page-note">内置封面为示意插画。自建画风可点击封面上传图片。</p>
+</div>
+<div id="ad-style-editor" hidden="">
+<header class="ad-style-detail-heading studio-editor-tools">
+<span id="ad-style-model-badge" hidden="">
+</span>
+<h3 id="ad-style-editor-title" class="ad-page-title studio-hidden-heading">
+</h3>
+
+</header>
+<div class="city-style-form">
+<div class="ad-style-meta-fields">
+<label>
+<span class="ad-field-title">画风名称</span>
+<input id="ad-style-name" placeholder="为这套画风取个名字" maxlength="120">
+</label>
+<label>
+<span class="ad-field-title">适配格式</span>
+<select id="ad-style-format">
+<option value="nai45">NAI 4.5 Full</option>
+<option value="generic">通用</option>
+</select>
+</label>
+<label>
+<span class="ad-field-title">模型备注</span>
+<input id="ad-style-basis" placeholder="如 NAI 4.5 Full、GPT Image 2、通用" maxlength="120">
+</label>
+</div>
+<label>
+<span class="ad-field-title">正面提示词</span>
+<textarea id="ad-style-positive" rows="5" placeholder="画师、笔触、色彩与质感…">
+</textarea>
+</label>
+<div class="city-negative-field"><div class="city-prompt-heading"><label class="ad-field-title" for="ad-style-negative">负面提示词</label><label class="studio-editor-switch"><input type="checkbox" id="ad-style-use-negative" aria-label="使用本画风负面词"><span>启用</span><i class="studio-toggle" aria-hidden="true"></i></label></div><textarea id="ad-style-negative" rows="5" placeholder="需要避免的视觉特征…">
+</textarea></div>
+<p class="ad-muted">负面词需模型支持。适配格式仅用于画风分类。</p><p id="city-style-save-state" role="status">修改后自动保存</p>
+</div>
+<footer class="ad-section-actions ad-style-savebar"><button id="ad-style-delete" type="button" class="ad-trash" aria-label="删除当前画风" title="删除当前画风">删除</button>
+<button id="ad-style-apply" class="ad-primary" type="button">应用画风</button>
+</footer>
+</div>
+</section>
+<section data-ad-page="profiles" hidden="">
+<div id="ad-profiles-browse">
+<div class="ad-profile-heading studio-profile-heading">
+<h3 class="city-profile-list-title">人物列表</h3>
+<small id="ad-profile-count">
+</small>
+</div>
+<div id="ad-profile-list"></div>
+</div>
+<form id="ad-profile-editor" hidden="">
+<div class="ad-profile-heading">
+<h3 class="ad-page-title studio-hidden-heading">编辑角色</h3>
+
+</div>
+<div class="ad-profile-edit-body">
+<aside>
+<button type="button" id="ad-profile-portrait" class="ad-profile-portrait" aria-label="查看完整登记画面">
+</button>
+<button type="button" id="ad-profile-avatar" class="ad-profile-avatar-adjust">调整头像</button>
+</aside>
+<div class="ad-profile-fields">
+<label for="ad-profile-name">人物姓名<input id="ad-profile-name" maxlength="80" autocomplete="off" required="">
+</label>
+<label for="ad-profile-aliases">
+<span>别名<small>多个别名用逗号分隔</small>
+</span>
+<input id="ad-profile-aliases" maxlength="240" placeholder="可不填写" autocomplete="off">
+</label>
+<label for="ad-profile-form">
+<span>形态<small>留空使用默认形态</small>
+</span>
+<input id="ad-profile-form" maxlength="80" placeholder="默认形态" autocomplete="off">
+</label>
+<p class="ad-profile-note">外貌沿用登记结果，在人物画面中微调后重新登记。</p>
+<p id="ad-profile-error" role="alert" hidden="">
+</p>
+</div>
+</div>
+<footer class="ad-profile-actions"><button id="ad-profile-delete" type="button" class="ad-trash" aria-label="删除角色档案">删除</button>
+<button type="button" id="ad-profile-cancel">取消</button>
+<button type="submit" id="ad-profile-save" class="primary">保存修改</button>
+</footer>
+</form>
+</section>
+<section data-ad-page="seeds" hidden="">
+<div id="city-current-seed">
+<div class="film-seed-row"><label for="ad-seed">当前 Seed</label><div class="film-seed-value">
+<input id="ad-seed" readonly aria-label="当前 Seed" placeholder="—">
+</div><button type="button" id="ad-seed-save">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z">
+</path>
+</svg>收藏</button>
+<label class="studio-seed-toggle">
+<input id="ad-seed-fixed" type="checkbox" aria-label="固定 Seed">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg><span id="city-collection-seed-lock-label">锁定</span>
+<i class="studio-toggle" aria-hidden="true">
+</i>
+</label></div>
+</div>
+<div class="city-seed-list-heading"><h3>已收藏</h3><small id="city-seed-count"></small><button id="ad-seed-add" type="button">＋ 添加 Seed</button></div>
+<div id="ad-seed-list"></div>
+</section>
+<section data-ad-page="logs" hidden="">
+<button type="button" class="studio-home-return">← 导演首页</button>
+<div class="ad-page-heading-unified">
+<h3 class="ad-page-title">运行记录</h3>
+<small>出错时下载或分享记录，方便排查。</small>
+</div>
+<div class="ad-log-toolbar">
+<span id="ad-log-count" class="ad-muted">
+</span>
+<div class="ad-log-actions">
+<button id="ad-log-export">导出任务记录</button>
+<button id="ad-log-clear" class="ad-quiet">清空记录</button>
+</div>
+</div>
+<div id="ad-log-list" class="ad-log-list">
+</div>
+</section>
+</main>
+<nav id="studio-navigation" aria-label="青空主导航">
+<button type="button" data-studio-nav="settings">
+<svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<rect x="3" y="5" width="18" height="14" rx="1">
+</rect>
+<path d="M3 9h18M7 5v4m4-4v4m4-4v4m4-4v4">
+</path>
+</svg>
+<span>导演<small>DIRECTOR</small></span>
+</button>
+<button type="button" data-studio-nav="profiles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 21v-2a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v2 M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/></svg><span>角色</span></button><button type="button" data-studio-nav="styles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 4h18v16H3zM3 16l5-5 4 4 3-3 6 6"/></svg><span>画风</span></button><button type="button" data-studio-nav="seeds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 3 3 6 6 1-4.5 4.5 1 6-5.5-3-5.5 3 1-6L3 10l6-1z"/></svg><span>Seed</span></button><button type="button" data-studio-nav="logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM8 10h8M8 14h8M8 18h5"/></svg><span>记录<small>LOG</small></span></button><button type="button" data-studio-nav="api" hidden>
+<svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<circle cx="12" cy="12" r="9">
+</circle>
+<path d="m10 8 6 4-6 4z">
+</path>
+</svg>
+<span>动态<small>ANIMATION</small></span>
+</button>
+<button type="button" data-studio-nav="frame" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 5h18v14H3zM7 5v4m5-4v3m5-3v4"/></svg><span>尺寸</span></button><button type="button" data-studio-nav="params" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18M8 3v6m8 0v6m-5 0v6"/></svg><span>参数</span></button><button type="button" data-studio-nav="tutorial" aria-label="使用教程" title="使用教程"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5c-2.4-1.6-5.2-2-8-1.5v13c3-.5 5.8 0 8 1.5 2.2-1.5 5-2 8-1.5v-13c-2.8-.5-5.6-.1-8 1.5Z"/><path d="M12 6.5v13M7 9c1.4 0 2.7.3 3.8 1M17 9c-1.4 0-2.7.3-3.8 1"/></svg><span>教程</span></button></nav>
+<dialog id="film-quick" class="film-quick" aria-labelledby="city-picker-title"><header class="city-picker-head"><h2 id="city-picker-title">切换画风</h2><button type="button" id="film-quick-close" aria-label="关闭选择"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></header><div id="film-style-options"></div><button type="button" id="film-style-manage">画风管理 ›</button></dialog>
+</dialog>
+<dialog id="ad-log-detail" class="ad-modal ad-action-modal" aria-labelledby="ad-log-detail-title">
+<div class="ad-dialog-body ad-log-detail-body" tabindex="0" aria-label="运行详情正文">
+<h3 id="ad-log-detail-title">运行记录</h3>
+<div class="city-log-detail-kicker"><strong id="ad-log-detail-task"></strong> <span id="ad-log-detail-status" class="ad-log-badge"></span></div>
+<p id="ad-log-detail-meta"></p>
+<section id="ad-log-detail-result" aria-labelledby="ad-log-reason-title">
+<h4 id="ad-log-reason-title"></h4>
+<p id="ad-log-detail-code" class="ad-log-error-code" hidden></p>
+<p id="ad-log-detail-reason"></p>
+</section>
+<p id="ad-log-detail-feedback" role="status" aria-live="polite"></p>
+</div>
+<footer><button id="ad-log-detail-close" type="button">返回列表</button><button id="ad-log-detail-export" type="button">导出此条</button></footer>
+</dialog>
+<dialog id="ad-seed-favorite" class="ad-modal ad-action-modal">
+<form id="ad-seed-favorite-form">
+<div class="ad-dialog-body">
+<h3 id="ad-favorite-title">收藏 Seed</h3>
+<p id="ad-favorite-value"></p>
+<label id="ad-favorite-seed-field" hidden>Seed<input id="ad-favorite-seed" inputmode="numeric" maxlength="32" disabled placeholder="粘贴或输入 Seed 编号"></label>
+<label>所属模型 · 必填<input id="ad-favorite-model" required="" maxlength="100" placeholder="例如 NAI 4.5 Full">
+</label>
+<label>备注<input id="ad-favorite-note" maxlength="200">
+</label>
+<p id="ad-favorite-error" role="alert">
+</p>
+</div>
+<footer>
+<button type="button" id="ad-favorite-cancel">取消</button>
+<button id="ad-favorite-submit" type="submit">收藏</button>
+</footer>
+</form>
+</dialog>
+<dialog id="ad-prompt" class="ad-modal ad-wide" aria-labelledby="ad-prompt-title">
+<h3 id="ad-prompt-title">生成记录</h3>
+<nav id="ad-prompt-tabs" aria-label="生成记录内容">
+<button type="button" data-ad-prompt-tab="plan" aria-pressed="true">导演方案</button>
+<button type="button" data-ad-prompt-tab="final" aria-pressed="false">最终提示词</button>
+</nav>
+<article id="ad-record-content" aria-live="polite"></article>
+<p id="ad-prompt-export-status" role="status"></p>
+<footer>
+<button id="ad-prompt-download" type="button">导出提示词</button>
+<button id="ad-prompt-diagnostics" type="button">导出诊断记录</button>
+<button id="ad-prompt-close" type="button">返回</button>
+</footer>
+</dialog>
+<dialog id="ad-image-delete" class="ad-modal ad-action-modal">
+<div class="ad-dialog-body">
+<h3>确认删除？</h3>
+<p>从当前回复和图库移除图片，清理未被引用的文件。已登记的角色档案保留。</p>
+<p id="ad-image-delete-error" role="alert">
+</p>
+</div>
+<footer>
+<button type="button" id="ad-image-delete-cancel">取消</button>
+<button type="button" id="ad-image-delete-confirm">删除图片</button>
+</footer>
+</dialog>
+<dialog id="addock-scene-dialog" class="ad-modal ad-action-modal">
+<div class="ad-dialog-body">
+<h3>补充画面</h3>
+<p>可留空，由导演根据这条已生成的正文自动选景；也可以指定场景、人物、动作或镜头。只生成图片，不会续写或修改正文。</p>
+<label>画面要求<textarea id="addock-scene-request" rows="4" maxlength="1200" placeholder="留空自动选景，或填写想呈现的场景、人物、动作和镜头"></textarea></label>
+<p id="ad-scene-error" role="alert" hidden=""></p>
+</div>
+<footer>
+<button type="button" id="addock-scene-cancel">取消</button>
+<button type="button" id="addock-scene-submit" class="ad-primary">生成画面</button>
+</footer>
+</dialog>
+<dialog id="addock-tune-dialog" class="ad-modal ad-action-modal">
+<div class="ad-dialog-body">
+<h3 id="addock-tune-title">调整当前画面</h3>
+<p id="addock-character-tune-hint" hidden>调整人物特征，生成新候选。原图保留。</p>
+<div class="ad-tune-head">
+<label for="addock-tune-request">调整要求</label>
+<div class="ad-tune-switches">
+<label id="addock-tune-new-scene-switch" class="ad-tune-switch">新场景<input type="checkbox" role="switch" id="addock-tune-new-scene" aria-describedby="addock-tune-method-hint"><i aria-hidden="true"></i></label>
+<label id="addock-tune-switch" class="ad-tune-switch">图生图<input type="checkbox" role="switch" id="addock-tune-method" aria-describedby="addock-tune-method-hint"><i aria-hidden="true"></i></label>
+</div>
+</div>
+<textarea id="addock-tune-request" aria-describedby="addock-tune-method-hint" rows="4" maxlength="800" placeholder="例如：让她转头看向窗外"></textarea>
+<p id="addock-tune-method-hint" aria-live="polite">基于当前场景调整画面</p>
+<div id="addock-tune-shot-field" class="ad-shot-field">
+<span class="ad-shot-title">镜头构图</span>
+<div class="ad-radio">
+<label>
+<input name="ad-tune-shot" type="radio" value="near">
+<span>近景优先</span>
+</label>
+<label>
+<input name="ad-tune-shot" type="radio" value="full">
+<span>全身优先</span>
+</label>
+</div>
+</div>
+<p id="ad-tune-error" role="alert" hidden=""></p>
+</div>
+<footer>
+<button type="button" id="addock-tune-cancel">取消</button>
+<button type="button" id="addock-tune-submit" class="ad-primary">生成新候选</button>
+</footer>
+</dialog>
+<dialog id="addock-dna-dialog" class="ad-modal ad-action-modal">
+<div class="ad-dialog-body">
+<h3>登记角色</h3>
+<p>同名同形态再次登记时，所选人物图的外貌会替换原档案。</p>
+<div class="ad-registration-grid"><button type="button" id="ad-registration-avatar" aria-label="选择人物头像"><img id="ad-registration-avatar-image" alt="头像预览" draggable="false" hidden><span>选择头像</span></button><div class="ad-registration-fields"><label>姓名<input id="addock-dna-name" maxlength="80" placeholder="填写人物姓名" autocomplete="off">
+</label>
+<label>形态<input id="addock-dna-form" maxlength="80" value="默认形态" placeholder="默认形态">
+</label></div></div>
+<p id="ad-registration-status" role="status">
+</p>
+<p id="ad-registration-error" role="alert" hidden="">
+</p>
+</div>
+<footer>
+<button type="button" id="addock-dna-cancel">取消</button>
+<button type="button" id="addock-dna-submit" class="ad-primary">确认登记</button>
+</footer>
+</dialog>
+<dialog id="ad-manage-confirm" class="ad-modal ad-action-modal" aria-labelledby="ad-manage-title">
+<div class="ad-dialog-body">
+<h3 id="ad-manage-title">
+</h3>
+<p id="ad-manage-description">
+</p>
+<p id="ad-manage-error" role="alert" hidden="">
+</p>
+</div>
+<footer>
+<button id="ad-manage-cancel" type="button">取消</button>
+<button id="ad-manage-submit" type="button" class="ad-primary">确认</button>
+</footer>
+</dialog>
+<dialog id="ad-registration-result" class="ad-modal ad-action-modal">
+<div class="ad-dialog-body">
+<h3 id="ad-registration-result-title">登记完成</h3>
+<div id="ad-registration-result-text">
+</div>
+</div>
+<footer class="ad-single-action">
+<button id="ad-registration-result-close" type="button" class="ad-primary">知道了</button>
+</footer>
+</dialog>
+
+<dialog id="ad-seed-locked" class="ad-modal ad-action-modal" aria-labelledby="ad-seed-locked-title"><div class="ad-dialog-body"><h3 id="ad-seed-locked-title">重复生成警告</h3><p>当前固定 Seed 与已有图片的生成请求完全相同。再次提交可能生成重复图片并产生额外费用，因此本次没有提交。可以修改画风、尺寸或生成参数后再试。</p></div><footer><button type="button" id="ad-seed-locked-close">知道了</button></footer></dialog>
+
+

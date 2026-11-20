@@ -1,0 +1,40 @@
+/* Current launcher presentation. Owns this surface; no historical skins. */
+
+#ad-launcher{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none!important;animation:none!important;cursor:grab!important}
+#ad-launcher *{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;pointer-events:none!important}
+#ad-launcher:active{cursor:grabbing!important}
+#ad-launcher:where(:not([hidden]))::before{content:""!important;position:absolute!important;display:block!important;inset:7px -13px -9px -8px!important;background:radial-gradient(ellipse at 67% 78%,#9e1d4fdf 0%,#81133aa6 28%,#6b153851 48%,transparent 71%)!important;opacity:.2;filter:blur(4px)!important;pointer-events:none!important;border:0!important;border-radius:45%!important;animation:none!important}
+#ad-launcher:is([data-phase=preparing],[data-phase=prompt-ready],[data-phase=queued],[data-phase=generating],[data-phase=saving],[data-phase=loading])::before{animation:ad-sister-process 5.2s cubic-bezier(.45,0,.55,1) infinite!important}
+#ad-launcher .ph-avatar:where(:not([hidden])){display:block!important;position:relative!important;z-index:1!important;width:52px!important;height:52px!important;filter:brightness(.93) saturate(.98)!important;background-position:0 0;animation:ad-sister-blink 6.4s step-end infinite!important}
+#ad-launcher:is([data-phase=preparing],[data-phase=prompt-ready],[data-phase=queued],[data-phase=generating],[data-phase=saving],[data-phase=loading]) .ph-avatar{animation:ad-sister-blink 4.8s step-end infinite!important}
+#ad-launcher[data-phase=done] .ph-avatar{background-position:0 100%!important;animation:ad-sister-finish .5s ease-out both!important}
+#ad-launcher[data-phase=failed] .ph-avatar{background-position:100% 100%!important;animation:none!important}
+#ad-launcher[data-phase=done]::before{opacity:.16!important;animation:none!important}
+#ad-launcher[data-phase=failed]::before{opacity:.24!important;animation:none!important}
+#ad-launcher #ad-launcher-caption:where(:not([hidden])){position:absolute!important;display:block!important;top:50%!important;bottom:auto!important;left:auto!important;right:calc(100% + 8px)!important;width:max-content!important;max-width:200px!important;min-height:0!important;padding:6px 12px 6px 10px!important;border:0!important;border-radius:0!important;transform:translateY(-50%)!important;clip-path:polygon(6% 0,100% 0,94% 100%,0 100%)!important;background:linear-gradient(135deg,#2c1b27,#19121d)!important;box-shadow:none!important;color:#e1cfaf!important;font:italic 650 10px/1.5 "Microsoft YaHei"!important;letter-spacing:.06em!important;white-space:normal!important;text-shadow:none!important;pointer-events:none!important}
+#ad-launcher #ad-launcher-caption:empty{display:none!important}
+#ad-launcher[data-label-side=right] #ad-launcher-caption{left:calc(100% + 8px)!important;right:auto!important}
+#ad-launcher #ad-launcher-caption:where(:not([hidden]))::before{content:""!important;position:absolute!important;display:block!important;left:5px!important;top:1px!important;width:16px!important;height:1px!important;background:#c5a1698c!important;transform:skew(-25deg)!important}
+#ad-launcher #ad-launcher-caption:where(:not([hidden]))::after{content:""!important;position:absolute!important;display:block!important;inset:auto 5px 0 auto!important;width:24px!important;height:2px!important;background:linear-gradient(90deg,#762035,#b2374e)!important;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%)!important}
+#ad-launcher[data-phase=failed] #ad-launcher-caption{color:#e9a4b4!important}
+#ad-launcher[data-phase=done] #ad-launcher-caption{color:#f0dab1!important}
+@media (prefers-reduced-motion:reduce){#ad-launcher::before{animation:none!important}#ad-launcher .ph-avatar{animation:none!important}}
+@keyframes ad-sister-blink{0%,43%,48%,100%{background-position:0 0}44%,47%{background-position:100% 0}}
+@keyframes ad-sister-finish{0%{transform:translateY(1px)}60%{transform:translateY(-1px)}100%{transform:translateY(0)}}
+@keyframes ad-sister-process{0%,100%{opacity:.38;transform:scale(.98)}50%{opacity:.85;transform:scale(1.02)}}
+
+#ad-launcher:where(:not([hidden])){position:fixed;right:12px;bottom:100px;z-index:2147483600;display:block;width:48px;height:48px;min-width:48px;min-height:48px;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:#e1cfaf;isolation:isolate;overflow:visible;box-shadow:none;transform:none;-webkit-tap-highlight-color:transparent}
+#ad-launcher .ph-avatar{background-image:url("__PHANTOM_phantom-assistant-sprites-clean.png__");background-size:200% 200%;background-repeat:no-repeat}
+#ad-launcher :is(.ad-camera-frame,.ad-camera-icon){display:none!important}
+
+
+@media(prefers-reduced-motion:reduce){#ad-launcher[data-phase]::before,#ad-launcher[data-phase] .ph-avatar{animation:none!important}#ad-launcher:is([data-phase=preparing],[data-phase=generating],[data-phase=saving])::before{opacity:.38!important}}
+
+#ad-launcher #ad-launcher-badge{position:absolute!important;z-index:3!important;inset:1px -4px auto auto!important;display:none!important;place-items:center!important;width:14px!important;height:14px!important;border:1px solid #c6ad8e!important;border-radius:50%!important;background:#332630!important;color:#f0e5d3!important;box-shadow:0 1px 3px #0005!important;animation:none!important}
+#ad-launcher #ad-launcher-badge:is([data-phase=done],[data-phase=failed],[data-phase=uncertain]):not([hidden]){display:grid!important}
+#ad-launcher #ad-launcher-badge:is([data-phase=preparing],[data-phase=prompt-ready],[data-phase=queued],[data-phase=generating],[data-phase=saving],[data-phase=loading]):not([hidden]){display:grid!important;width:11px!important;height:11px!important;inset:2px -3px auto auto!important;border:1.5px solid #9b697b!important;border-top-color:#f2d4b7!important;background:#281b27!important;animation:ad-status-turn 1.6s linear infinite!important}
+#ad-launcher #ad-launcher-badge[data-phase=failed]{background:#922840!important;color:#fff0e3!important;border-color:#d88693!important}
+#ad-launcher #ad-launcher-badge[data-phase=uncertain]{background:#6c4b2c!important;color:#ffedcd!important;border-color:#c69a63!important}
+#ad-launcher .ad-badge-icon{display:block!important;width:11px!important;height:11px!important;fill:none!important;stroke:currentColor!important;stroke-width:2.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+#ad-launcher #ad-launcher-badge[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){#ad-launcher #ad-launcher-badge[data-phase]{animation:none!important}}

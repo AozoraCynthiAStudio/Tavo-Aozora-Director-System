@@ -1,0 +1,3 @@
+const {chromium}=require('playwright');
+const path=require('node:path'),{pathToFileURL}=require('node:url');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true}),p=await b.newPage({viewport:{width:390,height:844}});for(const surface of ['home','dialog','directory','detail','viewer']){await p.goto(pathToFileURL(path.join(__dirname,'../dist/studio-review/index.html')).href+(surface==='home'?'':'?surface='+surface));await p.waitForTimeout(900);await p.screenshot({path:path.join(__dirname,'../dist/phantom-check/surface-'+surface+'.png')});}await b.close();})().catch(e=>{console.error(e);process.exit(1)});

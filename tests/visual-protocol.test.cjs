@@ -1,0 +1,27 @@
+'use strict';
+const {test}=require('node:test'),assert=require('node:assert/strict'),core=require('../src/core.cjs'),visual=require('../src/visual-protocol.cjs');
+const equipment=core.Wardrobe.normalizeEquipment({HEAD:[{name:'red hairpin'}],TOP:[{name:'white blouse'}],LOWER:[{name:'navy skirt'}],FULL:[],LEGWEAR:[{name:'black tights'}],FOOTWEAR:[{name:'brown shoes'}],HAND:[],ACCESSORIES:[]});
+const plan={scene:'one woman at a station',description:'她站在车站。',characters:[{name:'A',form:'默认形态',identity:'adult woman, green eyes',equipment}]};
+test('current grouped protocol round-trips the eight-region snapshot',()=>{const text=visual.format(plan,'current');assert.deepEqual(visual.parse(text.replace(/^<ad-visual[^>]*>/,'').replace('</ad-visual>','')),plan);assert.deepEqual(core.parseVisual(text,'current').plan.characters[0].equipment,equipment);});
+test('current protocol rejects a missing or incomplete equipment object',()=>{assert.throws(()=>visual.format({...plan,characters:[{...plan.characters[0],equipment:undefined}]},'bad'),/装备/);assert.throws(()=>visual.format({...plan,characters:[{...plan.characters[0],equipment:{TOP:[]}}]},'bad'),/八部位/);});
+test('whole-plan JSON is not an alternative readable protocol',()=>{assert.throws(()=>visual.parse(JSON.stringify(plan)),/格式/);});
+test('outdated clothing field labels are rejected instead of converted',()=>{const text=visual.format(plan,'bad').replace(/^装备：.*$/m,'上装：white blouse');assert.throws(()=>core.parseVisual(text,'bad'),/格式不完整/);});
+test('unknown state and explicit empty region remain distinct and must use canonical types',()=>{const text=visual.format(plan,'typed');const bad=text.replace('"FULL":[]','"FULL":"none"');assert.throws(()=>core.parseVisual(bad,'typed'),/格式不完整/);assert.equal(core.Wardrobe.normalizeEquipment({}).TOP,null);assert.deepEqual(core.Wardrobe.normalizeEquipment({TOP:[]}).TOP,[]);});
+test('duplicate fields, discontinuous actors and duplicate owned blocks are rejected',()=>{const text=visual.format(plan,'bad');assert.throws(()=>core.parseVisual(text.replace('姓名：A','姓名：A\n姓名：B'),'bad'));assert.throws(()=>core.parseVisual(text.replace('【人物 1】','【人物 2】'),'bad'));assert.throws(()=>core.parseVisual(text+text,'bad'));});
+test('multiple actors retain independent current equipment',()=>{const other={...plan.characters[0],name:'B',equipment:core.Wardrobe.normalizeEquipment({TOP:[{name:'blue shirt'}]})},parsed=core.parseVisual(visual.format({...plan,characters:[plan.characters[0],other]},'two'),'two').plan;assert.equal(parsed.characters[0].equipment.TOP[0].name,'white blouse');assert.equal(parsed.characters[1].equipment.TOP[0].name,'blue shirt');});
+test('standalone rendering and story text hide only the owned current protocol',()=>{const request={id:'render',storyInput:''},raw='<bubble>'+visual.format(plan,'render')+'</bubble>',parsed=core.parseVisual(raw,'render'),rendered=core.renderVisual(raw,parsed,request,parsed.plan);assert(rendered.startsWith('<bubble>'));assert(rendered.endsWith('</bubble>'));assert(!rendered.includes('<ad-visual'));assert(core.storyText(rendered).includes('她站在车站。'));});
+test('plain current hairstyle survives visual recovery and replaces registered hair for one frame',()=>{
+ const update='flushed cheeks, dark brown hair in a high ponytail, loose strands by her ears';
+ const source='场景：medium shot, one woman at a station\n人物：A\n本轮外貌：'+update;
+ const overrides=visual.readDraft(source).characters[0].appearanceOverrides;
+ assert.deepEqual(overrides,{hair:'dark brown hair in a high ponytail',hairDetail:'loose strands by her ears'});
+ const actor={...plan.characters[0],appearanceOverrides:overrides};
+ const text=visual.format({...plan,characters:[actor]},'hair').replace(/^本轮外貌：.*$/m,'本轮外貌：'+update);
+ const parsed=core.parseVisual(text,'hair').plan;
+ const registered={name:'A',form:'默认形态',registrationDNA:{schema:1,slots:{hair:'long wavy dark brown hair',eyes:'green eyes'}}};
+ const result=core.reuseRegisteredIdentity(parsed,{kind:'story_cg'},[registered]);
+ const prompt=core.compose(result.plan,{}, {format:'nai45'}).prompt;
+ assert.match(prompt,/dark brown hair in a high ponytail, loose strands by her ears, green eyes/);
+ assert.doesNotMatch(prompt,/long wavy dark brown hair|flushed cheeks/);
+ assert.equal(registered.registrationDNA.slots.hair,'long wavy dark brown hair');
+});

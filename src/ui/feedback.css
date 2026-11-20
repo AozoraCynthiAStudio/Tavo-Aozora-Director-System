@@ -1,0 +1,14 @@
+/* Current feedback presentation. Owns this surface; no historical skins. */
+
+.pp-ui :is(.ad-style-savebar,.ad-profile-actions,.style-editor-actions,.character-editor-actions,.ad-section-actions,.local-actions){background:transparent!important;background-image:none!important;box-shadow:none!important;border:0!important}
+.pp-ui :is(.ad-muted,.studio-help-copy,.city-size-hint){color:#79513a!important;opacity:1!important}
+.pp-ui :is(button,input,textarea,select):focus-visible{outline:2px solid #a52b47!important;outline-offset:2px!important}
+.pp-ui [data-pp-feedback=success]{color:#24634b!important}
+.pp-ui [data-pp-feedback=error]{color:#a21e3d!important}
+.pp-ui [data-pp-feedback=pending]{color:#8a4b12!important}
+.pp-ui .paper{animation:none!important;transition:none!important}
+@media (max-width:900px),(max-aspect-ratio:1/1){#adirector-cg-dock[data-view=current][data-mobile-photo=true]{left:50%!important;right:auto!important;margin-left:0!important;margin-right:0!important;transform:translateX(-50%)!important}}
+
+.ad-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
+.pp-ui :is(#city-style-save-state,#motion-save-state,#paste-status,#studio-size-status,#params-status,#ad-log-detail-feedback){color:#94233f!important;font-weight:750!important;opacity:1!important}
