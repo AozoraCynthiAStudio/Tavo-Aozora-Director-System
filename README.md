@@ -2,6 +2,10 @@
 
 青空导演系统是 Tavo 的生图插件。设定你想看的画面，导演会结合剧情、人物档案和画风安排镜头，生成与故事相连的 CG。
 
+**[直接下载 v1.0.0 安装包](https://github.com/AozoraCynthiAStudio/Tavo-Aozora-Director-System/releases/download/v1.0.0/Aozora_Director_System_V1.0.0.tpg)**
+
+<img src="src/assets/marketplace/cover.png" alt="青空导演系统封面" width="200">
+
 ## 功能
 
 - **剧情 CG**：为下一轮剧情选景，也可以从已经保存的回复补图。
@@ -11,6 +15,10 @@
 
 主力优化面向 NAI 4.5 FULL。其他模型可通过 Tavo 原生生图链路使用通用模式。
 
+## 界面预览
+
+<img src="src/assets/tutorial/next-turn.png" alt="导演下一幕的画面要求与镜头设置" width="360"> <img src="src/assets/tutorial/card-actions.png" alt="CG 卡片和图片操作" width="360">
+
 [查看动态 CG 示例](src/assets/tutorial/motion-loop.gif)
 
 ## 安装
@@ -19,7 +27,7 @@
 
 ## 从源码构建
 
-在项目根目录运行：
+在项目根目录运行以下命令。
 
 ```powershell
 npm test
