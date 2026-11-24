@@ -13,7 +13,6 @@
   tavo.plugin.onInputAction('next-director',()=>open('next','story_cg'));
   tavo.plugin.onInputAction('character-director',()=>open('next','character_intro'));
   tavo.plugin.onInputAction('cancel-director',safe(async()=>{const hasTask=!!app.snapshot().pending;if(hasTask)await app.cancelPending();const message=hasTask?'已取消本轮任务':'当前没有待执行任务';app.notice(message);await tavo.utils.toast(message);}));
-  tavo.plugin.onSidebarAction('open-stage',()=>open('stage'));
   tavo.plugin.onSidebarAction('open-settings',()=>open('settings'));
   tavo.plugin.on('generation:prepare',safe(e=>{app.traceText?.('host.generation.prepare',e.text,{generationId:String(e.generationId||''),eventChatId:String(e.chatId||''),source:String(e.source||'')});return app.prepare(e);}));
   // Intentionally no await or host writes on pre-save success critical path.

@@ -1,0 +1,46 @@
+.ad-local-gallery[hidden]{display:none!important}
+.ad-local-gallery{color:#482c27;padding:0 3% 4%;font:inherit;min-width:0}
+.ad-local-gallery header,.ad-local-gallery nav{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ad-local-gallery h2{flex-basis:100%;font-size:1.25em;margin:0 0 5px;color:#542d26}
+.ad-local-gallery nav{margin-top:10px;padding:4px;border:1px solid #cda98d;background:#f9e8d5}
+.ad-local-gallery button{padding:.55em .75em;border:1px solid #c39a7e;background:#fff0de;color:#532c26;font:inherit;cursor:pointer}
+.ad-local-gallery nav button{flex:1;border-color:transparent}
+.ad-local-gallery nav button[aria-pressed=true]{border-color:#901831;background:#941d35;color:#fff2db}
+.ad-local-gallery button:focus-visible,.ad-local-gallery input:focus-visible{outline:2px solid #a12743;outline-offset:2px}
+.ad-local-gallery button:disabled{opacity:.45;cursor:default}
+.ad-local-gallery section>button{display:block;width:100%;margin:0 0 7px;text-align:left}
+.ad-local-gallery p[role=status]{color:#795044;margin:10px 0}
+.ad-gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ad-gallery-grid article{position:relative;min-width:0}
+.ad-gallery-grid button{display:block;width:100%;padding:0;overflow:hidden;background:#513a39}
+.ad-gallery-grid img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;color:#fff3df}
+.ad-gallery-grid input{position:absolute;top:5px;right:5px;width:18px;height:18px;accent-color:#a12743}
+.ad-gallery-large{display:block;margin:auto;max-width:100%;max-height:52dvh;object-fit:contain;touch-action:pan-y}
+.ad-gallery-image-unavailable{outline:1px dashed #a12743}
+@media (max-width:480px){.ad-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pp-ui .rail [data-studio-nav=gallery]{--nav-art:url("__WORKBENCH_nav-gallery.png__");clip-path:polygon(14% 13%,97% 3%,87% 84%,78% 92%,3% 98%)}
+.ad-local-gallery nav{margin:0 0 12px;border-width:0 0 1px;padding:0;background:none;gap:0}
+.ad-local-gallery nav button{border:0;border-bottom:2px solid transparent;background:none;font-weight:750}
+.ad-local-gallery nav button[aria-pressed=true]{color:#8f1930;border-color:#961c35;background:#ae415611}
+.ad-local-gallery header{gap:5px 8px}
+.ad-local-gallery header h2{flex:1 0 100%;font-size:1em;margin:0 0 2px}
+.ad-local-gallery header button{border-color:transparent;background:#9d654413;padding:.45em .65em}
+.ad-local-gallery p[role=status]:empty{display:none}
+.ad-local-gallery>section{margin-top:10px}
+.ad-gallery-selection,.ad-gallery-pager{display:flex;align-items:center;flex-wrap:wrap;gap:6px;border-block:1px solid #c39a7e66;padding:6px 0;margin-bottom:8px}
+.ad-gallery-selection button,.ad-gallery-pager button{padding:.4em .6em}
+.ad-gallery-selection button[data-danger=true]{color:#931f39}
+.ad-gallery-pager{justify-content:center;margin:10px 0 0;border-bottom:0}
+.ad-gallery-pager span{min-width:42px;text-align:center;color:#795044}
+.ad-gallery-grid article{border:1px solid #ae8266}
+.ad-gallery-grid article:has(input:checked){outline:2px solid #a12743}
+.pp-ui .rail [data-studio-nav=gallery]{clip-path:polygon(2.97% 94.90%,10.25% 26.21%,24.23% 7.43%,96.15% 4.96%,88.43% 79.58%,77.66% 92.92%);--nav-outline:url("__WORKBENCH_nav-outline-logs.svg__")}
+
+.pp-ui .rail [data-studio-nav=tutorial]{--nav-art:url("__WORKBENCH_nav-tutorial.png__");--nav-outline:url("__WORKBENCH_nav-outline-logs.svg__");clip-path:polygon(2.97% 94.90%,10.25% 26.21%,24.23% 7.43%,96.15% 4.96%,88.43% 79.58%,77.66% 92.92%)}
+
+.ad-gallery-selection{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.pp-ui .ad-gallery-selection button[data-danger=true]{color:#fff0da}.pp-ui .ad-gallery-selection button[data-danger=true]:last-child{background:#fff0de;color:#8e2639;box-shadow:none}.ad-gallery-selection button:disabled{opacity:.4}
+.ad-gallery-tools{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.pp-ui .ad-gallery-tools button{font-style:normal;min-height:36px;padding:4px 3px;line-height:1.15}
+.pp-ui .ad-gallery-tools button[data-secondary=true]{background:#fff0de;color:#8e2639;box-shadow:none}
+.pp-ui .ad-gallery-tools.logs-toolbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:6px;margin:4px 0 0;padding-bottom:5px}
+.pp-ui .ad-gallery-tools.logs-toolbar>button{box-sizing:border-box;width:100%;min-width:0;height:28px;min-height:28px;padding:2px;line-height:1.1;white-space:nowrap}

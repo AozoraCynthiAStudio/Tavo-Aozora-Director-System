@@ -54,7 +54,3 @@
 .pp-ui .tutorial-mode-grid p:last-child{margin-bottom:0}
 .pp-ui .tutorial-action-icon{display:grid;place-items:center;width:40px;height:40px;margin-top:2px;border:0;background:none;color:#6e3a30}
 .pp-ui .tutorial-action-icon .tutorial-inline-icon{display:block;width:30px;height:30px;max-width:30px;max-height:30px;color:currentColor;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.pp-ui .rail [data-studio-nav=tutorial]{--nav-outline:url("__WORKBENCH_nav-outline-logs.svg__");clip-path:polygon(2.97% 94.90%,10.25% 26.21%,24.23% 7.43%,96.15% 4.96%,88.43% 79.58%,77.66% 92.92%);background-image:linear-gradient(145deg,#37302f,#151116)!important}
-.pp-ui .rail [data-studio-nav=tutorial]>svg{display:block!important;visibility:visible!important;position:absolute;z-index:3;top:17%;left:50%;width:42%;height:36%;transform:translateX(-50%);color:#fff;stroke-width:1.8}
-.pp-ui .rail [data-studio-nav=tutorial]>span{display:block!important;visibility:visible!important;position:absolute;z-index:3;top:60%;left:0;right:0;color:#fff;text-align:center;font-size:11px;font-weight:950;line-height:1.2;letter-spacing:.05em}
-.pp-ui .rail [data-studio-nav=tutorial][aria-selected=true]{filter:brightness(1.18) drop-shadow(0 0 2px #bb1d35)}

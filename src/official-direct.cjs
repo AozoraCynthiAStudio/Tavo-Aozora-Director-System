@@ -64,7 +64,7 @@ async function generate(tavo,compiled,job,guard){
     }
     await guard();
     let saved;
-    try{saved=await tavo.file.save('ad_image_'+job.id+'.png',encode(png),{scope:'chat',encoding:'base64'});}
+    try{saved=await tavo.file.save(job.filename||'ad_image_'+job.id+'.png',encode(png),{scope:job.filename?'global':'chat',encoding:'base64'});}
     catch(error){const failure=requestError('图片已返回但保存失败','IMAGE_STORAGE_FAILED');failure.details=String(error?.message||error);throw failure;}
     await guard();
     if(!saved)throw requestError('图片已返回但保存未确认，请先查看记录','IMAGE_STORAGE_FAILED');

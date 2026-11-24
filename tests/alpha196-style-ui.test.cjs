@@ -69,3 +69,13 @@ for(const positive of ['artist:atdan, 0.25::artist:ask (askzy)::, game cg, offic
   assert.deepEqual(saved.find(style=>style.id===anime.id),{...previous,positive:anime.positive});
  }finally{app.close();}
 });
+
+test('fresh storage never creates an anime migration backup for the bundled preset',async()=>{
+ const f=fixture(),app=createApp(f.tavo,require('../src/core.cjs'),f.store,f.provider,{rules,styles});
+ try{
+  await app.load();
+  assert.deepEqual(app.snapshot().styles.map(style=>style.id),styles.map(style=>style.id));
+  await app.load();
+  assert.deepEqual(app.snapshot().styles.map(style=>style.id),styles.map(style=>style.id));
+ }finally{app.close();}
+});

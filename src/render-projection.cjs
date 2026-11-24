@@ -15,7 +15,7 @@ const frames=[
  ['lower',/^(?:(?:lower[- ]body|waist[- ]down)(?: shot| framing)?|(?:legs?|thighs?|knees?|hips|waist)[- ]only|(?:close[- ]up|detail shot) (?:of|on) (?:the )?(?:legs?|thighs?|knees?|hips|waist|calves?))\b/i],
  ['torso',/^(?:(?:torso|chest|back|shoulders?|arms?)[- ]only|(?:close[- ]up|detail shot) (?:of|on) (?:the )?(?:torso|chest|back|abdomen|stomach|shoulders?|arms?))\b/i],
  ['portrait',new RegExp('^(?:portrait|headshot|head shot|face close[- ]up)'+boundary,'i')],
- ['upper',new RegExp('^(?:upper[-_ ]body(?: shot| view| framing)?|waist up|medium close[- ]up|bust shot)'+boundary,'i')],
+ ['upper',new RegExp('^(?:upper[-_ ]body(?: shot| view| framing)?|waist[- ]up(?: framing| shot)?|medium close[- ]up(?: shot)?|bust shot)'+boundary,'i')],
  ['cowboy',new RegExp('^(?:medium shot|mid shot|cowboy shot|thigh up|knee up|three[- ]quarter shot)'+boundary,'i')],
  ['full',new RegExp('^(?:full[-_ ]body(?: shot| view| framing| composition| portrait)?|full figure|head to toe)'+boundary,'i')],
  ['wide',/^(?:wide shot|long shot|establishing shot|panoramic view)\b/i]

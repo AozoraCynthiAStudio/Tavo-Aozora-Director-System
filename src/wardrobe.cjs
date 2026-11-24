@@ -6,6 +6,17 @@ const LABELS={HEAD:'头部',TOP:'上身',LOWER:'下身',FULL:'跨部位',LEGWEAR
 const clean=x=>String(x??'').trim();
 const norm=x=>clean(x).normalize('NFKC').toLowerCase();
 const key=c=>norm(c.name)+'|'+norm(c.form||'默认形态');
+const sceneProp=/\b(?:back[ -]?packs?|rucksacks?|knapsacks?|daypacks?|school[ -]?bags?|handbags?|purses?|tote bags?|shoulder bags?|crossbody bags?|messenger bags?|duffel bags?|satchels?|suitcases?|luggage|briefcases?|umbrellas?|cameras?|binoculars?|flashlights?|phones?|walking sticks?|tool[ -]?boxes?|handheld tools?|swords?|firearms?)\b|背包|双肩包|书包|手提包|挎包|行李|公文包|雨伞|相机|望远镜|手电筒|手机|手杖|工具箱|手持工具/i;
+function withoutSceneProps(equipment){
+ const strip=items=>{
+  if(!Array.isArray(items)||!items.some(item=>sceneProp.test(item.name)))return items;
+  const rest=items.filter(item=>!sceneProp.test(item.name));
+  return rest.length?rest:null;
+ };
+ return Object.fromEntries(Object.entries(equipment).map(([slot,value])=>[
+  slot,isLayered(value)?Object.fromEntries(Object.entries(value).map(([layer,items])=>[layer,strip(items)])):strip(value)
+ ]));
+}
 const empty=()=>Object.fromEntries(SLOTS.map(s=>[s,null]));
 const INNER_ITEMS={
  TOP:/\b(?:bra(?:ssiere)?s?|bralettes?|undershirts?)\b|胸罩|乳罩|文胸|胸衣|内衣/i,
@@ -68,7 +79,7 @@ function normalizeCharacter(c){
  const out={name:clean(c.name),form:clean(c.form)||'默认形态',equipmentVersion:2,equipment:normalizeEquipment(c.equipment)};
  if(c.registrationDNA!==undefined)out.registrationDNA=structuredClone(c.registrationDNA);if(c.appearanceOverrides!==undefined)out.appearanceOverrides=structuredClone(c.appearanceOverrides);if(c.frameSelection!==undefined)out.frameSelection=structuredClone(c.frameSelection);if(c.identity!==undefined)out.identity=clean(c.identity);if(c.relation!==undefined)out.relation=clean(c.relation);if(c.source!==undefined)out.source=clean(c.source);if(c.messageId!==undefined)out.messageId=String(c.messageId);if(c.aliases!==undefined)out.aliases=[...c.aliases];return out;
 }
-function normalizeRows(rows=[]){if(!Array.isArray(rows))throw Error('装备人物列表无效');const seen=new Set();return rows.map(raw=>{const c=normalizeCharacter(raw),id=key(c);if(seen.has(id))throw Error('装备人物身份重复');seen.add(id);return c;});}
+function normalizeRows(rows=[]){if(!Array.isArray(rows))throw Error('装备人物列表无效');const seen=new Set();return rows.map(raw=>{const c=normalizeCharacter(raw),id=key(c);c.equipment=withoutSceneProps(c.equipment);if(seen.has(id))throw Error('装备人物身份重复');seen.add(id);return c;});}
 function canonicalIdentity(c,state=[],profiles=[]){
  const form=norm(c.form||'默认形态'),name=norm(c.name),matches=[...profiles,...state].filter(p=>norm(p.form||'默认形态')===form&&[p.name,...(p.aliases||[])].some(n=>norm(n)===name));
  const identities=new Map(matches.map(p=>[key(p),p]));if(identities.size>1)throw Error('装备人物别名存在歧义，请使用正式姓名');
@@ -81,7 +92,7 @@ function validateUpdates(raw,state,request={},narrative='',profiles=[],options={
   try{
    if(!patch||typeof patch!=='object'||!clean(patch.name)||patch.fact&&patch.fact!=='current')continue;
    const identity=canonicalIdentity(patch,working,profiles);
-   const proposed=normalizeEquipment(patch.regions,false);
+   const proposed=withoutSceneProps(normalizeEquipment(patch.regions,false));
    const old=working.find(row=>key(row)===key(identity));
    if(options.initialKeys?.has(key(identity))&&!old)continue;
    const regions={};
@@ -100,7 +111,7 @@ function applyUpdates(state,updates){
  const rows=normalizeRows(state);
  for(const patch of updates){let at=rows.findIndex(r=>key(r)===key(patch));if(at<0){rows.push(normalizeCharacter({...patch,equipment:empty()}));at=rows.length-1;}
   const row=rows[at],equipment=mergeRegions(row.equipment,patch.regions);
-  rows[at]=normalizeCharacter({...row,equipment,source:'equipment-v2'});
+  rows[at]=normalizeCharacter({...row,equipment:withoutSceneProps(equipment),source:'equipment-v2'});
  }
  return rows;
 }
@@ -138,7 +149,7 @@ function resolveFrame(plan,state,profiles=[]){
   const actor=normalizeCharacter(raw);
   const identity=canonicalIdentity(actor,baseline,profiles);
   const known=baseline.find(row=>key(row)===key(identity));
-  const equipment=frameEquipment(actor.equipment,known?.equipment);
+  const equipment=frameEquipment(sceneProp.test(plan.scene)?actor.equipment:withoutSceneProps(actor.equipment),known?.equipment);
   const changed=SLOTS.filter(slot=>regionChange(slot,known?.equipment[slot],actor.equipment[slot])!==undefined);
   audit.push({...identity,changed,source:'selected-frame'});
   return {...actor,...identity,equipment};
@@ -176,7 +187,7 @@ function endingUpdates(plan,state,rawUpdates,profiles=[]){
  const baseline=normalizeRows(state),frame=resolveFrame(plan,baseline,profiles).plan;
  const framePatches=frame.characters.map(actor=>{
   const previous=baseline.find(row=>key(row)===key(actor)),regions={};
-  for(const [slot,value] of Object.entries(compactEquipment(actor.equipment))){
+  for(const [slot,value] of Object.entries(compactEquipment(withoutSceneProps(actor.equipment)))){
    const old=previous?.equipment[slot];
    if(old==null)regions[slot]=value;
    else if(Object.hasOwn(INNER_ITEMS,slot)){
@@ -288,7 +299,7 @@ function parseUpdates(text,_legacyRequestId){
 function payload(value){return '<!--ad-equipment:'+encodeURIComponent(JSON.stringify(value))+'-->';}
 function readPayload(text){const m=ProtocolBoundary.ownedComments(text,'ad-equipment').find(m=>m.text.startsWith('<!--ad-equipment:'));if(!m)return null;try{const p=JSON.parse(decodeURIComponent(m.inner));if(!p.id||!p.chatId||!Array.isArray(p.updates))throw Error();return p;}catch{throw Error('装备保存数据损坏');}}
 const layerInstruction='上身 TOP 与下身 LOWER 有内层状态时可写 {"LOWER":{"inner":[]}}，表示明确没穿内裤，外层裙裤照旧。内层穿着用同样的衣物列表，未知省略。只更新外层时可写 outer。遮挡不改变穿着，可见的内层用 visible:true。';
-const continuityInstruction='首次在当前故事中安排人物穿着时，先服从人物设定和上下文，再一次确定完整八部位及上/下身内外层；袜子、鞋、帽饰、手套和配饰都要明确有或没有，未穿用 []，不能把未提到的部位留给生图模型随机搭配。已经有记录的部位继续沿用，仅补齐尚未确定的部位；进入新段落、换镜头、人物暂时离场再出现，都不是重新搭配的理由。镜头外和被衣物遮住的穿着仍保留，只控制画面可见性，不清空、不重选。首次安排的衣着应与画面及正文一致；后续只有正文实际发生穿脱、换装或明确确认新穿着时才改变。补历史图只用当时的已知穿着和该段事实，不从之后的剧情借衣服，也不替历史补造被遮住的未知衣物。单独人物候选或玩家只对当前图片指定的服装只影响该图片，不自动改写剧情穿着。';
+const continuityInstruction='背包、手提包、行李、相机、雨伞、手持工具等外部物件属于当前场景道具，即使背着、挂在身上或握在手里，也只在当前情节确实携带且入镜时由 Scene 写明归属与状态。不得登记为固定外貌、写入持续穿着或仅凭过去携带过就再次加入。首饰等佩戴型配饰依据本帧的实际穿着、遮挡和取景按需呈现。首次在当前故事中安排人物穿着时，先服从人物设定和上下文，再一次确定完整八部位及上/下身内外层；袜子、鞋、帽饰、手套和配饰都要明确有或没有，未穿用 []，不能把未提到的部位留给生图模型随机搭配。已经有记录的部位继续沿用，仅补齐尚未确定的部位；进入新段落、换镜头、人物暂时离场再出现，都不是重新搭配的理由。镜头外和被衣物遮住的穿着仍保留，只控制画面可见性，不清空、不重选。首次安排的衣着应与画面及正文一致；已发生的解扣、拉开、掀起、滑落属于衣着状态变化。按定格写所在位置，保留仍在身上的衣物。玩家对本帧的明确衣着要求直接用于画面；剧情结尾的持久状态以正文实际变化为准。补历史图只用当时的已知穿着和该段事实，不从之后的剧情借衣服，也不替历史补造被遮住的未知衣物。单独人物候选或玩家只对当前图片指定的服装只影响该图片，不自动改写剧情穿着。';
 function compactEquipment(equipment){
  const compactItems=(items,inner)=>items.filter(item=>clean(item?.name)).map(garment=>({
   name:garment.name,
@@ -325,10 +336,10 @@ function instruction(id,state,profiles=[],options={}){
  return [
   '【剧情装备同步】'+change,
   continuityInstruction,
-  '【八部位】HEAD帽饰、TOP上身、LOWER下身、FULL跨部位、LEGWEAR腿袜、FOOTWEAR鞋、HAND手套、ACCESSORIES饰品。只列变化部位。物品可写 name、state、visible；整部位未穿用 []。'+layerInstruction,
+  '【八部位】HEAD帽饰、TOP上身、LOWER下身、FULL跨部位、LEGWEAR腿袜、FOOTWEAR鞋、HAND手套、ACCESSORIES饰品。只列变化部位。物品可写 name、state、visible。半脱保留物品及其 state，例如 {"name":"white jacket","state":"unzipped and slipped off one shoulder"}。整部位已完全脱空用 []。'+layerInstruction,
   ...(known.length?['【本轮开场的衣着】'+JSON.stringify(known)]:[]),
   ...(profiles.length?['【人物身份参考】'+JSON.stringify(profiles.map(p=>({name:p.name,form:p.form,aliases:p.aliases||[]})))]:[]),
   ending
  ].join('\n');
 }
-module.exports={SLOTS,LABELS,specificGarmentName,garmentItems,layerInstruction,continuityInstruction,endingUpdates,compactEquipment,mergeRegions,frameEquipment,resolveFrame,key,normalizeEquipment,normalizeCharacter,normalizeRows,canonicalIdentity,validateUpdates,applyUpdates,resolve,forImage,snapshotPlan,replay,commitEvent,removeEvent,stateBefore,strip,parseUpdates,payload,readPayload,instruction};
+module.exports={SLOTS,sceneProp,LABELS,specificGarmentName,garmentItems,layerInstruction,continuityInstruction,endingUpdates,compactEquipment,mergeRegions,frameEquipment,resolveFrame,key,normalizeEquipment,normalizeCharacter,normalizeRows,canonicalIdentity,validateUpdates,applyUpdates,resolve,forImage,snapshotPlan,replay,commitEvent,removeEvent,stateBefore,strip,parseUpdates,payload,readPayload,instruction};

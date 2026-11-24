@@ -2,7 +2,7 @@
 
 青空导演系统是 Tavo 的生图插件。设定你想看的画面，导演会结合剧情、人物档案和画风安排镜头，生成与故事相连的 CG。
 
-**[直接下载 v1.0.0 安装包](https://github.com/AozoraCynthiAStudio/Tavo-Aozora-Director-System/releases/download/v1.0.0/Aozora_Director_System_V1.0.0.tpg)**
+**[直接下载 v1.1.8 安装包](https://github.com/AozoraCynthiAStudio/Tavo-Aozora-Director-System/releases/download/v1.1.8/Aozora_Director_System_V1.1.8.tpg)**
 
 <img src="src/assets/marketplace/cover.png" alt="青空导演系统封面" width="200">
 
@@ -23,7 +23,7 @@
 
 ## 安装
 
-从 [v1.0.0 Release](https://github.com/AozoraCynthiAStudio/Tavo-Aozora-Director-System/releases/tag/v1.0.0) 下载 **Aozora_Director_System_V1.0.0.tpg**，在 Tavo 插件管理中导入。进入聊天后，从输入菜单选择「导演下一幕」或「设计人物外观」。图片服务和教程都在插件界面中。
+从 [v1.1.8 Release](https://github.com/AozoraCynthiAStudio/Tavo-Aozora-Director-System/releases/tag/v1.1.8) 下载 **Aozora_Director_System_V1.1.8.tpg**，在 Tavo 插件管理中导入。进入聊天后，从输入菜单选择「导演下一幕」或「设计人物外观」。图片服务和教程都在插件界面中。
 
 ## 从源码构建
 

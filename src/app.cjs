@@ -384,11 +384,12 @@ function createApp(tavo,core,store,provider,assets,notify){
       const oldAnimePositive='artist:mignon, artist:allenes, 0.15::artist:kuvshinov_ilya::, game cg';
       const oldAnimeNegative='lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated';
       const latestAnime=assets.styles.find(s=>s.id==='mignon_allenes');
+      const normalizedAnime=latestAnime&&core.neutralBuiltinStyle(latestAnime);
       let previousAnime=styles.find(s=>s.id==='mignon_allenes');
       if(latestAnime&&previousAnime){
         const oldUnmodified=previousAnime.positive===oldAnimePositive&&previousAnime.negative===oldAnimeNegative&&previousAnime.useNegative!==false;
-        const alreadyCurrent=previousAnime.positive===latestAnime.positive&&previousAnime.negative===latestAnime.negative;
-        if(!oldUnmodified&&!alreadyCurrent){
+        const alreadyCurrent=previousAnime.positive===normalizedAnime.positive&&previousAnime.negative===normalizedAnime.negative&&(previousAnime.useNegative!==false)===(normalizedAnime.useNegative!==false);
+        if(Array.isArray(values[1])&&!oldUnmodified&&!alreadyCurrent){
           const backupId='mignon_allenes_backup_alpha180';
           if(!styles.some(s=>s.id===backupId))styles.push({...previousAnime,id:backupId,name:previousAnime.name+' · 升级前备份'});
         }
@@ -498,7 +499,7 @@ function createApp(tavo,core,store,provider,assets,notify){
     if(tracker.snapshot().phase==='idle'&&latestMessageId){const record=await store.readRecord(latestMessageId);await store.guard(t);if(record){const state=core.Status.fromRecord(record);activity(state.phase,{operationId:'restored:'+latestMessageId,messageId:latestMessageId,error:state.error});}}
     emit('ready');
   }
-  async function officialApiStatus(provider){const saved=await tavo.variable.get('aozora_direct_official_v1','global')||{},selected=provider||saved.provider||'official',relay=saved.thirdParty||{},parameters=Dynamic.normalize(saved.parameters,saved.strength);return {provider:selected,configured:!!core.clean(selected==='thirdparty'?relay.apiKey:saved.apiKey),url:selected==='official'?'https://image.novelai.net/ai/generate-image':relay.url||'',strength:parameters.strength,dynamicSeedMode:parameters.seedMode,parameters};}
+  async function officialApiStatus(provider){const saved=await tavo.variable.get('aozora_direct_official_v1','global')||{},selected=provider||saved.provider||'official',relay=saved.thirdParty||{},parameters=Dynamic.normalize(saved.parameters,saved.strength);return {provider:selected,configured:!!core.clean(selected==='thirdparty'?relay.apiKey:saved.apiKey),url:selected==='official'?(core.clean(saved.apiKey)?'https://image.novelai.net/ai/generate-image':''):relay.url||'',strength:parameters.strength,dynamicSeedMode:parameters.seedMode,parameters};}
   async function saveOfficialApi(value,strength,options={}){const previous=await tavo.variable.get('aozora_direct_official_v1','global')||{},provider=options.provider||previous.provider||'official';if(!['official','thirdparty'].includes(provider))throw Error('请选择有效API类型');const relay={...previous.thirdParty},existing=provider==='thirdparty'?relay.apiKey:previous.apiKey,key=value===undefined?core.clean(existing):core.clean(value).replace(/^Bearer\s+/i,'');if(key&&key.length<20)throw Error('请填写完整的API Key');if(provider==='thirdparty'&&key.startsWith('pst-'))throw Error('非官方API请填写该站点密钥');const selected=strength??previous.strength??Dynamic.DEFAULTS.strength;if(!Number.isFinite(selected)||selected<0.25||selected>0.9)throw Error('变化强度需在0.25到0.90之间');const parameters=Dynamic.validate({...Dynamic.normalize(previous.parameters,previous.strength),...options.parameters,strength:selected});const dynamicSeedMode=parameters.seedMode;if(provider==='thirdparty'){const address=String(options.url??relay.url??'').trim();if(!address)throw Error('请填写自己的中转API地址');const u=new URL(address);if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash)throw Error('请填写不含密钥的HTTPS API URL');relay.url=u.toString().replace(/\/+$/,'');relay.apiKey=key;}const next={...previous,provider,strength:selected,dynamicSeedMode,parameters,thirdParty:relay};if(provider==='official')next.apiKey=key;await tavo.variable.set('aozora_direct_official_v1',next,'global');emit('official-api');return officialApiStatus();}
   async function generationSettings(provider){const saved=await tavo.variable.get('aozora_direct_official_v1','global')||{};provider=provider||saved.provider||'official';return {relay:Dynamic.normalize(provider==='official'?(saved.officialGeneration||{width:config.width||1216,height:config.height||832}):saved.thirdParty?.generation),connection:await officialApiStatus(provider)};}
   function staticGenerationSettings(service){
@@ -517,12 +518,25 @@ function createApp(tavo,core,store,provider,assets,notify){
     if(settings)cfg.directorFrame={provider:settings.connection.provider,width:settings.relay.width,height:settings.relay.height};
   }
   async function saveGenerationSettings(value,key,url,provider){const address=new URL(url||(provider==='official'?'https://image.novelai.net/ai/generate-image':''));if(address.protocol!=='https:'||address.username||address.password||address.search||address.hash)throw Error('请填写不含密钥的 HTTPS API 地址');provider=provider||(address.hostname==='image.novelai.net'?'official':'thirdparty');if(!['auto','native','openai'].includes(value.apiFormat||'auto'))throw Error('请选择有效的接口格式');const parameters=Dynamic.validate({...Dynamic.normalize(value),sizeMode:'custom'});await saveOfficialApi(key,undefined,{provider,url});const next=await tavo.variable.get('aozora_direct_official_v1','global');if(provider==='official')next.officialGeneration=parameters;else next.thirdParty.generation=parameters;next.provider=provider;await tavo.variable.set('aozora_direct_official_v1',next,'global');return generationSettings(provider);}
-  async function motionConnectionStatus(){const saved=await tavo.variable.get('aozora_motion_connection_v1','global')||{},provider=saved.provider||'official';return {apiFormat:saved.apiFormat||'auto',provider,url:provider==='official'?'https://image.novelai.net/ai/generate-image':saved.thirdParty?.url||'',configured:!!core.clean(provider==='official'?saved.apiKey:saved.thirdParty?.apiKey)};}
+  async function motionConnectionStatus(){const saved=await tavo.variable.get('aozora_motion_connection_v1','global')||{},provider=saved.provider||'official';return {apiFormat:saved.apiFormat||'auto',provider,url:provider==='official'?(core.clean(saved.apiKey)?'https://image.novelai.net/ai/generate-image':''):saved.thirdParty?.url||'',configured:!!core.clean(provider==='official'?saved.apiKey:saved.thirdParty?.apiKey)};}
   async function saveMotionParameters(parameters){const previous=await tavo.variable.get('aozora_direct_official_v1','global')||{},base=Dynamic.normalize(previous.parameters,previous.strength),dynamic=Dynamic.validate({...base,...parameters});await tavo.variable.set('aozora_direct_official_v1',{...previous,parameters:dynamic,strength:dynamic.strength,dynamicSeedMode:dynamic.seedMode},'global');emit('official-api');return dynamic;}
   async function saveMotionConnection(value,url,parameters,apiFormat='auto'){if(!['auto','native','openai'].includes(apiFormat))throw Error('请选择有效的接口格式');const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash)throw Error('请填写不含密钥的 HTTPS API 地址');const provider=u.hostname==='image.novelai.net'?'official':'thirdparty',previous=await tavo.variable.get('aozora_motion_connection_v1','global')||{},existing=provider==='official'?previous.apiKey:previous.thirdParty?.apiKey,key=value===undefined?core.clean(existing):core.clean(value).replace(/^Bearer\s+/i,'');if(!key||key.length<20)throw Error('请填写完整的 API Key');if(provider==='thirdparty'&&key.startsWith('pst-'))throw Error('第三方 API 请填写站点密钥');const dynamic=parameters?Dynamic.validate({...Dynamic.normalize(),...parameters}):null,next={apiFormat,provider,apiKey:provider==='official'?key:'',thirdParty:provider==='thirdparty'?{url:u.toString().replace(/\/+$/,''),apiKey:key}:{}};await tavo.variable.set('aozora_motion_connection_v1',next,'global');if(dynamic)await saveMotionParameters(dynamic);return motionConnectionStatus();}
   async function copyStaticConnectionToMotion(){const saved=await tavo.variable.get('aozora_direct_official_v1','global')||{},status=await officialApiStatus();if(!status.configured)throw Error('请先保存静态图 API 连接');await tavo.variable.set('aozora_motion_connection_v1',structuredClone(saved),'global');return motionConnectionStatus();}
   async function readRecord(mid){
-    const t=store.token(),record=await store.readRecord(mid);if(!record||!provider.pngInfo)return record;
+    const t=store.token();let record=await store.readRecord(mid);if(!record)return record;
+    const missing=new Set();
+    for(const image of record.images||[]){
+      if(!String(image.pointer).startsWith('files/global/'))continue;
+      await store.guard(t);
+      if(!await tavo.file.exists(image.pointer))missing.add(image.pointer);
+    }
+    if(missing.size)record=await store.mutateRecord(mid,current=>{
+      current.images=current.images.filter(image=>!missing.has(image.pointer));
+      if(!current.images.some(image=>image.id===current.currentImageId))current.currentImageId=current.images.at(-1)?.id||'';
+      if(!current.images.length&&current.status==='done')current.status='idle';
+      return current;
+    },t);
+    if(!provider.pngInfo)return record;
     const recovered=new Map();for(const image of record.images||[]){if(image.seed!=null||image.metadata?.metadataStorage||!image.pointer)continue;try{const raw=await tavo.file.load(image.pointer,{encoding:'base64'});await store.guard(t);if(typeof raw!=='string')continue;const metadata=await provider.pngInfo(raw);if(!metadata)continue;const seed=metadata.seed??null,verification=provider.verify({format:image.config?.format,syntax:image.syntax,characters:image.plan?.characters||[],requestedSeed:image.requestedSeed,fixedSeed:image.config?.seedFixed,options:image.options||{}},metadata,seed);recovered.set(image.id,{pointer:image.pointer,metadata,seed,seedSource:seed===null?'':'image-metadata',seedVerification:{status:seed===null?'not-returned':image.requestedSeed==null?'returned':seed===image.requestedSeed?'matched':'mismatch',requestedSeed:image.requestedSeed??null,returnedSeed:seed,source:seed===null?null:'image-metadata'},verification});}catch{/* Metadata migration never submits a generation request. */}}
     if(!recovered.size)return record;return store.mutateRecord(mid,r=>({...r,images:r.images.map(i=>{const fresh=recovered.get(i.id);return fresh&&fresh.pointer===i.pointer&&i.seed==null?{...i,...fresh}:i;})}),t);
   }
@@ -958,7 +972,8 @@ function createApp(tavo,core,store,provider,assets,notify){
       if(record.bodyHash!==sourceBodyHash||(extra?.bodyHash&&extra.bodyHash!==sourceBodyHash)){trace('image.generate.body-hash-mismatch',{chatId:t.chatId,messageId:key,requestId:record.requestId||'',generationId:record.generationId||'',recordBodyHash:record.bodyHash,sourceBodyHash,revision:sourceRevision});throw Error('正文已改变，未将旧画面提交到新版本');}
       if(!reroll&&record.status!=='queued')return record;
       const ensureTarget=async()=>{await store.guard(t);const current=await getMessage(key);if(sourceRevision!==revision(key,t)||!current||record.bodyHash!==core.fingerprint(core.storyText(current.content||current.text||'')))throw Error('来源消息已删除、回溯或修改，旧任务结果不再绑定');};
-      const job={id:core.id('image'),messageId:key,chatId:t.chatId};trace('image.generate.job-created',{chatId:t.chatId,messageId:key,requestId:record.requestId||'',generationId:record.generationId||'',jobId:job.id,sourceImageId:sourceImageId||'',mode,revision:sourceRevision});
+      const job={id:core.id('image'),messageId:key,chatId:t.chatId};
+      job.filename='ad_image_c'+t.chatId+'_'+job.id+'.png';trace('image.generate.job-created',{chatId:t.chatId,messageId:key,requestId:record.requestId||'',generationId:record.generationId||'',jobId:job.id,sourceImageId:sourceImageId||'',mode,revision:sourceRevision});
       const source=record.images.find(x=>x.id===sourceImageId)||record;
       const motionReplay=mode==='motion-replay',newMotion=mode==='motion',tuning=extra?.tuning===true;
       if(mode==='replace'&&!record.images.some(i=>i.id===sourceImageId))throw Error('要重抽的图片已不存在');
@@ -1106,10 +1121,11 @@ function createApp(tavo,core,store,provider,assets,notify){
         // Keep the returned artifact in memory if record persistence fails. Never silently resubmit.
         job.result=item;
         rec=await store.mutateRecord(key,async r=>{await ensureTarget();return {...r,images:commitImage(r,item),currentImageId:item.id,recoverableImage:null,status:'done',error:'',budgetAudit:item.budgetAudit,warning:[r.wardrobeWarning,item.renderAudit?.warning,item.languageAudit?.warning,item.budgetAudit?.warning,item.verification?.warning].filter(Boolean).join('；'),timings:{...r.timings,...result.timings,commitStartedAt:Date.now()},updatedAt:Date.now()};},t);trace('image.record.committed',{chatId:t.chatId,messageId:key,requestId:record.requestId||'',generationId:record.generationId||'',jobId:job.id,imageId:item.id,imageCount:rec.images?.length||0,currentImageId:rec.currentImageId||'',pointerReturned:!!item.pointer});
+        try{await saveGalleryMetadata(item,rec,t);}catch(error){trace('gallery.metadata.failed',{jobId:job.id,error:error.message});}
         activity('done',{operationId:job.id,messageId:key});emit('record',{messageId:key,record:rec,imageCompleted:true});await cleanupReplacement(item,record,t);return rec;
       }catch(error){
         trace('image.provider-or-save.failed',{chatId:t.chatId,messageId:key,requestId:record.requestId||'',generationId:record.generationId||'',jobId:job.id,revisionAtStart:sourceRevision,currentRevision:revision(key,t),sourceWasRolledBack:sourceRevision!==revision(key,t),errorName:String(error?.name||''),errorMessage:String(error?.message||error),errorCode:String(error?.code||''),providerPhase:true,resultPointerReturned:!!job.result?.pointer});
-        if(/来源消息/.test(error.message)||sourceRevision!==revision(key,t)){tracker.drop(job.id);emit('activity',{activity:tracker.snapshot()});try{await deleteUnreferenced(job.result?.pointer||'files/chat/ad_image_'+job.id+'.png',t);}catch{}return null;}
+        if(/来源消息/.test(error.message)||sourceRevision!==revision(key,t)){tracker.drop(job.id);emit('activity',{activity:tracker.snapshot()});try{await deleteUnreferenced(job.result?.pointer||'files/chat/'+job.filename,t);}catch{}return null;}
         const uncertain=!!job.result||[408,504].includes(Number(error.statusCode))||['IMAGE_TIMEOUT','IMAGE_STORAGE_FAILED','IMAGE_DOWNLOAD_HTTP','IMAGE_DOWNLOAD_NETWORK'].includes(error.code)||/超时|timeout|timed out|返回未包含|聊天已切换/i.test(error.message);
         try{const failed=await store.mutateRecord(key,r=>({...r,status:uncertain?'uncertain':'failed',budgetAudit:compiled.budgetAudit,error:error.message,errorSource:error.source||'director-task',errorCode:error.code||'',errorStatus:error.statusCode||null,errorDetail:error.details||error.message,recoverableImage:job.result||null}),t);emit('record',{messageId:key,record:failed});}catch{}
         if(!closed&&store.token().chatId===t.chatId)activity(uncertain?'uncertain':'failed',{operationId:job.id,messageId:key,error:error.message,errorCode:error.code,statusCode:error.statusCode});notice(error.message);throw error;
@@ -1139,11 +1155,15 @@ function createApp(tavo,core,store,provider,assets,notify){
     return generate(mid,true,imageId,null,'motion-replay',{replace:operation==='replace'});
   }
   function commitImage(record,item){const images=[...(record.images||[])];if(images.some(i=>i.id===item.id))return images;if(item.replacesImageId){const at=images.findIndex(i=>i.id===item.replacesImageId);if(at<0)throw Error('重抽来源图片已移除，返回图片保留待恢复');images[at]=item;}else images.push(item);return images;}
-  async function cleanupReplacement(item,previous,t){if(!item.replacesImageId)return;const old=previous.images?.find(i=>i.id===item.replacesImageId);if(old&&old.pointer!==item.pointer)scheduleFileCleanup([old.pointer,old.motion?.sourcePointer],t);}
+  async function cleanupReplacement(item,previous,t){if(!item.replacesImageId)return;const old=previous.images?.find(i=>i.id===item.replacesImageId);if(old&&old.pointer!==item.pointer){
+    // A replaced frame can still be the source of a dynamic image.
+    if(globalGalleryName.test(old.pointer)){try{await deleteArchivedImage(old.pointer,t);}catch(error){trace('gallery.replacement.cleanup.failed',{error:error.message});}}
+    else scheduleFileCleanup([old.pointer,old.motion?.sourcePointer],t);
+  }}
   async function recover(mid){const t=store.token();const rec=await store.readRecord(mid);if(!rec?.recoverableImage)throw Error('没有可恢复的返回图片');const item=rec.recoverableImage,next=await store.mutateRecord(mid,r=>({...r,images:commitImage(r,item),currentImageId:item.id,recoverableImage:null,status:'done',error:''}),t);activity('done',{operationId:rec.jobId||'recover:'+mid,messageId:String(mid)});emit('record',{messageId:String(mid),record:next,imageCompleted:true});await cleanupReplacement(item,rec,t);return next;}
   function candidateRegistrationDNA(actor){
     const baseline=core.DNA.snapshot(actor?.registrationDNA);
-    return baseline&&core.DNA.snapshot({schema:1,slots:{...baseline.slots,...core.DNA.overrides(actor.appearanceOverrides)}});
+    return baseline&&core.withoutScenePropsDNA({schema:1,slots:{...baseline.slots,...core.DNA.overrides(actor.appearanceOverrides)}});
   }
   function changedRegistrationSlots(source,previous,image,record,actorIndex){
     const protectedSlots=new Set();
@@ -1250,7 +1270,7 @@ function createApp(tavo,core,store,provider,assets,notify){
   }
   async function favorite(item,model,note=''){if(item?.seed===null||item?.seed===undefined)throw Error('这张图片没有可收藏的结果 Seed');const name=core.clean(model);if(!name)throw Error('请填写所属模型');favorites=favorites.filter(x=>!(x.model===name&&String(x.seed)===String(item.seed)));favorites.unshift({seed:String(item.seed),model:name,note:core.clean(note),time:Date.now()});await store.set('favorites',favorites,'global');emit('settings');}
   async function saveFavorites(value){favorites=value;await store.set('favorites',favorites,'global');emit('settings');}
-  async function removeImage(mid,imageId){const t=store.token(),record=await store.readRecord(mid),image=record?.images.find(i=>i.id===imageId);if(!image)throw Error('这张图片已不存在');const next=await store.mutateRecord(mid,r=>{r.images=r.images.filter(x=>x.id!==imageId);r.currentImageId=r.images.at(-1)?.id||'';if(!r.images.length&&r.status!=='generating'){r.status='idle';r.error='';}return r;},t);if(!next.images.length&&next.status==='idle'){tracker.dropMessage(mid);emit('activity',{activity:tracker.snapshot()});}emit('record',{messageId:String(mid),record:next});scheduleFileCleanup([image.pointer,image.motion?.sourcePointer],t);return next;}
+  async function removeImage(mid,imageId){const t=store.token(),record=await store.readRecord(mid),image=record?.images.find(i=>i.id===imageId);if(!image)throw Error('这张图片已不存在');const next=await store.mutateRecord(mid,r=>{r.images=r.images.filter(x=>x.id!==imageId);r.currentImageId=r.images.at(-1)?.id||'';if(!r.images.length&&r.status!=='generating'){r.status='idle';r.error='';}return r;},t);if(!next.images.length&&next.status==='idle'){tracker.dropMessage(mid);emit('activity',{activity:tracker.snapshot()});}emit('record',{messageId:String(mid),record:next});if(globalGalleryName.test(image.pointer))await deleteArchivedImage(image.pointer,t);else scheduleFileCleanup([image.pointer,image.motion?.sourcePointer],t);return next;}
   async function toggleKept(mid,imageId){const t=store.token();const next=await store.mutateRecord(mid,r=>{const image=r.images.find(x=>x.id===imageId);if(!image)throw Error('找不到图片');image.kept=!image.kept;return r;},t);emit('record',{messageId:String(mid),record:next});return next;}
   function openingWardrobeForReply(mid,message,record){
     const order=Number(message.index??mid);
@@ -1443,7 +1463,122 @@ function createApp(tavo,core,store,provider,assets,notify){
   async function index(options={}){if(options.reconcile!==false)await reconcile();return store.get('index','chat',[]);}
   function imageGenerationRecord(record,image,detailed=false){return core.generationRecord(record,image,detailed,diagnosticEvents);}
   async function imageUrl(pointer,embedded=false){const match=String(pointer).match(/^files\/(chat|global)\/([^/]+)$/);if(!match)throw Error('图片文件路径无效');if(embedded){const t=store.token();await store.guard(t);const data=await tavo.file.load(pointer,{encoding:'dataUrl'});await store.guard(t);if(typeof data!=='string'||!/^data:image\//i.test(data))throw Error('已生成文件无法读取为图片，请保留记录检查');return data;}return await tavo.file.url(match[2],match[1]);}
-  async function download(pointer){return tavo.file.export(pointer);}
-  return {load,snapshot,uncertainViewed,acknowledgeUncertain,isRegenerating,cardImages,readCurrentReply,motionConnectionStatus,saveMotionConnection,saveMotionParameters,copyStaticConnectionToMotion,officialApiStatus,saveOfficialApi,generationSettings,saveGenerationSettings,availableStyles,saveConfig,saveStyles,saveProfiles,editProfile,setProfileAvatar,deleteProfile,deleteStyle,restoreDefaultStyles,saveFavorites,queueNext,cancelPending,prepare,success,terminal,onSaved,onDeleted,reconcile,generate,recover,registerCharacter,confirmRegistration,favorite,index,getMessage,imageUrl,download,imageGenerationRecord,removeImage,toggleKept,supplement,tune,animate,repeatMotion,readRecord,notice,trace,traceText,exportDiagnostics,subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},close(){if(diagnosticPersistTimer){clearTimeout(diagnosticPersistTimer);diagnosticPersistTimer=null;}closed=true;regeneration=null;latestMessageId='';latestLookup++;for(const item of readyMonitors.values())clearTimeout(item.timer);readyMonitors.clear();imageHeads.clear();tracker.reset();prepared.clear();supplementJobs.clear();textOnlyGenerations.clear();recoveryJobs.clear();store.close();emit('closed');}};
+  const globalGalleryName=/^files\/global\/(ad_image_c(\d+)_image_[a-z0-9]+_[a-z0-9]+\.png)$/i;
+  const chatGalleryName=/^files\/chat\/ad_image_(?:c\d+_)?image_[a-z0-9]+_[a-z0-9]+\.png$/i;
+  const galleryMetadataName=pointer=>globalGalleryName.exec(pointer)[1]+'.json';
+  async function deleteArchivedImage(pointer,t){
+    for(const row of await index({reconcile:false})){
+      await store.guard(t);
+      const record=await store.readRecord(row.messageId);
+      if([...(record?.images||[]),record?.recoverableImage].some(image=>image&&(image.pointer===pointer||image.motion?.sourcePointer===pointer)))return;
+    }
+    await store.guard(t);await tavo.file.delete(pointer);await store.guard(t);
+    await tavo.file.delete(galleryMetadataName(pointer),{scope:'global'});
+  }
+  async function saveGalleryMetadata(item,record,t){
+    if(!globalGalleryName.test(item.pointer))return;
+    await store.guard(t);
+    const chat=await tavo.chat.current();await store.guard(t);
+    const summary=core.redactRecord(imageGenerationRecord(record,item));
+    await tavo.file.save(galleryMetadataName(item.pointer),JSON.stringify({chatId:t.chatId,title:chat?.displayTitle||chat?.name||'',summary}),{scope:'global',encoding:'utf8'});
+  }
+  async function galleryFiles(scope='chat'){
+    if(!['chat','global'].includes(scope))throw Error('图片范围无效');
+    if(typeof tavo.file.list!=='function')throw Error('请更新 Tavo 以查看本地图片');
+    const t=store.token(),files=[];
+    let cursor;
+    do{
+      await store.guard(t);
+      const page=await tavo.file.list({scope,limit:200,...(cursor?{cursor}:{})});
+      await store.guard(t);
+      if(!Array.isArray(page?.files))throw Error('无法读取当前故事的文件列表');
+      for(const file of page.files){
+        if(scope==='chat'&&chatGalleryName.test(file.path))files.push(file);
+        const match=scope==='global'&&globalGalleryName.exec(file.path);
+        if(match)files.push({...file,chatId:match[2]});
+      }
+      const previous=cursor;
+      cursor=page.nextCursor;
+      if(cursor&&cursor===previous)throw Error('文件分页未前进');
+    }while(cursor);
+    if(scope==='chat'){
+      files.push(...(await galleryFiles('global')).filter(file=>file.chatId===t.chatId));
+    }
+    if(scope==='global'){
+      const titles=new Map();
+      for(const file of files){
+        if(!titles.has(file.chatId)){
+          await store.guard(t);
+          const meta=await readGalleryMetadata(file.path);
+          titles.set(file.chatId,meta?.title||'');
+        }
+        file.storyName=titles.get(file.chatId);
+      }
+      await store.guard(t);
+    }
+    return files;
+  }
+  async function readGalleryMetadata(pointer){
+    try{const data=await tavo.file.load(galleryMetadataName(pointer),{scope:'global',encoding:'utf8'});return JSON.parse(data||'null');}
+    catch{return null;}
+  }
+  async function galleryRecord(pointer){
+    const t=store.token();
+    const archived=globalGalleryName.exec(pointer);
+    if(archived&&archived[2]!==t.chatId){const metadata=await readGalleryMetadata(pointer);await store.guard(t);return metadata?.summary?{summary:metadata.summary}:null;}
+    for(const row of await index({reconcile:false})){
+      await store.guard(t);
+      const record=await store.readRecord(row.messageId);
+      await store.guard(t);
+      const item=record?.images?.find(image=>image.pointer===pointer||image.motion?.sourcePointer===pointer);
+      if(item)return {record,item};
+    }
+    if(globalGalleryName.test(pointer)){const metadata=await readGalleryMetadata(pointer);await store.guard(t);return metadata?.summary?{summary:metadata.summary}:null;}
+    return null;
+  }
+  async function deleteGalleryFiles(pointers,chatId,scope='chat'){
+    const t=store.token();
+    if(String(chatId)!==t.chatId)throw Error('故事已切换，请重新选择图片');
+    const allowed=new Set((await galleryFiles(scope)).map(file=>file.path));
+    const selected=new Set(pointers);
+    if([...selected].some(pointer=>!allowed.has(pointer)))throw Error('有图片已移除或不属于青空图库，请刷新后重试');
+    if(jobs.size||tracker.snapshot().busy)throw Error('请等当前生成结束后再清理图片');
+    for(const row of await index({reconcile:false})){
+      await store.guard(t);
+      const record=await readRecord(row.messageId);
+      const matches=image=>image&&(selected.has(image.pointer)||selected.has(image.motion?.sourcePointer));
+      if(!record||!record.images?.some(matches)&&!matches(record.recoverableImage))continue;
+      const next=await store.mutateRecord(row.messageId,current=>{
+        current.images=current.images.filter(image=>!matches(image));
+        if(matches(current.recoverableImage))current.recoverableImage=null;
+        if(!current.images.some(image=>image.id===current.currentImageId))current.currentImageId=current.images.at(-1)?.id||'';
+        if(!current.images.length&&current.status==='done')current.status='idle';
+        return current;
+      },t);
+      emit('record',{messageId:String(row.messageId),record:next});
+    }
+    for(const pointer of selected){
+      await store.guard(t);
+      await tavo.file.delete(pointer);
+      await store.guard(t);
+      if(globalGalleryName.test(pointer)){await tavo.file.delete(galleryMetadataName(pointer),{scope:'global'});await store.guard(t);}
+      if(await tavo.file.exists(pointer))throw Error('有图片未能删除，请刷新后重试');
+      const thumbnail=core.thumbnailName(pointer);
+      await store.guard(t);
+      if(await tavo.file.exists(thumbnail,{scope:'chat'})){
+        await store.guard(t);
+        await tavo.file.delete(thumbnail,{scope:'chat'});
+      }
+    }
+  }
+  async function download(pointer){
+    const path=String(pointer),match=/^files\/(?:chat|global)\/([A-Za-z0-9_.-]+)$/.exec(path);
+    if(!match)throw Error('无法识别要下载的图片路径');
+    const t=store.token();await store.guard(t);
+    const data=await tavo.file.load(path,{encoding:'base64'});await store.guard(t);
+    if(typeof data!=='string'||!data.trim())throw Error('无法读取要下载的原图');
+    return tavo.file.export(match[1],data,{encoding:'base64'});
+  }
+  return {load,snapshot,uncertainViewed,acknowledgeUncertain,isRegenerating,cardImages,readCurrentReply,motionConnectionStatus,saveMotionConnection,saveMotionParameters,copyStaticConnectionToMotion,officialApiStatus,saveOfficialApi,generationSettings,saveGenerationSettings,availableStyles,saveConfig,saveStyles,saveProfiles,editProfile,setProfileAvatar,deleteProfile,deleteStyle,restoreDefaultStyles,saveFavorites,queueNext,cancelPending,prepare,success,terminal,onSaved,onDeleted,reconcile,generate,recover,registerCharacter,confirmRegistration,favorite,index,getMessage,imageUrl,download,galleryFiles,galleryRecord,deleteGalleryFiles,imageGenerationRecord,removeImage,toggleKept,supplement,tune,animate,repeatMotion,readRecord,notice,trace,traceText,exportDiagnostics,subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},close(){if(diagnosticPersistTimer){clearTimeout(diagnosticPersistTimer);diagnosticPersistTimer=null;}closed=true;regeneration=null;latestMessageId='';latestLookup++;for(const item of readyMonitors.values())clearTimeout(item.timer);readyMonitors.clear();imageHeads.clear();tracker.reset();prepared.clear();supplementJobs.clear();textOnlyGenerations.clear();recoveryJobs.clear();store.close();emit('closed');}};
 }
 if(typeof module!=='undefined')module.exports={createApp};

@@ -10,6 +10,8 @@ test('alpha225: near framing remains a strong priority but cannot redesign the a
  const text=prompt('near');
  assert.match(text,/本轮镜头范围：近景优先/);
  assert.match(text,/只扩大到读懂主要动作所需的最小范围/);
+ assert.match(text,/开阔地点只说明所在空间/);
+ assert.match(text,/不要用含糊的 medium distance 代替人物裁切/);
  assert.doesNotMatch(text,/必须近景构图/);
  assert.match(text,/场景：medium close-up, waist-up framing, 1girl/);
 });

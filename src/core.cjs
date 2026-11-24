@@ -13,7 +13,7 @@ const RuleCompiler=typeof require==='function'?require('./director-rules.cjs'):D
 // Pure protocol / composition. No host, DOM, storage or provider requests.
 const Budget=typeof require==='function'?require('./prompt-budget.cjs'):DirectorBudget;
 const DNA=typeof require==='function'?require('./identity-dna.cjs'):DirectorDNA;
-const VERSION = '1.0.0';
+const VERSION = '1.1.8';
 const NAI_CAST_LIMIT = 2;
 const DEFAULTS = {format:'nai45',shot:'near',ratio:'api',styleId:'',seedFixed:false,seedValue:'',autoGenerate:true,autoExpand:false};
 const clean = x => String(x ?? '').trim();
@@ -53,14 +53,19 @@ function normalizedPlan(value){
   const directorSummary=VisualProtocol.directorSummary(value.directorSummary),sourceExcerpt=VisualProtocol.sourceExcerpt(value.sourceExcerpt);
   return {scene,characters,...(directorSummary?{directorSummary}:{}),...(sourceExcerpt!==undefined?{sourceExcerpt}:{}),...(Array.isArray(value.fragments)?{fragments:value.fragments.slice(0,6)}:{}),...(clean(value.description)?{description:clean(value.description).replace(/\s*\n\s*/g,' ').slice(0,600)}:{})};
 }
+function withoutScenePropsIdentity(value){return clean(value).split(/[,，;；]/).map(clean).filter(part=>part&&!Wardrobe.sceneProp.test(part)).join(', ');}
+function withoutScenePropsDNA(value){
+ const snapshot=DNA.snapshot(value);
+ return snapshot&&DNA.snapshot({...snapshot,slots:Object.fromEntries(Object.entries(snapshot.slots).map(([slot,text])=>[slot,Wardrobe.sceneProp.test(text)?withoutScenePropsIdentity(text):text]))});
+}
 function reuseRegisteredIdentity(plan,request={},profiles=[]){
  const audit=[];
  if(request.kind==='character_intro')return {plan,audit};
  const characters=plan.characters.map(actor=>{
   const profile=Height.profileFor(actor,profiles);if(!profile)return actor;
-  const registrationDNA=DNA.snapshot(profile.registrationDNA);
+  const registrationDNA=withoutScenePropsDNA(profile.registrationDNA);
   // Legacy flat profiles are reused verbatim, never classified by local word lists.
-  if(!registrationDNA){const ignoredSlots=Object.keys(DNA.overrides(actor.appearanceOverrides));const identity=clean(profile.identity);if(!identity)return actor;audit.push({name:actor.name,form:actor.form,field:'identity',source:'registered-verbatim',...(ignoredSlots.length?{ignoredSlots}:{})});const {registrationDNA:ignored,appearanceOverrides:ignoredChanges,...rest}=actor;return {...rest,identity};}
+  if(!registrationDNA){const ignoredSlots=Object.keys(DNA.overrides(actor.appearanceOverrides));const identity=Wardrobe.sceneProp.test(profile.identity)?withoutScenePropsIdentity(profile.identity):clean(profile.identity);if(!identity)return actor;audit.push({name:actor.name,form:actor.form,field:'identity',source:'registered-verbatim',...(ignoredSlots.length?{ignoredSlots}:{})});const {registrationDNA:ignored,appearanceOverrides:ignoredChanges,...rest}=actor;return {...rest,identity};}
   const appearanceOverrides=DNA.overrides(actor.appearanceOverrides),identity=DNA.renderIdentity(registrationDNA,appearanceOverrides);
   audit.push({name:actor.name,form:actor.form,field:'identity',source:'registered-snapshot',overriddenSlots:Object.keys(appearanceOverrides)});
   return {...actor,registrationDNA,identity,...(Object.keys(appearanceOverrides).length?{appearanceOverrides}:{})};
@@ -516,7 +521,7 @@ function confirmedSeed(result){
 }
 const frameSelectionInstruction='按本帧标记需要强调的外貌和衣着。只标记实际入镜、能区分人物、影响当前状态或玩家明确要求的细节。近景、全身和局部镜头遵循同一原则。场景只引用定位人物或讲清动作所需的外貌和衣着，其余细节放在各自人物栏。appearance 填已有登记DNA或本轮外貌的槽名，只有「外貌」文本时可逐字引用其中的逗号分隔短语。outfit 逐字引用当前可见装备的 name，衣着状态仍由完整装备快照继承。该选择只作辅助，不替代登记DNA或装备状态；未选中或空数组不代表删除可见人物特征、不穿衣物或清空主衣物。无法确认时省略该字段。';
 function buildInstruction(request,ruleCatalog,profiles,{visualOnly=false}={}){
-  const cfg=settings(request.config),registered=(profiles||[]).map(({avatar,...profile})=>profile),character=request.kind==='character_intro',story=!!clean(request.storyInput);
+  const cfg=settings(request.config),registered=(profiles||[]).map(({avatar,...profile})=>({...profile,identity:Wardrobe.sceneProp.test(profile.identity)?withoutScenePropsIdentity(profile.identity):profile.identity,registrationDNA:withoutScenePropsDNA(profile.registrationDNA)||undefined})),character=request.kind==='character_intro',story=!!clean(request.storyInput);
   const nextTurn=request.kind==='story_cg'&&story&&!visualOnly,savedReply=request.kind==='story_cg'&&story&&visualOnly&&request.sceneSelection==='saved-reply';
   const name=clean(request.targetName),form=clean(request.targetForm)||'默认形态';
   const cast=cfg.format==='nai45'?castConstraint(request):null;
@@ -538,7 +543,7 @@ function buildInstruction(request,ruleCatalog,profiles,{visualOnly=false}={}){
       : '本轮明确要求 '+cast.target+' 位清晰主体同框。采用能容纳全员和读清主要动作的最小景别，保留明确指定的机位。'
     : cfg.shot==='full'
     ? '本轮镜头范围：全身。没有玩家明确指定局部或近景裁切时，Scene必须以 full-body shot、head-to-toe framing 明确取景，主要人物从头到脚完整入画，头顶和双脚都在画面内。不得用 medium shot、portrait、waist-up 或近景代替。人物仍占据主要画面。'
-     : '本轮镜头范围：近景优先。按动作焦点选择最小可读区域，通常不超过腰部以上；脸只在动作或情绪需要时入画。先调整相机机位和朝向；主动作仍看不清时，只扩大到读懂主要动作所需的最小范围。';
+     : '本轮镜头范围：近景优先。按动作焦点选择最小可读区域，优先选择腰部以上或关键局部，只有姿势、支撑、多人空间关系或玩家明确要求需要时才扩大到全身或远景。脸只在动作或情绪需要时入画。室外、广场、旷野、大厅等开阔地点只说明所在空间；除非玩家明确要展示全景，或主要动作确实需要交代远近位置，否则保持主体占据画面主要面积。人物半身近景在 Scene 开头同时写 medium close-up 和 waist-up framing，局部镜头则写明确的部位与裁切。选定一个景别，后面不再加 wide shot、establishing shot、panoramic view 或 distant subject 等互相冲突的构图词。不要用含糊的 medium distance 代替人物裁切；如有远景物体，写明它在背景中的位置，不改变人物的取景。已有地点时在当前画幅内用一处具体可见环境线索及实际光线交代地点，可放在虚化背景中，不要改成空白背景。先调整相机机位和朝向；主动作仍看不清时，只扩大到读懂主要动作所需的最小范围。';
   const texts=[
     '【Aozora导演 · 本轮任务】',
     savedReply?'为已保存回复新增画面：先按要求确定采用正文选景或独立画面，再安排镜头，只输出视觉块。':visualOnly?'从已完成的本轮内容选一个画面，只输出视觉块。':nextTurn?'先结合上下文和玩家要求定下一帧，先输出画面块，再写正文。':staticFrame?'先确定静帧，输出视觉块，再在块外写同一画面的中文正文。':(story&&!character?'先结合上文和玩家要求确定要画的定格，再围绕同一幕写正文。':'按本轮要求输出画面方案。'),
@@ -572,7 +577,7 @@ function buildInstruction(request,ruleCatalog,profiles,{visualOnly=false}={}){
     texts.push(request.freshFromDeletion?
       '玩家已删除该角色原登记。旧候选图及历史AI自行补充的外貌不是永久原设定；只保留目前人物卡、世界书、玩家明确要求及已确立的剧情事实，缺失部分重新设计。不要从旧图片自动恢复已删除的DNA。':
       '首次设计以当前人物卡、世界书、玩家要求及明确剧情事实为依据。未登记的旧图片不会自动成为人物原设定；本次要生成可供玩家选择的新候选。');
-    texts.push('人物候选用「登记DNA」直接返回分槽 JSON。每个已知槽值用简短英文表达，合并同义描述，保留玩家设定的颜色、位置和识别特征。没有事实的槽省略。候选在玩家主动登记后才写进档案。');
+    texts.push('人物候选用「登记DNA」直接返回分槽 JSON。手提包、背包、相机、雨伞、行李及手持工具等外部物件只描述在当前 Scene，不写入登记DNA或持续装备。每个已知槽值用简短英文表达，合并同义描述，保留玩家设定的颜色、位置和识别特征。没有事实的槽省略。候选在玩家主动登记后才写进档案。');
   }
   const shotExample=cfg.shot==='full'?'full-body shot, head-to-toe framing':'medium close-up, waist-up framing';
   const exampleScene=shotExample+(cfg.format==='nai45'?', 1girl':'')+', soft window light, a woman turns toward the window';
@@ -582,7 +587,7 @@ function buildInstruction(request,ruleCatalog,profiles,{visualOnly=false}={}){
   texts.push('【容错与预算目的】用简洁英文保留玩家要求、关键动作和本帧状态。省略重复词和无关背景。');
   texts.push('【Aozora数据格式边界】程序数据只写在各自完整闭合的专用标签中：画面使用 <ad-visual>...</ad-visual>，衣着更新使用 <ad-wardrobe>...</ad-wardrobe>，身体设定更新使用 <ad-physical-state>...</ad-physical-state>。按本任务要求输出适用的数据块，不额外增加块。每块独立且只出现一次，不互相嵌套，不放入Markdown代码围栏或其他插件标签内；JSON必须完整且可解析。关闭标签后才能继续正文或其他附加结构。不要只输出裸的“【画面】”“场景：”或人物字段代替完整画面块，不把正文或其他附加结构包进Aozora数据块。');
   if(savedReply)texts.push('【导演记录与正文边界】判定与构思在内部完成，不向正文输出成人判定、规则核对、思考过程、剧情提纲或选景说明。只将已确定的方案结果记在同一个 <ad-visual> 内、场景行之后及人物行之前：本轮事件：正文选景时一句话概括对应事件，独立画面时注明“独立画面，非正文事件”；选定瞬间：一句话说明本图所取的具体一瞬；镜头安排：一句话说明最终机位、景别及裁切。每项只写简短结果，不写分析步骤、比较过程或 Gate 的 PASS/FAIL。三项仅供生成记录中的导演方案查看，不是正文，不进入生图提示词；不新增协议块。关闭视觉块后结束，不输出或修改正文。');
-  if(story)texts.push('【Scene 分工】一行只写这张图需要的镜头与裁切、主体动作和彼此位置、必要道具或环境线索。同一个可见事实只写一次。已登记外貌由人物栏继承；本帧发型等外貌变化交给「本轮外貌」，静态衣着及其变化交给「装备」。衣物、头发或道具本身参与动作时，Scene 只写动作及其必要对象，把颜色、款式等归回对应人物栏。「关系」只补 Scene 未交代且需要指定归属的姿态。省略审美修饰、次要环境和相邻时刻。');
+  if(story)texts.push('【Scene 分工】一行只写这张图需要的镜头与裁切、主体动作和彼此位置、必要道具或环境线索。正文已明确地点且当前画幅看得见环境时，保留至少一个具体场所线索和已知主光；近景可把线索放在虚化背景中，用简短背景从句写出场所，重点仍是当前主体与裁切。明确纯色背景、极限特写及不可见环境按原要求。该线索与关键动作一起保留在精简后的 Scene。同一个可见事实只写一次。已登记外貌由人物栏继承；本帧发型等外貌变化交给「本轮外貌」，静态衣着及其变化交给「装备」。衣物、头发或道具本身参与动作时，Scene 只写动作及其必要对象，把颜色、款式等归回对应人物栏。「关系」只补 Scene 未交代且需要指定归属的姿态。省略审美修饰、次要环境和相邻时刻。');
   if(cfg.format==='nai45')texts.push('【NAI 软预算】整份正面提示词建议约512以内（英文词数 ×1.80 粗估），包含画风词和全部人物外貌、装备。'+(story?'给人物栏留空间，普通 Scene 写约55至75个英文词；复杂定格可写长一些，优先保留玩家指定的取景、动作和可见关系。':'用简短英文保留关键可见事实。')+'超出预算仍可出图。');
   if(nextTurn)texts.push('人物栏按需填写：非默认形态写「形态」；未登记人物写英文「外貌」，已登记人物的临时发型等变化必须写在「本轮外貌」一行，使用 JSON 对象，例如 本轮外貌：{"hair":"dark brown hair in a high ponytail"}。保留未变的发色；旧刘海或碎发本帧已不适用时写 "hairDetail":""。汗水、红晕等反应写进 Scene。「装备」只列定格当下相对开场变化或首次确定的部位；省略则沿用，明确脱空用 []。多人动作需要绑定时，用「关系」写英文短语。');
   else texts.push('「形态」仅在非默认形态时填写。已登记人物按姓名/别名及形态继承外貌。剧情中的未登记人物用「外貌」写已知英文特征。对话中临时改变的发型、发色等，只要在本轮所选画面里已经实际生效，就必须用「本轮外貌」覆盖对应槽位，例如 {"hair":"short black bob"}；该覆盖只影响当前画面，不改正式人物档案。不要把愿望、计划或未来变化当成已生效外貌。稳定特征确实改变时也用「本轮外貌」JSON表达当前值。 在「装备」写这幅画面描写结束时的穿着，列出该时点相对本轮开场已变化或首次确认的部位，例如 装备：{"TOP":[{"name":"white blouse"}],"FULL":[]}。整部位脱空必须写 []，省略表示沿用开场。外层脱下后，原本遮住而现在可见的衣物也要更新为可见。需要独立说明某人的姿态时，可用「关系」填英文短语。');
@@ -648,7 +653,7 @@ function generationRecord(record,image,detail=false,events=[]){
  });
 }
 function staticCaption(request,plan={}){const label=clean(plan.description)||clean(request.request)||(request.kind==='character_intro'?clean(request.targetName)+' · '+(clean(request.targetForm)||'默认形态'):'由导演选择当前画面');return '【静态画面】'+escapeHtml(label);}
-const Core={reuseRegisteredIdentity,resolveFragments,VERSION,DEFAULTS,styleFormat,styleMatches,clean,id,fingerprint,settings,imageServiceMode,supportsNaiImageEdit,hasMotionOrigin,seedValue,normalizedPlan,naiClearSubjectTagCount,validateCastLimit,cleanDirectorInput,inputMarker,parseVisual,readSaved,readableBlock,referenceBlock,storyText,escapeHtml,compose,confirmedSeed,buildInstruction,applyShotPreference,staticCaption,generationRecord,redactRecord};
+const Core={reuseRegisteredIdentity,withoutScenePropsDNA,resolveFragments,VERSION,DEFAULTS,styleFormat,styleMatches,clean,id,fingerprint,settings,imageServiceMode,supportsNaiImageEdit,hasMotionOrigin,seedValue,normalizedPlan,naiClearSubjectTagCount,validateCastLimit,cleanDirectorInput,inputMarker,parseVisual,readSaved,readableBlock,referenceBlock,storyText,escapeHtml,compose,confirmedSeed,buildInstruction,applyShotPreference,staticCaption,generationRecord,redactRecord};
 Core.hasUntranslatedPromptText=PromptValidation.hasUntranslatedText;
 Core.frameCompressionPrompt=PromptAdapters.frameCompressionPrompt;
 Core.inspectStoryGrounding=inspectStoryGrounding;

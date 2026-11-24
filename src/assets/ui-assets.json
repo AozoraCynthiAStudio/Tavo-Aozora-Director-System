@@ -40,5 +40,7 @@
   "src/assets/style-cover-westreal.jpg": "src/assets/ui/de85067ab58c9f8a.webp",
   "src/assets/style-cover-generic.svg": "src/assets/ui/e98d21ead519b949.svg",
   "src/assets/phantom/dialog-middle.png": "src/assets/ui/6d488486d6e76741.webp",
-  "src/assets/phantom/phantom-assistant-sprites-clean.png": "src/assets/ui/e8765b1b94368b64.webp"
+  "src/assets/phantom/phantom-assistant-sprites-clean.png": "src/assets/ui/e8765b1b94368b64.webp",
+  "src/assets/workbench/nav-gallery.png": "src/assets/ui/nav-gallery.png",
+  "src/assets/workbench/nav-tutorial.png": "src/assets/ui/nav-tutorial.png"
 }

@@ -19,7 +19,7 @@
  const footerArt=make('div','footer-art pp-footer-art');footerArt.setAttribute('aria-hidden','true');foot.append(footerArt,back);
  desk.append(nav,paper);ui.append(mast,desk,foot);canvas.append(screen,ui,housing,nameplate);position.append(canvas);root.append(position);
  for(const button of nav.querySelectorAll('button')){
-  const label={settings:'导演',profiles:'角色',styles:'画风',seeds:'Seed',api:'动态',logs:'记录',frame:'尺寸',params:'参数',tutorial:'教程'}[button.dataset.studioNav];
+  const label={settings:'导演',profiles:'角色',styles:'画风',seeds:'Seed',api:'动态',logs:'记录',frame:'尺寸',params:'参数',gallery:'图库',tutorial:'教程'}[button.dataset.studioNav];
   button.setAttribute('aria-label',label);
  }
  const tutorialIconSources={
