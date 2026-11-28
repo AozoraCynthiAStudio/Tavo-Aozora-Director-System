@@ -1,7 +1,15 @@
 [
   {
+    "id": "nai45_modern_japanese_cg",
+    "name": "现代动漫CG",
+    "positive": "1.15::mignon::, 0.8::fuzichoco::, 0.75::casino_(casinoep)::, 0.6::ashima_(roro046)::, 0.55::modare::, 1.2::konya_karasue::, 0.55::maccha (mochancc)::, 0.9::yd (orange maru)::, 2::ke-ta::, -4::artist collaboration::, year 2025, 1.1::realistic rendering, detailed textures, intricate details::",
+    "negative": "lowres, artistic error, worst quality, bad quality, very displeasing, jpeg artifacts, film grain, chromatic aberration, blurry, unfinished, multiple views, split view, clone, text, logo, watermark, artist name, bad face, bad anatomy, bad proportions, bad hands, missing finger, extra digits, fused fingers, extra limbs, long neck, bad feet, deformed, oily shiny skin, chibi",
+    "useNegative": true,
+    "format": "nai45"
+  },
+  {
     "id": "meekohopanes_ru_zhai",
-    "name": "日系半写实游戏 CG",
+    "name": "东方半写实游戏 CG",
     "positive": "0.8::artist:meekohopanes::, 0.5::artist:ru zhai::, game cg, [[shiny skin]], soft body, soft lineart, official art,beautiful lighting,novel illustration,-7::artist collaboration::",
     "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
     "useNegative": true,
@@ -9,7 +17,7 @@
   },
   {
     "id": "mignon_allenes",
-    "name": "动漫游戏 CG",
+    "name": "经典动漫游戏 CG",
     "positive": "artist:cc lin,0.1::artist:kidmo::,0.1::artist:akkijin::,2::game cg::,official art",
     "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
     "useNegative": true,
@@ -24,9 +32,9 @@
     "format": "nai45"
   },
   {
-    "id": "meekohopanes",
-    "name": "欧美半写实 CG",
-    "positive": "artist:meekohopanes, game cg",
+    "id": "nai45_eastern_cinematic_cg",
+    "name": "东方绘影CG",
+    "positive": "artist:soejima shigenori, artist:96yottea, {{{{artist:murata_yuusuke}}}}, {{dino_(dinoartforame), wanke, liduke}}, 1.3::intricate details, finely detailed features, illustration::, 1.2::cinematic lighting::",
     "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
     "useNegative": true,
     "format": "nai45"

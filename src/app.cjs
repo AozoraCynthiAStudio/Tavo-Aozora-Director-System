@@ -170,7 +170,7 @@ function createApp(tavo,core,store,provider,assets,notify){
   const revision=(mid,t=store.token())=>revisions.get(messageKey(mid,t))||0;
   let config=core.settings(),styles=[],profiles=[],designResets=[],favorites=[],requests={},wardrobe=[];const auxiliaryMarker='[adirector-aux:'+core.id('guard')+']';let equipmentBundle={schema:2,events:[]},equipmentQueue=Promise.resolve(),physicalStateBundle=core.PhysicalState.emptyBundle(),physicalState=core.PhysicalState.emptyState(),physicalStateQueue=Promise.resolve();
   function availableStyles(format,mode){if(format===undefined){format=config.format;mode=config.imageService;}return styles.filter(s=>core.styleSupports(s,format,mode));}
-  function preferredStyle(format){const rows=availableStyles(format),preferred=format==='nai45'?'meekohopanes_ru_zhai':'generic_quality';return rows.find(s=>s.id===preferred)?.id||(format==='nai45'?rows[0]?.id:'')||'';}
+  function preferredStyle(format){const rows=availableStyles(format),preferred=format==='nai45'?'nai45_modern_japanese_cg':'generic_quality';return rows.find(s=>s.id===preferred)?.id||(format==='nai45'?rows[0]?.id:'')||'';}
   const styleSlot=value=>['nai5','seedream','gpt-image'].includes(value.imageService)?value.imageService:value.format;
   function reconcileStyles(next=config){
     const memories={...(next.styleIds||{})};
@@ -561,7 +561,7 @@ function createApp(tavo,core,store,provider,assets,notify){
       positive:s.positive==="Idealized photorealism with the casting and finish of a high-end beauty and fashion editorial. Beautify both the face and the figure of every adult subject, including characters whose features and build are already established. Keep their recognizable facial landmarks, age, complexion, hairstyle and broad physique, while presenting them with refined, harmonious facial proportions, expressive eyes, well-balanced body proportions and graceful posture. A tall, full-figured character should look statuesque and naturally curvy, with a harmonious silhouette and elegant carriage. Preserve the character’s characteristic fullness, strength or slenderness in its most flattering form. Render with coherent camera perspective and depth of field, sculpting soft light and fill, luminous even skin with fine texture, and richly resolved hair, clothing and surroundings. Use refined beauty retouching and flattering tonal separation while retaining the scene’s mood, lighting context and requested framing. Clean, low-noise image with smooth shadow transitions and clear edges, retaining delicate, natural skin and fabric texture."?refinedPortrait.positive:s.positive,
       negative:s.negative==="distorted anatomy, extra or missing limbs, fused or extra fingers, distorted hands, broken joint alignment, warped eyes, waxy skin, plastic shine, heavy skin smoothing, harsh sharpening, blown highlights, CGI doll-like rendering, compression artifacts, unsolicited text, logos, watermarks, raw documentary snapshot look, gritty skin microcontrast, exaggerated pores, muddy complexion, hard on-camera flash, generic lookalike faces, beauty-filter face, extreme slimming, exaggerated body proportions, perspective distortion, heavy film grain, color noise, noisy shadows, muddy detail, duplicated limbs, crossed limb ownership, left-right position swaps"?refinedPortrait.negative:s.negative});
     if(refinedPortrait)styles=styles.map(s=>s.id===refinedPortrait.id&&s.positive==="Idealized photorealism with polished editorial beauty. Present each character attractively through expression, posture and camera work, keeping the described face and build. Fine skin texture with light retouching and soft highlights, clean shadows, natural perspective, and tactile hair and fabric. Follow the scene’s light direction and mood."?{...s,positive:refinedPortrait.positive}:s);
-    styles=styles.map(({basis,...style})=>({...style,format:core.styleFormat({...style,basis})})).sort((a,b)=>(b.id==='meekohopanes_ru_zhai')-(a.id==='meekohopanes_ru_zhai'));
+    styles=styles.map(({basis,...style})=>({...style,format:core.styleFormat({...style,basis})}));
     if(!await store.get('nai5SignatureStyleV2','global',false)){
       const preset=assets.styles.find(s=>s.id==='nai5_signature_cg');
       const previous={"name":"写实质感游戏 CG","positive":"0.5::artist:egami::,0.7::artist:meion::,artist:infinote,5::game cg::,official art,very aesthetic, amazing quality, \nRender the characters with lifelike volume and realistic material response. Keep their silhouettes distinct from the background, with smooth light-to-shadow transitions across the cheeks, noses, and jawlines. Show subtle skin texture, soft contact shadows, and distinct reflections on hair, fabric, and leather,","negative":"lowres, worst quality, bad quality, very displeasing, artistic error, jpeg artifacts, bad anatomy, bad proportions, malformed limbs, extra limbs, missing limbs, extra arms, extra legs, floating limbs, disconnected limbs, bad hands, malformed hands, poorly drawn hands, fused fingers, extra fingers, missing fingers, extra digits, fewer digits, bad feet, malformed feet, long neck, deformed face, bad face, mismatched pupils, cross-eyed, duplicate, cloned face, text, logo, watermark, signature","useNegative":true,"format":"nai5"};
@@ -626,6 +626,48 @@ function createApp(tavo,core,store,provider,assets,notify){
       await store.set('styles',styles,'global',t);
       await store.set('nai5TwoBuiltinStylesV1',true,'global',t);
     }
+    if(!await store.get('nai45ModernDefaultV1','global',false)){
+      await store.guard(t);
+      const preset=assets.styles.find(style=>style.id==='nai45_modern_japanese_cg');
+      if(preset&&!styles.some(style=>style.id===preset.id))styles.unshift(structuredClone(preset));
+      await store.set('styles',styles,'global',t);
+      await store.set('nai45ModernDefaultV1',true,'global',t);
+    }
+    if(!await store.get('nai45StyleNamesV1','global',false)){
+      await store.guard(t);
+      const previousNames={
+        nai45_modern_japanese_cg:'现代日系游戏 CG',
+        meekohopanes_ru_zhai:'日系半写实游戏 CG',
+        mignon_allenes:'动漫游戏 CG'
+      };
+      styles=styles.filter(style=>!(style.id==='meekohopanes'&&
+        ['欧美半写实 CG','Aozora-欧美半写实CG · Meekohopanes'].includes(style.name)&&
+        !style.cover&&style.useNegative!==false&&
+        core.fingerprint(JSON.stringify([style.positive,style.negative]))==='642d8c2f'));
+      styles=styles.map(style=>{
+        if(!Object.hasOwn(previousNames,style.id)||style.name!==previousNames[style.id])return style;
+        const preset=assets.styles.find(item=>item.id===style.id);
+        return preset?{...style,name:preset.name}:style;
+      });
+      await store.set('styles',styles,'global',t);
+      await store.set('nai45StyleNamesV1',true,'global',t);
+    }
+    if(!await store.get('nai45EasternStyleV1','global',false)){
+      await store.guard(t);
+      if(sequence!==loadEpoch)return;
+      const previousMigration=await store.get('nai45PhotographicAndEasternStylesV1','global',false);
+      await store.guard(t);
+      if(sequence!==loadEpoch)return;
+      const eastern=assets.styles.find(style=>style.id==='nai45_eastern_cinematic_cg');
+      if(!previousMigration&&eastern&&!styles.some(style=>style.id===eastern.id)){
+        styles.push(structuredClone(eastern));
+      }
+      await store.set('styles',styles,'global',t);
+      await store.set('nai45EasternStyleV1',true,'global',t);
+      await store.guard(t);
+      if(sequence!==loadEpoch)return;
+    }
+    styles=styles.filter(style=>style.id!=='nai45_photographic_semireal');
     const memories={...(config.styleIds||{})},old=styles.find(s=>s.id===config.styleId);const slot=styleSlot(config);if(old&&core.styleMatches(old,slot)&&!(slot==='generic'&&old.id==='seedream_soft_portrait')&&!Object.hasOwn(memories,slot))memories[slot]=old.id;
     if(config.imageService==='hamubox'&&assets.styles.some(s=>s.id==='seedream_soft_portrait')){if(old?.id&&old.id!=='generic_quality')memories.seedream??=old.id;config=core.settings({...config,imageService:'seedream',format:'generic'});}
     config=reconcileStyles({...config,styleIds:memories});await store.set('styles',styles,'global',t);await store.set('config',config,'chat',t);

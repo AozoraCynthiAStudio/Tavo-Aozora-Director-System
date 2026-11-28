@@ -1675,7 +1675,7 @@
     if(!app||!studioReady)return;const epoch=++studioEpoch,s=app.snapshot(),cfg=s.config;
     const style=s.styles.find(x=>x.id===cfg.styleId);
     $('studio-style-name').textContent=style?.name||'选择画风';
-    const cover=$('city-home-style-cover'),art=style?.cover||(['seedream_soft_portrait','nai5_signature_cg','nai5_soft_gradient_anime'].includes(style?.id)?studioBuiltinCover(style):'');
+    const cover=$('city-home-style-cover'),art=style?.cover||(['seedream_soft_portrait','nai45_modern_japanese_cg','nai45_eastern_cinematic_cg','nai5_signature_cg','nai5_soft_gradient_anime'].includes(style?.id)?studioBuiltinCover(style):'');
     cover.hidden=!art;
     if(art&&cover.getAttribute('src')!==art)cover.src=art;
     const generic=genericModeSelected(cfg);

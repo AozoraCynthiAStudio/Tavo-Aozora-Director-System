@@ -1,6 +1,6 @@
 {
   "name": "aozora-director",
-  "version": "1.8.9",
+  "version": "1.9.5",
   "private": true,
   "description": "只需要设定目标，导演会帮你画出心仪的画面。",
   "scripts": {

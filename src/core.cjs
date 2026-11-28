@@ -13,7 +13,7 @@ const RuleCompiler=typeof require==='function'?require('./director-rules.cjs'):D
 // Pure protocol / composition. No host, DOM, storage or provider requests.
 const Budget=typeof require==='function'?require('./prompt-budget.cjs'):DirectorBudget;
 const DNA=typeof require==='function'?require('./identity-dna.cjs'):DirectorDNA;
-const VERSION = '1.8.9';
+const VERSION = '1.9.5';
 const NAI_GROUP_DETAIL_THRESHOLD = 2;
 const DEFAULTS = {format:'nai45',shot:'near',ratio:'api',styleId:'',seedFixed:false,seedValue:'',autoGenerate:true,autoExpand:false};
 const clean = x => String(x ?? '').trim();

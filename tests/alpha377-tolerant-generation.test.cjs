@@ -72,13 +72,14 @@ test('a missing Scene preserves the body without calling either provider',async(
  }finally{f.app.close();}
 });
 
-test('first style matches the supplied string exactly and migrates only its unchanged predecessor',async()=>{
+test('former default style matches the supplied string exactly and migrates only its unchanged predecessor',async()=>{
  const wanted='0.8::artist:meekohopanes::, 0.5::artist:ru zhai::, game cg, [[shiny skin]], soft body, soft lineart, official art,beautiful lighting,novel illustration,-7::artist collaboration::';
- assert.equal(styles[0].positive,wanted);
+ const previous=styles.find(style=>style.id==='meekohopanes_ru_zhai');
+ assert.equal(previous.positive,wanted);
  const old='0.8::artist:meekohopanes::, 0.25::artist:ru zhai::, game cg, [[shiny skin]], soft body, soft lineart, official art, -7::artist collaboration::';
  for(const customize of [false,true]){
-  const f=fixture(),saved={...styles[0],positive:old+(customize?', custom addition':'')};
-  await f.tavo.variable.set('aozora_director_v1.styles',[saved,...styles.slice(1)],'global');
+  const f=fixture(),saved={...previous,positive:old+(customize?', custom addition':'')};
+  await f.tavo.variable.set('aozora_director_v1.styles',[saved,...styles.filter(style=>style.id!==previous.id)],'global');
   const app=createApp(f.tavo,Core,f.store,f.provider,{rules,styles});await app.load();
   try{assert.equal(app.snapshot().styles.find(s=>s.id===saved.id).positive,customize?saved.positive:wanted);}finally{app.close();}
  }

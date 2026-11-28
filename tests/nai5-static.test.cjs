@@ -407,3 +407,58 @@ test('Reset restores built-in styles across services and preserves custom styles
     }
   }finally{f.app.close();}
 });
+
+test('NAI 4.5 modern CG is the default, preserves existing selections and can be reset',async()=>{
+  const shipped=require('../src/assets/styles.json');
+  const id='nai45_modern_japanese_cg',previous='meekohopanes_ru_zhai';
+  const current=fixture([],[],shipped),upgraded=fixture([],[],shipped);
+  await upgraded.tavo.variable.set('aozora_director_v1.styles',shipped.filter(style=>style.id!==id),'global');
+  await upgraded.tavo.variable.set('aozora_director_v1.config',{imageService:'nai45',format:'nai45',styleIds:{nai45:previous}},'chat');
+  try{
+    await current.app.load();
+    await current.app.saveConfig({imageService:'nai45',format:'nai45'});
+    assert.equal(current.app.snapshot().config.styleId,id);
+    await upgraded.app.load();
+    assert.equal(upgraded.app.snapshot().config.styleId,previous);
+    assert.ok(upgraded.app.availableStyles().some(style=>style.id===id));
+    await upgraded.app.deleteStyle(id);
+    await upgraded.app.load();
+    assert.ok(!upgraded.app.availableStyles().some(style=>style.id===id));
+    await upgraded.app.restoreDefaultStyles();
+    assert.deepEqual(upgraded.app.availableStyles().find(style=>style.id===id),shipped[0]);
+    assert.equal(upgraded.app.snapshot().config.styleId,previous);
+  }finally{current.app.close();upgraded.app.close();}
+});
+
+test('NAI 4.5 upgrade removes the photographic preset and falls back from it',async()=>{
+  const shipped=require('../src/assets/styles.json');
+  const eastern=shipped.find(style=>style.id==='nai45_eastern_cinematic_cg');
+  const retired={...eastern,id:'nai45_photographic_semireal',name:'摄影半写实'};
+  const custom={...retired,id:'custom-style'};
+  const f=fixture([],[],shipped);
+  await f.tavo.variable.set('aozora_director_v1.styles',[...shipped,retired,custom],'global');
+  await f.tavo.variable.set('aozora_director_v1.nai45PhotographicAndEasternStylesV1',true,'global');
+  await f.tavo.variable.set('aozora_director_v1.nai45EasternStyleV1',true,'global');
+  await f.tavo.variable.set('aozora_director_v1.nai45PhotographicRefreshV1',true,'global');
+  await f.tavo.variable.set('aozora_director_v1.config',{imageService:'nai45',format:'nai45',styleId:retired.id,styleIds:{nai45:retired.id}},'chat');
+  try{
+    await f.app.load();
+    assert.equal(f.app.snapshot().config.styleId,'nai45_modern_japanese_cg');
+    const styles=f.app.snapshot().styles;
+    assert.deepEqual(styles.map(style=>style.id),[...shipped,custom].map(style=>style.id));
+    assert.deepEqual(styles.find(style=>style.id===custom.id),custom);
+    await f.app.restoreDefaultStyles();
+    assert.deepEqual(f.app.snapshot().styles,[...shipped,custom]);
+  }finally{f.app.close();}
+});
+
+test('NAI 4.5 adds Eastern Cinematic CG when upgrading from before 1.9.1',async()=>{
+  const shipped=require('../src/assets/styles.json');
+  const eastern=shipped.find(style=>style.id==='nai45_eastern_cinematic_cg');
+  const f=fixture([],[],shipped);
+  await f.tavo.variable.set('aozora_director_v1.styles',shipped.filter(style=>style.id!==eastern.id),'global');
+  try{
+    await f.app.load();
+    assert.deepEqual(f.app.snapshot().styles.filter(style=>style.id===eastern.id),[eastern]);
+  }finally{f.app.close();}
+});

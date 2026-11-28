@@ -200,7 +200,7 @@ test('Seedream remembers its style and provider keys independently',async()=>{
     assert.equal((await f.app.seedreamConnection('sync')).key,undefined);
     assert.equal((await f.app.seedreamConnection('async',true)).key,'legacy-test-key');
     await f.app.saveConfig({imageService:'nai45',format:'nai45'});
-    assert.equal(f.app.snapshot().config.styleId,'meekohopanes_ru_zhai');
+    assert.equal(f.app.snapshot().config.styleId,'nai45_modern_japanese_cg');
     await f.app.saveConfig({imageService:'seedream',format:'generic'});
     assert.equal(f.app.snapshot().config.styleId,'seedream_soft_portrait');
   }finally{f.app.close();}

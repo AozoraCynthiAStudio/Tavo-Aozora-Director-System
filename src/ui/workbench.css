@@ -829,6 +829,10 @@
 #studio-seedream-dimensions select{font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:8px;padding:5px 10px}
 #studio-seedream-dimensions p{grid-column:1/-1;margin:0}
 
+.pp-ui [data-style-id="nai45_modern_japanese_cg"] .pp-style-art,
+.pp-ui [data-style-id="meekohopanes_ru_zhai"] .pp-style-art,
+.pp-ui [data-style-id="mignon_allenes"] .pp-style-art,
+.pp-ui [data-style-id="kittew"] .pp-style-art{object-position:center 54%}
 .pp-ui [data-style-id="seedream_soft_portrait"] .pp-style-art{object-fit:cover;object-position:58% center;background:#173e59}
 
 .pp-ui .studio-photo-mode-note:not([hidden]){margin:3px 0 9px;padding:6px 9px;border-left:2px solid #b3805b;color:#664638;font-size:clamp(10px,2.6cqw,14px);line-height:1.45}

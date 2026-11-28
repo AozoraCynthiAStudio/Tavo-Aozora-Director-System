@@ -156,6 +156,20 @@
     "method": "Transcoded from prior source assets; original design and attribution unchanged",
     "quality": 95
   },
+  "nai45ModernStyleCover": {
+    "origin": "User-supplied modern anime CG generation sample, cropped to a portrait of the right-hand character",
+    "file": "src/assets/style-cover-nai45-modern-japanese.jpg"
+  },
+  "nai45ComparisonStyleCovers": {
+    "origin": "User-supplied NAI 4.5 generation samples, cropped to portraits with varied framing",
+    "meekohopanes_ru_zhai": "src/assets/style-cover-nai45-eastern-semireal.jpg",
+    "mignon_allenes": "src/assets/style-cover-nai45-classic-anime.jpg",
+    "kittew": "src/assets/style-cover-nai45-western-anime.jpg"
+  },
+  "nai45EasternCinematicStyleCover": {
+    "origin": "User-supplied NAI 4.5 generation screenshots, cropped to remove the viewer interface",
+    "nai45_eastern_cinematic_cg": "src/assets/style-cover-nai45-eastern-cinematic.jpg"
+  },
   "nai5StyleCovers": {
     "origin": "Original illustrations generated with built-in ImageGen and cropped for the preset cards",
     "nai5_signature_cg": "src/assets/style-cover-nai5-clear-cg-v183.jpg",
