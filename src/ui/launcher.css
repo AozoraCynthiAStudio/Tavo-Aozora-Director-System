@@ -38,3 +38,15 @@
 #ad-launcher .ad-badge-icon{display:block!important;width:11px!important;height:11px!important;fill:none!important;stroke:currentColor!important;stroke-width:2.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
 #ad-launcher #ad-launcher-badge[hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){#ad-launcher #ad-launcher-badge[data-phase]{animation:none!important}}
+
+#ad-launcher[data-phase=no-director] .ph-avatar{background-position:100% 0!important;animation:none!important}
+#ad-launcher #ad-launcher-sleep:not([hidden]){position:absolute;z-index:4;top:-9px;right:-5px;width:33px;height:25px;color:#f3dbc4;font-family:"Microsoft YaHei",sans-serif;font-style:italic;font-weight:800;line-height:1;text-shadow:0 1px 3px #241527}
+#ad-launcher[data-label-side=right] #ad-launcher-sleep{right:auto;left:-5px}
+#ad-launcher #ad-launcher-sleep>span{position:absolute;opacity:0}
+#ad-launcher #ad-launcher-sleep>span:nth-child(1){left:0;bottom:0;font-size:8px;animation:ad-doze-first 2.7s infinite}
+#ad-launcher #ad-launcher-sleep>span:nth-child(2){left:8px;bottom:5px;font-size:11px;animation:ad-doze-second 2.7s infinite}
+#ad-launcher #ad-launcher-sleep>span:nth-child(3){left:19px;bottom:11px;font-size:14px;animation:ad-doze-third 2.7s infinite}
+@keyframes ad-doze-first{0%{opacity:0;transform:translateY(3px) scale(.7)}10%,79%{opacity:1;transform:none}90%,100%{opacity:0}}
+@keyframes ad-doze-second{0%,17%{opacity:0;transform:translateY(3px) scale(.7)}27%,79%{opacity:1;transform:none}90%,100%{opacity:0}}
+@keyframes ad-doze-third{0%,34%{opacity:0;transform:translateY(3px) scale(.7)}44%,79%{opacity:1;transform:none}90%,100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){#ad-launcher #ad-launcher-sleep>span:nth-child(n){animation:none;opacity:1}}

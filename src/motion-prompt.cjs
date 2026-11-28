@@ -23,7 +23,7 @@ function responseText(raw,depth=0){
  if(Array.isArray(raw.choices))return raw.choices.map(value=>responseText(value.message||value.text,depth+1)).filter(Boolean).join('\n');
  return '';
 }
-function readEditResponse(raw){
+function readEditResponse(raw,{structuredOnly=false}={}){
  const text=responseText(raw).replace(/^\uFEFF/,'').trim().replace(/<(think|analysis)\b[^>]*>[\s\S]*?<\/\1>/gi,'');
  const candidates=[],seen=new Set();
  function collect(value,depth=0){
@@ -31,7 +31,7 @@ function readEditResponse(raw){
   if(typeof value==='string'){try{collect(JSON.parse(value),depth+1);}catch{}return;}
   if(Array.isArray(value)){for(const entry of value)collect(entry,depth+1);return;}
   if(typeof value!=='object')return;
-  if(typeof value.scene==='string'||Array.isArray(value.edits)){
+  if(typeof value.scene==='string'||Array.isArray(value.edits)||(structuredOnly&&['changes','dnaChanges','wardrobeUpdates'].some(key=>Array.isArray(value[key])))){
    const key=JSON.stringify({scene:value.scene,focuses:value.focuses,poseEdits:value.poseEdits||[],edits:value.edits});
    if(typeof value.scene!=='string'||!seen.has(key)){seen.add(key);candidates.push(value);}return;
   }
@@ -54,6 +54,7 @@ function readEditResponse(raw){
  if(!candidates.length&&refusal){
   throw Object.assign(Error('文本模型拒绝了本次请求，未返回画面方案；原图已保留，未提交图片生成。'),{code:'TEXT_MODEL_REFUSED'});
  }
+ if(structuredOnly)throw Error('画面调整数据不是完整 JSON，请重新尝试');
  const visual=VisualProtocol.readDraft(text);
  if(visual.scene)return {scene:visual.scene,focuses:[],poseEdits:[]};
  if(text&&!/[{}]/.test(text)&&/\b(?:shot|view|woman|man|standing|sitting|holding|walking|turning)\b/i.test(text)&&!/[\u3400-\u9fff]/.test(text))return {scene:text.replace(/^```[^\n]*\n|\n```$/g,'').trim(),focuses:[],poseEdits:[]};

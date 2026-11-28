@@ -40,7 +40,7 @@ function sections(plan,style,format){
   const outfit=safe(format==='nai45'?visualOutfit(c.outfit):Generic.readable(visualOutfit(c.outfit)));
   const tags=safe(c.relation);
   const relation=format==='nai45'?tags:tags.split(',').map(tag=>tag.trim()).filter(tag=>tag&&!tag.includes('#')).join(', ');
-  const character={name:c.name,form:c.form,identity,outfit,relation};
+  const character={name:c.name,form:c.form,identity,outfit,relation,...(c.portraitAppearance?{portraitAppearance:safe(c.portraitAppearance)}:{})};
   return {...character,prompt:characterTags(character)};
  });
  if(characters.length===1){
@@ -52,10 +52,44 @@ function sections(plan,style,format){
  const scene=safe(omitRepeated(plan.scene,styleTags,format==='nai45')||plan.scene);
  return {base:[positive,scene].filter(Boolean).join(', '),scene,characters};
 }
-function compile(plan,style,format){const parts=sections(plan,style,format);if(format==='nai45'){
+function compile(plan,style,format,{seedream=false,photoModel=null,photoCrop=null,nai5=false}={}){const parts=sections(plan,style,format);
+ if(nai5){
+  const scene=Generic.sentence(Generic.readable(parts.scene));
+  parts.base=[String(style.positive||'').trim().replace(/\|/g,', '),scene].filter(Boolean).join(', ');
+  return {prompt:[parts.base,...parts.characters.map(c=>c.prompt)].join(' | '),sections:parts,syntax:'nai5-pipe',renderedScene:parts.scene,budgetAudit:Budget.nai5Audit(parts)};
+ }if(format==='nai45'){
  const bounded=Budget.converge({...plan,scene:parts.scene},style,parts);parts.base=bounded.base;
  return {prompt:bounded.prompt,sections:parts,syntax:'nai45-pipe',renderedScene:bounded.scene,budgetAudit:bounded.audit};
- }parts.base=Generic.sentence(Generic.readable(parts.scene));for(const c of parts.characters)c.prompt=Generic.characterText(c);
+ }
+ parts.base=Generic.sentence(Generic.readable(parts.scene));
+ for(const c of parts.characters)c.prompt=seedream?Generic.seedreamCharacterText(c):Generic.characterText(c);
+ if(seedream){
+  const continuity=parts.characters.length>1?'Keep these people visually distinct, including their facial landmarks and body proportions. Assign each person only their own physical features, clothing and actions.':'';
+  const exclusions=style.useNegative&&String(style.negative||'').trim();
+  const avoid=exclusions?Generic.sentence('Avoid '+Generic.readable(exclusions)):'';
+  const styleRendering=photoModel==='gpt-image'&&style.id==='seedream_soft_portrait'
+    ?'Keep skin satin-matte with subdued specular highlights and clean low-noise shadows. Use neutral white balance on faces and pale fabrics, with gentle cinematic contrast. Keep color temperature faithful to the scene, with balanced skin tones and no global color cast unless requested. Match the described body proportions at their stated scale.'
+    :photoModel==='seedream'&&style.id==='seedream_soft_portrait'
+      ?'Use refined beauty-editorial skin finishing: fine, even skin texture, softly blended tones and delicate highlights. Use graceful posture and the visible silhouette to express the character’s designed build. When an adult subject is already unclothed in the requested frame, retain the idealized beauty of the character design through harmonious proportions and sculptural contours. Apply the same idealized beauty standard to adult women and men. Preserve the character’s complexion and identifying skin features. When no complexion is established, default to a naturally fair tone. Render visible skin smooth and even-toned with fine texture, soft gradients and controlled highlights. Match expression and complexion changes to the actual moment. Keep any specified slight blush subtle and localized. Treat any intimate anatomy already visible in the framing with the same refined, harmonious proportions. If the face is visible, retain the established facial landmarks and the same polished beauty as in the character’s ordinary portraits. Keep the scene’s existing light direction, color temperature, framing and coverage.'
+      :'';
+  const physique=photoModel==='seedream'&&!['hands','feet','portrait'].includes(photoCrop)
+    ?parts.characters.flatMap(c=>{
+      const anchors=splitTags(c.identity).map(tag=>tag.trim()).filter(tag=>/\b(?:full[- ]figured|full[- ]busted|full bust|curvy|broad (?:shoulders|build|back)|broad[- ]shouldered|stocky|muscular|robust build|rounded hips)\b/i.test(tag));
+      if(!anchors.length)return [];
+      const traits=[...new Set(anchors)].join(', ');
+      return ['Keep '+c.name+'’s visible proportions faithful to these established traits: '+traits+'. Show the stated build directly in the visible silhouette and garment drape. Maintain the balance between breadth and fullness described for this character.'];
+    }):[];
+
+  const face=['hands','feet','lower','torso'].includes(photoCrop)||photoModel===null?[]:parts.characters.flatMap(c=>{
+    if(!c.portraitAppearance)return [];
+    const traits=splitTags(c.identity).map(tag=>tag.trim()).filter(tag=>/\b(?:face|eyes?|irises?|jaw|chin|cheekbones?|nose|lips?|mole|freckles?)\b/i.test(tag)&&!c.portraitAppearance.toLowerCase().includes(tag.toLowerCase()));
+    return traits.length?['Preserve '+c.name+'’s facial identifiers: '+[...new Set(traits)].join(', ')+'.']:[];
+  });
+  const anatomy=photoModel==='seedream'&&parts.characters.length
+    ? 'Preserve each character’s established anatomy and proportions. Give every visible body part its correct count, position, orientation and connection to the same body. Keep the head, neck, torso, pelvis, joints, extremities and other visible structures coherent as a whole. Where bodies overlap, keep their contours and anatomical ownership distinct, without fusion, duplication or misplaced structures. Follow the specified pose and support points, and keep occluded or off-frame anatomy out of view.' : '';
+  const prompt=[parts.base,anatomy,...parts.characters.map(c=>c.prompt),continuity,...face,...physique,Generic.sentence(style.positive),styleRendering,avoid].filter(Boolean).join('\n\n');
+  return {prompt,sections:parts,syntax:'seedream-natural-language'};
+ }
  return {prompt:Generic.compile({...plan,scene:parts.scene},style,parts),sections:parts,syntax:'generic-natural-language'};
 }
 const naiActorType=/^(girl|boy|other)(?:,\s*|$)/i;
@@ -103,11 +137,12 @@ function keepsFieldFacts(original,proposed){
  return true;
 }
 function frameCompressionPrompt(compiled,style,request={}){
+ const nai5=compiled.syntax==='nai5-pipe';
  const {sections,format}=compiled;
  if(!sections.characters.length)return '';
  const {words,estimate}=Budget.risk(compiled.prompt);
- if(format==='nai45'?estimate<=(compiled.budgetAudit?.target??512):words<=268)return '';
- const targetWords=format==='nai45'?284:250;
+ if(nai5?!compiled.budgetAudit?.overBudget:format==='nai45'?estimate<=(compiled.budgetAudit?.target??512):words<=268)return '';
+ const targetWords=nai5?Math.floor(words*compiled.budgetAudit.target/compiled.budgetAudit.estimateAfter):format==='nai45'?284:250;
  const actorText=sections.characters.map(({name,identity,outfit},index)=>({index,name,identity:format==='nai45'?identity.replace(naiActorType,''):identity,outfit,
   preserve:[...referenceFacts(identity,'identity'),...referenceFacts(outfit,'outfit'),...(compiled.protectedAppearance?.[index]||[]).map(text=>({kind:'explicit-frame-appearance',details:[text.toLowerCase()]}))]}));
  const fixed=sections.characters.map(c=>({...c,identity:format==='nai45'?c.identity.match(naiActorType)?.[1]||'':'',outfit:''}));
@@ -126,6 +161,7 @@ function frameCompressionPrompt(compiled,style,request={}){
  ].join('\n\n');
 }
 function applyFrameCompression(compiled,style,raw){
+ const nai5=compiled.syntax==='nai5-pipe';
  const {sections,format}=compiled;
  const text=typeof raw==='string'?raw:raw?.text||raw?.content||'';
  const result=JSON.parse(String(text).trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,''));
@@ -168,7 +204,7 @@ function applyFrameCompression(compiled,style,raw){
  const prompt=format==='nai45'
   ?[parts.base,...characters.map(c=>c.prompt)].join(' | ')
   :Generic.compile({scene:parts.scene},style,parts);
- if(Budget.risk(prompt).words>=Budget.risk(compiled.prompt).words){
+ if(nai5?Budget.nai5Risk(parts).estimate>=Budget.nai5Risk(sections).estimate:Budget.risk(prompt).words>=Budget.risk(compiled.prompt).words){
   return {prompt:compiled.prompt,sections:compiled.sections,edits:[],retained};
  }
  return {prompt,sections:parts,edits,retained};

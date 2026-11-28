@@ -156,6 +156,11 @@
     "method": "Transcoded from prior source assets; original design and attribution unchanged",
     "quality": 95
   },
+  "nai5StyleCovers": {
+    "origin": "Original illustrations generated with built-in ImageGen and cropped for the preset cards",
+    "nai5_signature_cg": "src/assets/style-cover-nai5-clear-cg-v183.jpg",
+    "nai5_soft_gradient_anime": "src/assets/style-cover-nai5-soft-gradient-anime.jpg"
+  },
   "marketplaceBranding": {
     "cover": {
       "file": "src/assets/marketplace/cover.png",

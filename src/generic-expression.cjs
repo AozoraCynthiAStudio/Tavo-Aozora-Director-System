@@ -1,5 +1,7 @@
 'use strict';
 function readable(value){return String(value||'').trim()
+ .replace(/-?\d+(?:\.\d+)?::([^|]*?)::/g,'$1')
+ .replace(/\bartist:[^,|]+,?\s*/gi,'')
  .replace(/\b(\d+)girls?\b/gi,(_,n)=>n==='1'?'one female character':n+' female characters')
  .replace(/\b(\d+)boys?\b/gi,(_,n)=>n==='1'?'one male character':n+' male characters')
  .replace(/\bpov\b/gi,'first-person view')
@@ -19,5 +21,11 @@ function characterText(c){
  const pose=readable(c.relation);
  return [appearance,pose?name+"'s pose: "+pose:'',worn?name+' is wearing '+worn:'',...absence.map(p=>p==='barefoot'?name+' is barefoot':name+' is wearing '+p)].filter(Boolean).map(sentence).join(' ');
 }
+function seedreamCharacterText(c){
+ const name=String(c.name||'').trim(),identity=readable(c.identity),pose=readable(c.relation);
+ const outfit=characterText({...c,identity:'',relation:''});
+ const portrait=readable(c.portraitAppearance);
+ return [pose?name+' in this frame: '+pose:'',portrait?name+' — '+portrait:identity?name+' — recognizable identity and physique, presented with flattering, idealized proportions and carriage: '+identity:'',outfit].filter(Boolean).map(sentence).join(' ');
+}
 function compile(plan,style,parts){return [sentence(readable(plan.scene)),...parts.characters.map(characterText),sentence(style.positive)].filter(Boolean).join('\n\n');}
-if(typeof module!=='undefined')module.exports={readable,sentence,characterText,compile};
+if(typeof module!=='undefined')module.exports={readable,sentence,characterText,seedreamCharacterText,compile};

@@ -31,7 +31,7 @@ test('alpha234: player fragments, ordinary cast all defer to the same definition
  assert.match(catalog.clearSubjectDefinition,/足够的上半身、身体或人物轮廓/);
  assert.match(catalog.clearSubjectDefinition,/无法独立辨认为一个人物形象时，不计入清晰主体/);
  assert.match(catalog.clearSubjectDefinition,/不因其属于玩家局部、画面边缘或遮挡而改变/);
- assert.match(catalog.castComposition,/一旦局部形成独立可辨认的人物形象，就必须计入人数上限/);
+ assert.match(catalog.castComposition,/按「统一清晰主体定义」统计画面实际可辨认的人物/);
 });
 
 
@@ -42,5 +42,5 @@ test('alpha234: cast selection has no player-specific camera rule or structured 
 
 test('alpha234: the built-in cast rule replaces the actor-limit UI',()=>{
  assert.doesNotMatch(ui,/studio-actor-options|ad-max/);
- assert.match(catalog.castComposition,/最多两位清晰主体/);
+ assert.doesNotMatch(catalog.castComposition,/最多两位清晰主体/);
 });

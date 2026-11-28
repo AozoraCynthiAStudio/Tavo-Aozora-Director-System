@@ -1,33 +1,24 @@
-# 青空导演系统 · Aozora Director System
+# 青空导演系统 1.8.2
 
-青空导演系统是 Tavo 的生图插件。设定你想看的画面，导演会结合剧情、人物档案和画风安排镜头，生成与故事相连的 CG。
+青空导演系统是用于 Tavo 的剧情 CG 插件。可从对话选景生图、为已保存回复补图，也可以设计并登记角色、调整已有画面和制作动态 CG。
 
-**[直接下载 v1.1.8 安装包](https://github.com/AozoraCynthiAStudio/Tavo-Aozora-Director-System/releases/download/v1.1.8/Aozora_Director_System_V1.1.8.tpg)**
+## 安装与使用
 
-<img src="src/assets/marketplace/cover.png" alt="青空导演系统封面" width="200">
+在 Tavo 的插件管理中导入 Aozora_Director_System_V1.8.2.tpg。进入聊天后，在输入菜单选择「导演下一幕」或「设计人物外观」。聊天悬浮按钮可以打开图片卡片，侧栏可以打开导演设置。配置示例和图标说明见插件内的「教程」。
 
-## 功能
+## 生图服务
 
-- **剧情 CG**：为下一轮剧情选景，也可以从已经保存的回复补图。
-- **人物设计与登记**：设计外观并保存人物特征，后续画面可以延续已登记的外貌和穿着。
-- **图片调整与动态 CG**：保留原图，新增或重抽候选。NAI 4.5 FULL 支持图生图与动态 CG。
-- **画风与历史**：内置四套 NAI 画风，支持自定义画风导入导出。按轮浏览正文和图片，也可查看生成记录。
+初次安装默认选择 NAI 4.5 Full。静态生图还支持 NAI 5 Full、Seedream 5.5、GPT Image 和通用 · Tavo。NAI 5 默认使用「清透质感游戏 CG」，也可选择「柔阶动漫插画」。可在「画风」页创建或导入预设，也可用「重置内置画风」恢复所有内置默认画风，自建画风不受影响。
 
-主力优化面向 NAI 4.5 FULL。其他模型可通过 Tavo 原生生图链路使用通用模式。
+NAI 4.5、NAI 5、Seedream 和 GPT Image 可在「动态」页独立设置图生图和双帧动态所用的 API。请选择支持对应编辑请求的服务商。动态 CG 由原图和一张变化帧交替播放，使用费用以渠道报价为准。
 
-## 界面预览
+## 人物档案与图片
 
-<img src="src/assets/tutorial/next-turn.png" alt="导演下一幕的画面要求与镜头设置" width="360"> <img src="src/assets/tutorial/card-actions.png" alt="CG 卡片和图片操作" width="360">
-
-[查看动态 CG 示例](src/assets/tutorial/motion-loop.gif)
-
-## 安装
-
-从 [v1.1.8 Release](https://github.com/AozoraCynthiAStudio/Tavo-Aozora-Director-System/releases/tag/v1.1.8) 下载 **Aozora_Director_System_V1.1.8.tpg**，在 Tavo 插件管理中导入。进入聊天后，从输入菜单选择「导演下一幕」或「设计人物外观」。图片服务和教程都在插件界面中。
+满意的人物候选可以登记，供后续画面延续外貌。图片卡片顶部的档案夹直达已登记角色。历史记录按回复显示剧情和对应图片，图库可查阅已保存的图片。有关联生成记录的图片也可以检查实际提示词和参数。
 
 ## 从源码构建
 
-在项目根目录运行以下命令。
+在源码包根目录运行以下命令。测试和构建使用 Node.js，打包使用 PowerShell。
 
 ```powershell
 npm test
@@ -35,6 +26,4 @@ npm run build
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-local.ps1
 ```
 
-构建输出在 `dist/`。第三方许可与素材来源分别见 [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) 和 [素材来源](src/assets/provenance.json)。
-
-插件灵感来自「渡鸦生图」，感谢 [渡鸦4455](https://hub.tavoai.dev/webview/creators/H3TAB?scene=plugin)。
+安装包与源码包生成在 dist 目录。插件素材来源和第三方许可见安装包中的 ASSET_PROVENANCE.json 与 THIRD_PARTY_NOTICES.txt。

@@ -74,6 +74,10 @@ function snapshot(value){
  }
  return orderedKeys(slots).some(k=>slots[k])?{schema:1,slots}:null;
 }
+function snapshotFromIdentity(value){
+ if(typeof value!=='string'||!value.trimStart().startsWith('{'))return null;
+ try{return snapshot(JSON.parse(value));}catch{return null;}
+}
 function snapshotIdentity(value){return fromSlots(value);}
 function registration(text){
  const identity=typeof text==='string'?clean(text):'';
@@ -163,4 +167,4 @@ function readRegistrationCompression(raw,source,protectedSlots=[]){
 // Camera never filters registered or candidate appearance facts.
 function project(text,crop){return {identity:clean(text),removed:[]};}
 
-module.exports={snapshot,snapshotIdentity,keys,instruction,category,compact,normalize,fromSlots,registration,prepare,project,overrides,renderIdentity,registrationPrompt,readRegistrationCompression,compactSlots};
+module.exports={snapshot,snapshotFromIdentity,snapshotIdentity,keys,instruction,category,compact,normalize,fromSlots,registration,prepare,project,overrides,renderIdentity,registrationPrompt,readRegistrationCompression,compactSlots};

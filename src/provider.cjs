@@ -1,4 +1,5 @@
 'use strict';
+const Hamubox=typeof require==='function'?require('./hamubox-direct.cjs'):DirectorHamubox;
 const Official=typeof require==='function'?require('./official-direct.cjs'):DirectorOfficial;
 function createProvider(tavo,core){
   const finiteNumber=(...values)=>{for(const value of values){if(value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value)))return Number(value);}return null;};
@@ -48,17 +49,19 @@ function createProvider(tavo,core){
     if(missing.length)warnings.push('返回图片元数据缺少部分人物提示词，请核对接口传递');
     if(seedMismatch)warnings.push('接口实际 Seed 与固定值不同，不能按已固定处理');
     if(negativeUnconfirmed)warnings.push('本次画风负面词未在返回元数据中确认');
-    const pipeSyntax=compiled.format==='nai45'&&compiled.syntax==='nai45-pipe';
+    const pipeSyntax=compiled.format==='nai45'&&['nai45-pipe','nai5-pipe'].includes(compiled.syntax);
     if(isolationUnconfirmed&&!pipeSyntax)warnings.push('元数据未确认独立人物栏，需核对接口传递');
     const notes=isolationUnconfirmed&&pipeSyntax?['采用单段提示词；元数据未单列人物栏，不能据此判断动作或人物是否混合']:[];
-    return {seedStatus:seed===null?'not-returned':compiled.requestedSeed===null||compiled.requestedSeed===undefined?'returned':seed===compiled.requestedSeed?'matched':'mismatch',status:info?.hasPrompt?(missing.length?'mismatch':'prompt-fields-confirmed'):'unknown',missing,seedMismatch,seedDifferent:seed!==null&&compiled.requestedSeed!==null&&compiled.requestedSeed!==undefined&&seed!==compiled.requestedSeed,negativeUnconfirmed,isolationUnconfirmed,characterPromptSyntax:pipeSyntax?'nai45-pipe':'generic',visualConsistency:'not-evaluated',notes,warning:warnings.join('；')};
+    return {seedStatus:seed===null?'not-returned':compiled.requestedSeed===null||compiled.requestedSeed===undefined?'returned':seed===compiled.requestedSeed?'matched':'mismatch',status:info?.hasPrompt?(missing.length?'mismatch':'prompt-fields-confirmed'):'unknown',missing,seedMismatch,seedDifferent:seed!==null&&compiled.requestedSeed!==null&&compiled.requestedSeed!==undefined&&seed!==compiled.requestedSeed,negativeUnconfirmed,isolationUnconfirmed,characterPromptSyntax:pipeSyntax?compiled.syntax:'generic',visualConsistency:'not-evaluated',notes,warning:warnings.join('；')};
   }
   async function generate(compiled,job,guard,onReturned=()=>{}){
     await guard();const options={...compiled.options,timeout:0,saveAs:job.filename||'ad_image_'+job.id+'.png',scope:job.filename?'global':'chat'};
-    const requestAudit={method:'tavo.image.generate',referenceImages:Array.isArray(options.referenceImages)?options.referenceImages.slice():[],extraBody:structuredClone(options.extraBody||{}),promptTransportAudit:{schema:'aozora-prompt-transport-audit-v1',capturePoint:'plugin-provider-boundary',transport:compiled.officialDirect?'official-direct-delegated':'tavo.image.generate',prompt:compiled.prompt||'',syntax:compiled.syntax||'',format:compiled.format||'',sections:compiled.sections||null,negativePrompt:options.negativePrompt||'',options:Object.fromEntries(Object.entries(options).filter(([k,v])=>!/(key|token|auth|password|secret|credential)/i.test(k)&&k!=='referenceImages'&&!(typeof v==='string'&&/^data:/i.test(v)))),referenceImageNames:(Array.isArray(options.referenceImages)?options.referenceImages:[]).map(v=>String(v).split('/').pop()),downstreamProviderPayload:compiled.officialDirect?'CAPTURED_BY_OFFICIAL_DIRECT_AUDIT':'UNKNOWN_HOST_CONTROLLED'},submittedAt:Date.now(),providerExecutionConfirmed:false};
-    const timings={imageCallStartedAt:Date.now()};let result;try{if(compiled.officialDirect)result=await Official.generate(tavo,compiled,job,guard);else result=await tavo.image.generate(compiled.prompt,options);timings.imageCallReturnedAt=Date.now();}catch(error){const detail=String(error?.message||error),mapping=detail.includes('CUSTOM_MODEL_MAPPING_REQUIRED');const failure=new Error(mapping?'图片 API 拒绝请求：CUSTOM_MODEL_MAPPING_REQUIRED（自定义模型映射缺失）。请核对 Tavo 图片 API 的实际 model ID 和站点映射；生成提示词已保留，未自动重试。':'图片 API 调用失败：'+detail);failure.source=compiled.officialDirect?'novelai-direct':'tavo.image.generate';failure.code=mapping?'CUSTOM_MODEL_MAPPING_REQUIRED':String(error?.code||'IMAGE_REQUEST_FAILED');failure.statusCode=error?.statusCode||error?.status||error?.response?.status||null;failure.details=error?.details||detail;throw failure;}
+    const method=compiled.seedreamViaTavo?'seedream-via-tavo':compiled.gptImageViaTavo?'gpt-image-via-tavo':compiled.gptImageConnection?'gpt-image-direct':compiled.seedreamConnection?'seedream-direct':compiled.hamuboxDirect?'hamubox-direct':compiled.officialDirect?'novelai-direct':'tavo.image.generate';
+    const requestAudit={method,referenceImages:Array.isArray(options.referenceImages)?options.referenceImages.slice():[],extraBody:structuredClone(options.extraBody||{}),promptTransportAudit:{schema:'aozora-prompt-transport-audit-v1',capturePoint:'plugin-provider-boundary',transport:method,prompt:compiled.prompt||'',syntax:compiled.syntax||'',format:compiled.format||'',sections:compiled.sections||null,negativePrompt:options.negativePrompt||'',options:Object.fromEntries(Object.entries(options).filter(([k,v])=>!/(key|token|auth|password|secret|credential)/i.test(k)&&k!=='referenceImages'&&!(typeof v==='string'&&/^data:/i.test(v)))),referenceImageNames:(Array.isArray(options.referenceImages)?options.referenceImages:[]).map(v=>String(v).split('/').pop()),downstreamProviderPayload:compiled.officialDirect?'CAPTURED_BY_OFFICIAL_DIRECT_AUDIT':compiled.hamuboxDirect?'PLUGIN_DIRECT':'UNKNOWN_HOST_CONTROLLED'},submittedAt:Date.now(),providerExecutionConfirmed:false};
+    const timings={imageCallStartedAt:Date.now()};let result;try{if(compiled.hamuboxDirect)result=await Hamubox.generate(tavo,compiled,guard);else if(compiled.officialDirect)result=await Official.generate(tavo,compiled,job,guard);else result=await tavo.image.generate(compiled.prompt,options);timings.imageCallReturnedAt=Date.now();}catch(error){const detail=String(error?.message||error),mapping=detail.includes('CUSTOM_MODEL_MAPPING_REQUIRED');const failure=new Error(mapping?'图片 API 拒绝请求：CUSTOM_MODEL_MAPPING_REQUIRED（自定义模型映射缺失）。请核对 Tavo 图片 API 的实际 model ID 和站点映射；生成提示词已保留，未自动重试。':'图片 API 调用失败：'+detail);failure.source=method;failure.code=mapping?'CUSTOM_MODEL_MAPPING_REQUIRED':String(error?.code||'IMAGE_REQUEST_FAILED');failure.statusCode=error?.statusCode||error?.status||error?.response?.status||null;failure.details=error?.details||detail;throw failure;}
     await guard();onReturned();let pointer=typeof result==='string'?result:(result?.path||result?.url||result?.image||'');
     if(result?.data)pointer=String(result.data).startsWith('data:')?result.data:'data:image/png;base64,'+result.data;
+    if(result?.imageExtension==='jpg')options.saveAs=options.saveAs.replace(/\.png$/,'.jpg');
     if(/^data:image\//i.test(pointer)){
       try{pointer=await tavo.file.save(options.saveAs,pointer,{encoding:'dataUrl',scope:options.scope});}
       catch(error){throw Object.assign(Error('图片已返回但保存失败'),{code:'IMAGE_STORAGE_FAILED',details:String(error?.message||error)});}
@@ -66,11 +69,11 @@ function createProvider(tavo,core){
     }
     if(!/^files\/(?:chat|global)\//.test(String(pointer)))throw Object.assign(Error('图片返回未包含可确认的持久化文件，请查看记录后再重试'),{code:'IMAGE_RESPONSE_INVALID'});
     if(!await tavo.file.exists(pointer))throw Object.assign(Error('服务返回的图片文件不存在'),{code:'IMAGE_STORAGE_FAILED'});await guard();
-    if(job.filename&&pointer==='files/chat/'+job.filename){
+    if(job.filename&&pointer==='files/chat/'+options.saveAs){
       const data=await tavo.file.load(pointer,{encoding:'base64'});await guard();
       if(!data)throw Object.assign(Error('无法读取宿主保存的图片'),{code:'IMAGE_STORAGE_FAILED'});
-      const globalPointer=await tavo.file.save(job.filename,data,{encoding:'base64',scope:'global'});await guard();
-      if(globalPointer!=='files/global/'+job.filename||!await tavo.file.exists(globalPointer))throw Object.assign(Error('无法确认全局图片已保存'),{code:'IMAGE_STORAGE_FAILED'});
+      const globalPointer=await tavo.file.save(options.saveAs,data,{encoding:'base64',scope:'global'});await guard();
+      if(globalPointer!=='files/global/'+options.saveAs||!await tavo.file.exists(globalPointer))throw Object.assign(Error('无法确认全局图片已保存'),{code:'IMAGE_STORAGE_FAILED'});
       await guard();await tavo.file.delete(pointer);await guard();pointer=globalPointer;
     }
     let seed=core.confirmedSeed(result),seedSource=seed===null?'':'response',metadata=null;

@@ -5,7 +5,7 @@ const CLEAR_SUBJECT_KEY='clearSubjectDefinition';
 const ADULT_GATE_KEY='adultGate';
 const ADULT_DETAIL_KEYS=['adultFraming','adultSurface','adultInsertion','adultVolume','adultPresence','adultPlayer'];
 const ADULT_KEYS=[ADULT_GATE_KEY,...ADULT_DETAIL_KEYS];
-const REQUIRED=['requestBoundary','sceneComposition',CLEAR_SUBJECT_KEY,'scaleDifference','castComposition','narrativeBridge','sceneSingle','identityContinuity','wardrobeState','characterDesign','nai45Format','genericFormat','qualityPolicy',...ADULT_KEYS];
+const REQUIRED=['requestBoundary','sceneComposition',CLEAR_SUBJECT_KEY,'scaleDifference','castComposition','narrativeBridge','sceneSingle','identityContinuity','wardrobeState','characterDesign','nai45Format','nai5Format','genericFormat','qualityPolicy',...ADULT_KEYS];
 function validateCatalog(catalog={}){
  const missing=REQUIRED.filter(key=>!clean(catalog[key]));
  const legacy=Object.entries(catalog).filter(([,value])=>/<cg-prompt\b|<cg-design\b/i.test(clean(value))).map(([key])=>key);
@@ -37,7 +37,7 @@ function compileRuleLayers(request,catalog={}){
  validateCatalog(catalog);
  const isCharacter=request.kind==='character_intro',isNai=request.config?.format!=='generic';
  const adultKeys=isCharacter?[]:ADULT_KEYS;
- const keys=['requestBoundary','sceneComposition',CLEAR_SUBJECT_KEY,'scaleDifference',...(isNai?['castComposition']:[]),...(request.storyInput?['narrativeBridge']:[]),'sceneSingle','identityContinuity','wardrobeState',...(isCharacter?['characterDesign']:[]),isNai?'nai45Format':'genericFormat','qualityPolicy',...adultKeys];
+ const keys=['requestBoundary','sceneComposition',CLEAR_SUBJECT_KEY,'scaleDifference',...(isNai?['castComposition']:[]),...(request.storyInput?['narrativeBridge']:[]),'sceneSingle','identityContinuity','wardrobeState',...(isCharacter?['characterDesign']:[]),request.config?.imageService==='nai5'?'nai5Format':isNai?'nai45Format':'genericFormat','qualityPolicy',...adultKeys];
  return keys.map((key,i)=>({name:String(i+1).padStart(2,'0')+'-'+key,text:catalog[key],stage:key===ADULT_GATE_KEY?'gate':ADULT_DETAIL_KEYS.includes(key)?'conditional-detail':'core'}));
 }
 function buildAdultContext(catalog={},options={}){

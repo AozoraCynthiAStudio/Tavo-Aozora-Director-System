@@ -99,7 +99,7 @@ test('alpha235: card and history gate adjustment and motion on source capabiliti
  assert.doesNotMatch(stage,/addock-intro-tune/);
  assert.match(menu,/id="addock-tune-dialog"/);
  assert.match(menu,/id="addock-tune-method"/);
- assert.match(controller,/\$\('addock-tune'\)\.hidden=!supportsImageEditing\(item\)/);
+ assert.match(controller,/\$\('addock-tune'\)\.hidden=!supportsTune\(item\)/);
  assert.match(controller,/motion:'addock-motion'/);
  assert.match(reader,/canEditSource\?\[/);
  assert.match(reader,/canRequestMotion\?\[/);

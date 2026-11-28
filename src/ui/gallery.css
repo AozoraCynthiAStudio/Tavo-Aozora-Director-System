@@ -44,3 +44,10 @@
 .pp-ui .ad-gallery-tools button[data-secondary=true]{background:#fff0de;color:#8e2639;box-shadow:none}
 .pp-ui .ad-gallery-tools.logs-toolbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:6px;margin:4px 0 0;padding-bottom:5px}
 .pp-ui .ad-gallery-tools.logs-toolbar>button{box-sizing:border-box;width:100%;min-width:0;height:28px;min-height:28px;padding:2px;line-height:1.1;white-space:nowrap}
+
+.ad-gallery-cleared{display:grid;justify-items:start;gap:16px;margin:8px 0;padding:18px 16px;border:1px solid #d3aa88;border-left:3px solid #9b2841;border-radius:5px;background:#fff0df}
+.ad-gallery-cleared h3{margin:0 0 5px;color:#532638;font-size:15px;line-height:1.4}
+.ad-gallery-cleared p{margin:0;color:#725141;font-size:12px;line-height:1.6}
+.pp-ui .ad-gallery-cleared .ad-gallery-return{min-height:40px;padding:7px 14px;background:#86263e;border:1px solid #86263e;border-radius:4px;color:#fff8ee;font-size:12px;font-style:normal;font-weight:700}
+.pp-ui .ad-gallery-cleared .ad-gallery-return:hover{background:#6c1e32}
+.pp-ui .ad-gallery-cleared .ad-gallery-return:focus-visible{outline:2px solid #86263e;outline-offset:3px}

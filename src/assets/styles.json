@@ -5,7 +5,6 @@
     "positive": "0.8::artist:meekohopanes::, 0.5::artist:ru zhai::, game cg, [[shiny skin]], soft body, soft lineart, official art,beautiful lighting,novel illustration,-7::artist collaboration::",
     "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
     "useNegative": true,
-    "basis": "NAI 4.5",
     "format": "nai45"
   },
   {
@@ -14,7 +13,6 @@
     "positive": "artist:cc lin,0.1::artist:kidmo::,0.1::artist:akkijin::,2::game cg::,official art",
     "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
     "useNegative": true,
-    "basis": "NAI 4.5",
     "format": "nai45"
   },
   {
@@ -23,7 +21,6 @@
     "positive": "artist:kittew, game cg",
     "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
     "useNegative": true,
-    "basis": "NAI 4.5",
     "format": "nai45"
   },
   {
@@ -32,16 +29,38 @@
     "positive": "artist:meekohopanes, game cg",
     "negative": "lowres, blurry, jpeg artifacts, text, watermark, logo, signature, bad anatomy, bad proportions, deformed body, bad hands, extra fingers, missing fingers, extra limbs, distorted face, asymmetrical eyes, cross-eyed, messy lineart, thick lineart, oversaturated",
     "useNegative": true,
-    "basis": "NAI 4.5",
     "format": "nai45"
   },
   {
     "id": "generic_quality",
     "name": "通用基础",
     "format": "generic",
-    "basis": "通用",
     "positive": "clear image, well-defined details",
     "negative": "low resolution, blurry, compression artifacts, watermark",
     "useNegative": false
+  },
+  {
+    "id": "seedream_soft_portrait",
+    "name": "理想化写实摄影",
+    "format": "generic",
+    "positive": "Idealized photorealism: an exceptionally beautiful, distinctly designed character photographed in a believable real setting. Refined facial harmony, expressive eyes and a graceful silhouette shaped from the character’s established proportions. Fine skin texture with light retouching and soft highlights, clean shadows, natural perspective, and tactile hair and fabric. Let the scene determine light direction, color temperature and mood.",
+    "negative": "malformed hands or anatomy, extra or fused digits, duplicated limbs, mixed character features, waxy skin, harsh sharpening, heavy grain, unintended text and watermarks",
+    "useNegative": true
+  },
+  {
+    "id": "nai5_signature_cg",
+    "name": "清透质感游戏 CG",
+    "positive": "1.35::very aesthetic, masterpiece, amazing quality, absurdres, ultra-detailed, highres::, {year 2026}, ::newest::, 1.2::semi-realistic, ink wash style::, 1.1::fine lineart, delicate linework::, colored lineart, 1.05::cinematic illustration, key art::, 1.05::detailed skin, realistic skin texture::, 1.15::subsurface scattering, soft skin glow::, [[shiny skin]], 1.05::soft shading, gentle shading, subtle ambient occlusion::, ::perfect anatomy, perfect proportions::, intricate details, 1.15::artist:re0n::, 0.95::artist:wo_jiushi_kanbudong::, 0.85::artist:ushikani_kassen::, ::artist:murata_yuusuke::, 0.75::artist:xiaobanbei_milk::, 0.65::artist:nixeu::, 0.55::artist:oda_non::, 0.6::artist:taesi::, 0.6::artist:dishwasher1910, ::, 0.8::artist:inoitoh::, 1.1::realistic lighting, depth of field::, no text, game cg",
+    "negative": "lowres, worst quality, bad quality, very displeasing, artistic error, jpeg artifacts, blurry face, flat face, lifeless eyes, mismatched pupils, cross-eyed, cloned face, childlike facial features, photorealistic face, 3d render, waxy skin, plastic skin, greasy skin, uniform gloss, flat lighting, washed-out colors, muddy shadows, blown highlights, heavy outlines, messy lineart, bad anatomy, bad proportions, malformed limbs, extra limbs, missing limbs, disconnected limbs, bad hands, fused fingers, extra fingers, missing fingers, bad feet, text, logo, watermark, signature",
+    "useNegative": true,
+    "format": "nai5"
+  },
+  {
+    "id": "nai5_soft_gradient_anime",
+    "name": "柔阶动漫插画",
+    "positive": "anime style, 1.0::artist:blue gk ::, 0.2::artist:gujianshaonu ::, 1.0::artist:Re0n ::, 1.5::artist:firstw1 ::, 0.5::choujiroo::, 0.2::artist:freng ::, 0.8::artist:kurono mitsuki ::, 0.7::artist:shigure s ::, 0.3::artist:xipa ::, 0.1::artist:taesi ::, 0.4::yoongonji::, 1::artist:great mosu::, year 2026,\n1.5::realistic texture, smooth gradients, detailed shading::, 1.5::depthness::, 2::shiny body::, shiny skin, 1.2::big eyes::, -1::multiple views::, amazing quality, masterpiece, very aesthetic, no text，\n高度精细，杰作，逼真质感，最佳质量，极具美感，惊艳画质，no text",
+    "negative": "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, 2::signature, artist name::, negative space, blank page, mismatched pupils, bad anatomy, bad hands, extra digits, missing fingers, fused fingers, extra arms, extra legs, bad feet, 1.5::simple eyes, blurry eyes::,\nartist collaboration, bkub, artist:xinzoruo, artist:milkpanda, artist:kurukurumagical, artist:bm94199, flat color, chibi, toon (style), 1980s (style), 1990s (style), one-hour drawing challenge, 3d, official style, official art，\nbad anatomy, extra limbs, poorly drawn face, blurry, extra faces, face in background, abstract face, distortion，bad portrait, bad illustration，3D质感",
+    "useNegative": true,
+    "format": "nai5"
   }
 ]

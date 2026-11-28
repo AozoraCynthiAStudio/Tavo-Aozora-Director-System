@@ -13,15 +13,45 @@ const RuleCompiler=typeof require==='function'?require('./director-rules.cjs'):D
 // Pure protocol / composition. No host, DOM, storage or provider requests.
 const Budget=typeof require==='function'?require('./prompt-budget.cjs'):DirectorBudget;
 const DNA=typeof require==='function'?require('./identity-dna.cjs'):DirectorDNA;
-const VERSION = '1.1.8';
-const NAI_CAST_LIMIT = 2;
+const VERSION = '1.8.9';
+const NAI_GROUP_DETAIL_THRESHOLD = 2;
 const DEFAULTS = {format:'nai45',shot:'near',ratio:'api',styleId:'',seedFixed:false,seedValue:'',autoGenerate:true,autoExpand:false};
 const clean = x => String(x ?? '').trim();
 function id(prefix='run'){return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10);}
 function fingerprint(text){let h=2166136261;for(const c of String(text)){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return (h>>>0).toString(16);}
-function settings(value={}){const current={...value};delete current.maxActors;delete current.adultComicInset;return {...DEFAULTS,...current,autoGenerate:value.autoGenerate!==false,autoExpand:value.autoExpand===true,format:value.format===undefined?DEFAULTS.format:value.format==='nai45'?'nai45':'generic',shot:value.shot==='full'?'full':'near',ratio:['api','16:9','1:1','2:3'].includes(value.ratio)?value.ratio:'api'};}
+const HAMUBOX_MODELS=Object.freeze({'dola-seedream-5-5-ep':'Seedream 5.5','grok-imagine-image':'Grok Imagine','grok-imagine-image-2.0':'Grok Imagine 2.0'});
+const HAMUBOX_DEFAULT='dola-seedream-5-5-ep';
+const SEEDREAM_QUICK_SIZES=Object.freeze({'16:9':[1424,800],'2:3':[832,1248],'1:1':[1024,1024]});
+function isSeedream(config){return config?.imageService==='seedream'||(config?.imageService==='hamubox'&&(!config.hamuboxModel||config.hamuboxModel===HAMUBOX_DEFAULT));}
+const GPT_IMAGE_SIZES=Object.freeze({
+ '1k':{'16:9':'1536x864','1:1':'1024x1024','2:3':'1024x1536'},
+ '2k':{'16:9':'2048x1152','1:1':'2048x2048','2:3':'1536x2304'},
+ '4k':{'16:9':'3840x2160','1:1':'2880x2880','2:3':'2160x3840'}
+});
+const GPT_IMAGE_OFFICIAL_ENDPOINT='https://api.openai.com/v1/images/generations';
+const IMAGE_CONNECTION_PRESETS=Object.freeze({
+ 'gpt-image':[
+  {label:'OpenAI 官方',url:GPT_IMAGE_OFFICIAL_ENDPOINT,model:'gpt-image-2.6-flare'},
+  {label:'HopBase 兼容示例',url:'https://api.hop-base.com/v1/images/generations',model:'gpt-image-2'}
+ ],
+ seedream:[
+  {label:'火山方舟官方',url:'https://ark.cn-beijing.volces.com/api/v3/images/generations',model:'doubao-seedream-5-5-261028'},
+  {label:'BytePlus 官方',url:'https://ark.ap-southeast.bytepluses.com/api/v3/images/generations',model:'dola-seedream-5-5-261028'},
+  {label:'HopBase 同步示例',url:'https://api.hop-base.com/v1/images/generations',model:'seedream-5-5'},
+  {label:'Hamubox 异步示例',url:'https://api.hamubox.com/v1/image/generations',model:HAMUBOX_DEFAULT}
+ ]
+});
+function gptImageLegacyModel(model){return /^gpt-image-(?:1(?:\.5|-mini)?)(?:-\d{4}-\d{2}-\d{2})?$/i.test(clean(model));}
+function gptImageSize(model,tier,ratio){
+ if(gptImageLegacyModel(model)&&ratio==='16:9')return '1536x1024';
+ return GPT_IMAGE_SIZES[gptImageLegacyModel(model)?'1k':tier][ratio];
+}
+function isPhotorealDirect(config){return config?.imageService==='gpt-image'||isSeedream(config);}
+function seedreamSize(resolution,aspectRatio){const sizes={'1k':{'16:9':'1424x800','2:3':'832x1248','1:1':'1024x1024'},'1.5k':{'16:9':'2048x1152','2:3':'1248x1872','1:1':'1536x1536'},'2k':{'16:9':'2816x1584','2:3':'1664x2496','1:1':'2048x2048'}};return sizes[resolution]?.[aspectRatio]||resolution.toUpperCase();}
+function settings(value={}){const current={...value};delete current.maxActors;delete current.adultComicInset;return {...DEFAULTS,...current,hamuboxModel:Object.hasOwn(HAMUBOX_MODELS,current.hamuboxModel)?current.hamuboxModel:HAMUBOX_DEFAULT,gptImageTransport:current.gptImageTransport==='tavo'?'tavo':'direct',gptImageResolution:Object.hasOwn(GPT_IMAGE_SIZES,current.gptImageResolution)?current.gptImageResolution:'1k',gptImageRatio:Object.hasOwn(SEEDREAM_QUICK_SIZES,current.gptImageRatio)?current.gptImageRatio:'16:9',hamuboxResolution:['1.5k','2k'].includes(current.hamuboxResolution)?current.hamuboxResolution:'1k',seedreamTransport:current.seedreamTransport==='tavo'?'tavo':'direct',seedreamProtocol:current.seedreamProtocol==='sync'?'sync':'async',seedreamRatio:Object.hasOwn(SEEDREAM_QUICK_SIZES,current.seedreamRatio)?current.seedreamRatio:'16:9',hamuboxIdentityReferences:current.imageService!=='seedream'&&current.hamuboxIdentityReferences===true,autoGenerate:value.autoGenerate!==false,autoExpand:value.autoExpand===true,launcherCaptions:value.launcherCaptions!==false,format:value.format===undefined?DEFAULTS.format:value.format==='nai45'?'nai45':'generic',shot:value.shot==='full'?'full':'near',ratio:['api','16:9','1:1','2:3'].includes(value.ratio)?value.ratio:'api'};}
 function imageServiceMode(value={}){
  const format=clean(value?.format).toLowerCase(),service=clean(value?.imageService).toLowerCase();
+ if(service==='nai5')return 'nai5';
  if(format==='generic'||service==='generic')return 'generic';
  if(format==='nai45'||['nai45','official','relay'].includes(service))return 'nai45';
  return 'unknown';
@@ -33,8 +63,39 @@ function supportsNaiImageEdit(image,currentConfig={}){
  const naiSyntax=/^nai45(?:-|$)/i.test(clean(image?.syntax)),existingMotion=!!image?.motion?.sourcePointer;
  return mode==='nai45'||(mode==='unknown'&&(naiSyntax||existingMotion));
 }
+function supportsReferenceEdit(config){return ['nai5','seedream','gpt-image'].includes(config?.imageService);}
+function supportsTextImageEdit(image){return !!image?.plan;}
 function styleFormat(style={}){if(clean(style.format))return clean(style.format);return /^(?:nai\s*4[. ]?5)(?:\b|$)/i.test(clean(style.basis))||['mignon_allenes','meekohopanes_ru_zhai','kittew','meekohopanes'].includes(style.id)?'nai45':'generic';}
 function styleMatches(style,format){return styleFormat(style)===format;}
+const STYLE_FORMAT_LABELS={nai45:'NAI 4.5',nai5:'NAI 5',generic:'通用 · Tavo',seedream:'Seedream 5.5','gpt-image':'GPT Image'};
+function styleSupports(style,format,service){
+ const type=styleFormat(style);
+ if(service==='nai5')return type==='nai5';
+ if(service==='seedream'||service==='gpt-image')return type===service||(type==='generic'&&style.id!=='generic_quality');
+ return type===format;
+}
+function seedService(config={},syntax=''){
+ const service=clean(config?.imageService);
+ if(service==='hamubox')return 'seedream';
+ if(['seedream','gpt-image'].includes(service))return service;
+ if(!service&&syntax==='nai5-pipe')return 'nai5';
+ const mode=imageServiceMode(config);
+ return mode==='unknown'?(syntax==='nai45-pipe'?'nai45':'generic'):mode;
+}
+function imageServiceChange(image,currentConfig,recordConfig){
+ const source=seedService(image?.config||recordConfig,image?.syntax);
+ const current=seedService(currentConfig);
+ return source===current?null:{source,current};
+}
+function favoriteSeedService(favorite){
+ if(Object.hasOwn(STYLE_FORMAT_LABELS,favorite.service))return favorite.service;
+ const name=clean(favorite.model).toLowerCase();
+ if(/\b(?:nai|novelai)(?:[ -]+diffusion)?[ -]*v?4[. -]?5\b/.test(name))return 'nai45';
+ if(/\b(?:nai|novelai)(?:[ -]+diffusion)?[ -]*v?5\b/.test(name))return 'nai5';
+ if(name.includes('seedream')||name.includes('hamubox'))return 'seedream';
+ if(/gpt[ -]*image/.test(name))return 'gpt-image';
+ return 'generic';
+}
 function seedValue(value,format){if(!/^\d+$/.test(clean(value)))throw Error('Seed 必须是非负整数');const n=Number(value);if(!Number.isSafeInteger(n)||(format==='nai45'&&n>4294967295))throw Error('Seed 超出当前格式支持的数值范围');return n;}
 function normalizedPlan(value){
   if(!value||typeof value!=='object'||Array.isArray(value))throw Error('视觉数据必须是对象');
@@ -43,12 +104,12 @@ function normalizedPlan(value){
   const seen=new Set(),characters=value.characters.map(p=>{
     if(!p||typeof p!=='object')throw Error('人物数据不完整');
     if(Object.hasOwn(p,'action'))throw Error('新单Scene协议不接受旧人物动作字段');
-    const registrationDNA=DNA.snapshot(p.registrationDNA),appearanceOverrides=DNA.overrides(p.appearanceOverrides),frameSelection=VisualProtocol.frameSelection(p.frameSelection);
+    const registrationDNA=DNA.snapshot(p.registrationDNA)||DNA.snapshotFromIdentity(p.identity),appearanceOverrides=DNA.overrides(p.appearanceOverrides),frameSelection=VisualProtocol.frameSelection(p.frameSelection);
     const name=clean(p.name),form=clean(p.form)||'默认形态',identity=DNA.renderIdentity(registrationDNA,appearanceOverrides)||clean(p.identity);
     if(!name||!identity)throw Error('人物姓名与外貌提示词不可为空');
     const key=name.normalize('NFKC').toLowerCase()+'|'+form.normalize('NFKC').toLowerCase();
     if(seen.has(key))throw Error('重复的人物身份');seen.add(key);
-    return Wardrobe.normalizeCharacter({name,form,identity,...(registrationDNA?{registrationDNA}:{}),...(Object.keys(appearanceOverrides).length?{appearanceOverrides}:{}),...(frameSelection?{frameSelection}:{}),equipment:p.equipment,...(p.relation!==undefined?{relation:VisualProtocol.relation(p.relation)}:{})});
+    return Wardrobe.normalizeCharacter({name,form,identity,portraitAppearance:clean(p.portraitAppearance).slice(0,600),nai5Face:p.nai5Face,...(registrationDNA?{registrationDNA}:{}),...(Object.keys(appearanceOverrides).length?{appearanceOverrides}:{}),...(frameSelection?{frameSelection}:{}),equipment:p.equipment,...(p.relation!==undefined?{relation:VisualProtocol.relation(p.relation)}:{})});
   });
   const directorSummary=VisualProtocol.directorSummary(value.directorSummary),sourceExcerpt=VisualProtocol.sourceExcerpt(value.sourceExcerpt);
   return {scene,characters,...(directorSummary?{directorSummary}:{}),...(sourceExcerpt!==undefined?{sourceExcerpt}:{}),...(Array.isArray(value.fragments)?{fragments:value.fragments.slice(0,6)}:{}),...(clean(value.description)?{description:clean(value.description).replace(/\s*\n\s*/g,' ').slice(0,600)}:{})};
@@ -214,16 +275,16 @@ function requestedCastIn(value){
 }
 function castConstraint(request){
  const explicit=requestedCastIn(request.request);
- if(!explicit)return {limit:NAI_CAST_LIMIT,target:null};
- return explicit.limitOnly?{limit:Math.min(explicit.count,NAI_CAST_LIMIT),target:null}:{limit:explicit.count,target:explicit.count};
+ if(!explicit)return {limit:null,target:null};
+ return explicit.limitOnly?{limit:explicit.count,target:null}:{limit:explicit.count,target:explicit.count};
 }
 function validateCastLimit(plan,request={},sourcePlan){
  if(settings(request.config).format!=='nai45')return {applied:false};
  const {limit,target}=castConstraint(request);
  const inherited=sourcePlan?Math.max(sourcePlan.characters.length,naiClearSubjectTagCount(sourcePlan.scene)||0):0;
- const allowedLimit=Math.max(limit,inherited);
+ const allowedLimit=limit===null?null:Math.max(limit,inherited);
  const count=plan.characters.length,tagCount=naiClearSubjectTagCount(plan.scene),visible=Math.max(count,tagCount||0);
- return {applied:true,allowedLimit,characterCount:count,sceneTagCount:tagCount,overPreference:visible>allowedLimit,requestedCountUnconfirmed:!sourcePlan&&target>1&&visible<target};
+ return {applied:true,allowedLimit,characterCount:count,sceneTagCount:tagCount,overPreference:allowedLimit!==null&&visible>allowedLimit,requestedCountUnconfirmed:!sourcePlan&&target>1&&visible<target};
 }
 function parseVisual(text,_legacyRequestId){
  const source=String(text||'');
@@ -301,13 +362,13 @@ function completeDraft(draft,request,profiles){
   const canonicalName=profile?.name||name,key=Wardrobe.key({name:canonicalName,form});
   if(seen.has(key))continue;
   seen.add(key);
-  let registrationDNA=DNA.snapshot(actor.registrationDNA);
+  let registrationDNA=DNA.snapshot(actor.registrationDNA)||DNA.snapshotFromIdentity(actor.identity);
   if(request.kind==='character_intro')registrationDNA=registrationDNA
    ?DNA.snapshot({schema:1,slots:DNA.compactSlots(registrationDNA.slots)})
    :candidateDNA(visualValue(actor.identity));
   const identity=visualValue(actor.identity).replace(/\bregistered appearance\b\s*,?\s*/gi,'').trim()
     ||clean(profile?.identity)||DNA.snapshotIdentity(profile?.registrationDNA)||DNA.snapshotIdentity(registrationDNA)||'person';
-  characters.push({name:canonicalName,form,identity,registrationDNA,appearanceOverrides:repairOverrides(actor.appearanceOverrides),frameSelection:VisualProtocol.frameSelection(actor.frameSelection),equipment:repairEquipment(actor.equipment),relation:VisualProtocol.relation(actor.relation)||undefined});
+  characters.push({name:canonicalName,form,identity,portraitAppearance:visualValue(actor.portraitAppearance),registrationDNA,appearanceOverrides:repairOverrides(actor.appearanceOverrides),frameSelection:VisualProtocol.frameSelection(actor.frameSelection),equipment:repairEquipment(actor.equipment),relation:VisualProtocol.relation(actor.relation)||undefined});
  }
  return {...draft,scene:visualValue(draft.scene),characters};
 }
@@ -357,6 +418,24 @@ function hideBrokenVisual(text,{allowBare=false}={}){
   if(span)source=ProtocolBoundary.removeRanges(source,[span]);
  }else source=ProtocolBoundary.removeRanges(source,ranges);
  return source.trim();
+}
+// Recover a Seedream instruction heading that the text model echoed into prose.
+function stripSeedreamAppearanceLeak(text){
+ const source=String(text||''),protectedSpans=[...ProtocolBoundary.protectedRanges(source),...ownedVisualSpans(source)];
+ const heading=/^[ \t]*(?:#{1,6}[ \t]+)?(?:\*\*)?【Seedream[ \t]+(?:画面外形|人物外观)】(?:\*\*)?[ \t]*\r?$/gmi;
+ const entry=/^(?:[-*]\s+)?(?:\*\*)?[\p{L}\p{N} _·.'’\-]{1,45}(?:\*\*)?[：:]\s*(?:\*\*)?[A-Za-z][^<>{}\u3400-\u9fff]{12,}$/u;
+ const remove=[];
+ for(const match of source.matchAll(heading)){
+  if(ProtocolBoundary.isProtected(match.index,protectedSpans))continue;
+  let end=match.index+match[0].length,offset=end;
+  for(const line of source.slice(end).matchAll(/(?:^|\n)([^\n]*)/g)){
+   const value=line[1].trim();offset=end+line.index+line[0].length;
+   if(!value)continue;
+   if(!entry.test(value)||ProtocolBoundary.isProtected(offset-1,protectedSpans))break;
+   remove.push({start:match.index,end:offset});
+  }
+ }
+ return ProtocolBoundary.removeRanges(source,remove);
 }
 function escapeHtml(x){return String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function renderVisual(text,parsed,request,plan){
@@ -452,26 +531,41 @@ function applyShotPreference(plan,request={}){
  if(!/\b(?:feet|foot) (?:visible|in frame)\b/i.test(existing))cue.push('entire figure including feet visible');
  return {...plan,scene:[...cue,...tags].join(', ')};
 }
+function nai5FaceSlots(value){
+ const result={};
+ for(const slot of ['eyesBrows','noseLips','faceJaw']){
+  const text=typeof value?.[slot]==='string'?clean(value[slot]):'';
+  if(text&&text.length<=120&&!/[|{}\[\]<>\r\n]/.test(text)&&!text.includes('::'))result[slot]=text;
+ }
+ return result;
+}
+function nai5FaceVisible(scene){return !Projection.readFrame(scene).faceOffFrame&&!/\b(?:rear view|back view|from behind)\b/i.test(scene);}
 function compose(plan,style={},config={}){
   style=neutralBuiltinStyle(style);
   const cfg=settings(config),resolved=resolveFragments(normalizedPlan(plan));
+  if((style.id||style.format||cfg.imageService==='nai5')&&!styleSupports(style,cfg.format,cfg.imageService))style={};
   const relativeHeightCue=Projection.sceneCrop(resolved.scene)==='hands'?'':Height.relativeCue(resolved,cfg.format);
   if(relativeHeightCue)resolved.scene=[resolved.scene,relativeHeightCue].filter(Boolean).join(', ');
   const projection=Projection.project(resolved,cfg.format),body=BodyRelations.compile(projection.plan,cfg.format,projection.audit.crop),p=body.plan,positive=clean(style.positive);
   if(relativeHeightCue)projection.audit.relativeHeightCue=relativeHeightCue;
   const outfitContext={scene:p.scene,crop:projection.audit.crop,format:cfg.format,multipleActors:p.characters.length>1};
-  const group=cfg.format==='nai45'&&Math.max(p.characters.length,naiClearSubjectTagCount(p.scene)||0)>NAI_CAST_LIMIT;
+  const group=cfg.format==='nai45'&&Math.max(p.characters.length,naiClearSubjectTagCount(p.scene)||0)>NAI_GROUP_DETAIL_THRESHOLD;
   p.characters=p.characters.map(actor=>{
     const visible=Wardrobe.forImage(actor,{...outfitContext,audit:projection.audit,includeEntries:!!actor.frameSelection?.outfit});
     const outfit=frameOutfit(actor,visible,projection.audit);
     const identity=frameAppearance(actor,group?groupAppearance(actor,p.scene,projection.audit):actor.identity,projection.audit);
-    return {...actor,identity,outfit};
+    const face=cfg.imageService==='nai5'&&nai5FaceVisible(p.scene)?nai5FaceSlots(actor.nai5Face):{};
+    if(Object.hasOwn(actor.appearanceOverrides||{},'eyes'))delete face.eyesBrows;
+    if(Object.hasOwn(actor.appearanceOverrides||{},'face')){delete face.noseLips;delete face.faceJaw;}
+    return {...actor,identity:[...new Set([identity,...Object.values(face)].filter(Boolean))].join(', '),outfit};
   });
-  const protectedAppearance=p.characters.map(actor=>[...new Set([...Object.values(actor.appearanceOverrides||{}).flatMap(value=>PromptAdapters.splitTags(clean(value)))].map(clean).filter(Boolean))]);
+  const protectedAppearance=p.characters.map(actor=>[...new Set([...[...Object.values(actor.appearanceOverrides||{}),...(cfg.imageService==='nai5'?Object.values(nai5FaceSlots(actor.nai5Face)).filter(text=>actor.identity.includes(text)):[])].flatMap(value=>PromptAdapters.splitTags(clean(value)))].map(clean).filter(Boolean))]);
   const options={};if(cfg.ratio!=='api')options.aspectRatio=cfg.ratio;if(cfg.imageService==='official'){for(const k of ['width','height'])if(!Number.isInteger(cfg[k])||cfg[k]<64||cfg[k]>2048||cfg[k]%64)throw Error('宽高须为64–2048之间的64倍数');if(cfg.width*cfg.height>3145728)throw Error('尺寸总像素超出限制');delete options.aspectRatio;options.extraBody={width:cfg.width,height:cfg.height};}
   if(style.useNegative&&clean(style.negative))options.negativePrompt=clean(style.negative);
   const languageAudit=PromptValidation.validate(p,style);
-  const composed=PromptAdapters.compile(p,{...style,positive},cfg.format),prompt=composed.prompt;
+  const seedream=isPhotorealDirect(cfg);
+  const nai5=cfg.imageService==='nai5';
+  const composed=PromptAdapters.compile(p,{...style,positive},cfg.format,{seedream,nai5,photoModel:cfg.imageService==='gpt-image'?'gpt-image':seedream?'seedream':null,photoCrop:projection.audit.crop}),prompt=composed.prompt;
   if(composed.budgetAudit){
     const full=resolveFragments(normalizedPlan(plan));full.characters=full.characters.map(c=>({...c,...Wardrobe.forImage(c,{...outfitContext,crop:'unknown'})}));
     const original=PromptAdapters.sections(full,{...style,positive},cfg.format);
@@ -490,9 +584,10 @@ function compose(plan,style={},config={}){
 }
 function applyFrameCompression(compiled,style,raw,inputFingerprint){
  const result=PromptAdapters.applyFrameCompression(compiled,style,raw);
- const before=Budget.risk(compiled.prompt),after=Budget.risk(result.prompt);
- const applied=after.words<before.words;
- const frameCompression={status:applied?'applied':'retained',inputFingerprint,wordsBefore:before.words,wordsAfter:after.words,adjusted:result.edits,retained:result.retained};
+ const nai5=compiled.syntax==='nai5-pipe';
+ const before=nai5?Budget.nai5Risk(compiled.sections):Budget.risk(compiled.prompt),after=nai5?Budget.nai5Risk(result.sections):Budget.risk(result.prompt);
+ const applied=nai5?after.estimate<before.estimate:after.words<before.words;
+ const frameCompression={status:applied?'applied':'retained',inputFingerprint,...(nai5?{estimateBefore:before.estimate,estimateAfter:after.estimate}:{wordsBefore:before.words,wordsAfter:after.words}),adjusted:result.edits,retained:result.retained};
  const oldBudget=compiled.budgetAudit;
  const budgetAudit=oldBudget?{...oldBudget,after,estimateAfter:after.estimate,overBudget:after.estimate>oldBudget.target,risk:after.estimate>oldBudget.target,
   mode:applied?'frame-compressed':oldBudget.mode,warning:after.estimate>oldBudget.target?oldBudget.warning:'',adjusted:[...oldBudget.adjusted,...result.edits],
@@ -521,7 +616,8 @@ function confirmedSeed(result){
 }
 const frameSelectionInstruction='按本帧标记需要强调的外貌和衣着。只标记实际入镜、能区分人物、影响当前状态或玩家明确要求的细节。近景、全身和局部镜头遵循同一原则。场景只引用定位人物或讲清动作所需的外貌和衣着，其余细节放在各自人物栏。appearance 填已有登记DNA或本轮外貌的槽名，只有「外貌」文本时可逐字引用其中的逗号分隔短语。outfit 逐字引用当前可见装备的 name，衣着状态仍由完整装备快照继承。该选择只作辅助，不替代登记DNA或装备状态；未选中或空数组不代表删除可见人物特征、不穿衣物或清空主衣物。无法确认时省略该字段。';
 function buildInstruction(request,ruleCatalog,profiles,{visualOnly=false}={}){
-  const cfg=settings(request.config),registered=(profiles||[]).map(({avatar,...profile})=>({...profile,identity:Wardrobe.sceneProp.test(profile.identity)?withoutScenePropsIdentity(profile.identity):profile.identity,registrationDNA:withoutScenePropsDNA(profile.registrationDNA)||undefined})),character=request.kind==='character_intro',story=!!clean(request.storyInput);
+  const cfg=settings(request.config);if(cfg.imageService==='seedream')cfg.ratio=cfg.seedreamRatio;else if(cfg.imageService==='gpt-image')cfg.ratio=cfg.gptImageRatio;
+  const registered=(profiles||[]).map(({avatar,...profile})=>({...profile,identity:Wardrobe.sceneProp.test(profile.identity)?withoutScenePropsIdentity(profile.identity):profile.identity,registrationDNA:withoutScenePropsDNA(profile.registrationDNA)||undefined})),character=request.kind==='character_intro',story=!!clean(request.storyInput);
   const nextTurn=request.kind==='story_cg'&&story&&!visualOnly,savedReply=request.kind==='story_cg'&&story&&visualOnly&&request.sceneSelection==='saved-reply';
   const name=clean(request.targetName),form=clean(request.targetForm)||'默认形态';
   const cast=cfg.format==='nai45'?castConstraint(request):null;
@@ -532,12 +628,14 @@ function buildInstruction(request,ruleCatalog,profiles,{visualOnly=false}={}){
     :savedReply?RuleCompiler.savedReplyCatalog(ruleCatalog)
     :staticStory?{...ruleCatalog,requestBoundary:clean(request.request)?'按玩家画面要求设计一张独立静帧，已知人物资料可用于保持一致。':automaticStill}
     :ruleCatalog;
-  const ruleLayers=RuleCompiler.compileRuleLayers({...request,config:cfg},selectedCatalog||{});
+  const seedream=isPhotorealDirect(cfg);
+  const catalog=seedream?{...selectedCatalog,genericFormat:selectedCatalog.genericFormat+' 用完整自然英文写单帧。所选画风和玩家明确指定的媒介决定视觉表现；人物审美建议适配该画风。插画、动漫等风格沿用角色辨识特征、体型、服装和镜头关系，并以所选媒介的方式表现。Scene 先写景别和镜头视角，再按画面左右及前后写人物站位，以家具或道具作为参照。每个动作紧跟对应人物，必要时写明哪只手、接触点和重心支撑。画面左右以观众视角为准，人物肢体左右以本人为准。人物栏保留登记的脸型、眼睛、发型、辨识特征与体型，服装按当前剧情。画面只写当前镜头可见的动作，不补写后续动作。双人动作优先写一帧可辨认的空间关系：先区分前后和左右，再以姓名分别写身体朝向、手脚归属和支撑，明确谁的哪只手接触哪一个对象。只保留会影响读图的接触和遮挡，不凭空补画画外肢体。若机位令关键动作被遮住，先调整机位；仍不清楚才用足以交代动作的更宽景别。画面要求保留明确的镜头、服装与动作优先。 人物审美默认采用高品质商业人像的选角标准：成年女性精致漂亮、五官协调且有神，体态优美并保有设定的曲线；成年男性按年龄和气质呈现清秀、英俊或成熟魅力。画面中的长相和身材都以该角色经过审美设计的版本呈现，已有档案的角色也按此处理。保留独有五官标记、年龄感、发型、肤色及体型倾向，并将这些特征组织成更漂亮协调的五官比例、身体线条和体态。例如高挑丰满应体现挺拔、匀称且富有曲线，词义不得扩大成臃肿或统一成纤瘦模特。明确指定的特殊体型与外貌仍要可辨识。审美化只作用于本轮画面，不能写回角色档案。镜头未指定时选能交代动作和关系、同时让可见的脸和体态好看的机位；避免无叙事必要的极端广角或遮脸。夜景保留现场氛围，可用符合场景的柔和补光。玩家明确指定的景别、朝向、站位、衣着和动作优先。'}:selectedCatalog;
+  const ruleLayers=RuleCompiler.compileRuleLayers({...request,config:cfg},catalog||{});
   const isAdultLayer=layer=>RuleCompiler.ADULT_KEYS.some(key=>layer.name.endsWith('-'+key));
   const earlyRuleText=ruleLayers.filter(layer=>!isAdultLayer(layer)).map(layer=>layer.text).join('\n\n');
   const adultGateText=ruleLayers.find(layer=>layer.name.endsWith('-'+RuleCompiler.ADULT_GATE_KEY))?.text||'';
   const adultDetailText=ruleLayers.filter(layer=>RuleCompiler.ADULT_DETAIL_KEYS.some(key=>layer.name.endsWith('-'+key))).map(layer=>layer.text).join('\n\n');
-  const framingInstruction=cast?.target>NAI_CAST_LIMIT
+  const framingInstruction=cast?.target>NAI_GROUP_DETAIL_THRESHOLD
     ? cfg.shot==='full'
       ? '本轮明确要求 '+cast.target+' 位清晰主体全身同框。采用能容纳全员的画幅；每位主要人物都要从头到脚完整入画并露出双脚，Scene写 full-body group shot、head-to-toe framing。只有玩家明确指定局部裁切时才允许裁掉身体部位。'
       : '本轮明确要求 '+cast.target+' 位清晰主体同框。采用能容纳全员和读清主要动作的最小景别，保留明确指定的机位。'
@@ -559,13 +657,14 @@ function buildInstruction(request,ruleCatalog,profiles,{visualOnly=false}={}){
     JSON.stringify(registered),
     '【本轮摄影机取景设置】',
     framingInstruction,
-    ...(cast?['本轮最多 '+cast.limit+' 位清晰主体。先让主要角色清楚入镜，互动角色仅在完整入镜更能讲清动作时占第二个位置；否则只让发生互动所需的局部出现。全身设置约束选定的清晰主体，正文参与人数不改变画面人数。']:[]),
+    ...(cast?.limit!=null?['玩家本轮要求最多 '+cast.limit+' 位清晰主体，按指定人数组织构图。']:[]),
     '玩家明确指定的机位、景别、只拍的身体部位、不露脸要求和入镜人物优先。脸不是默认必须入画。明确要求身体局部时，Scene开头写清局部裁切边界，只描述实际可见部位；不为身份辨认、脸部DNA或近景偏好向上扩大到头脸。',
     cfg.directorFrame
       ? '本轮实际出图尺寸：'+cfg.directorFrame.width+' × '+cfg.directorFrame.height+' 像素（'+(cfg.directorFrame.width===cfg.directorFrame.height?'方图':cfg.directorFrame.width>cfg.directorFrame.height?'横图':'竖图')+'）。按此画幅安排构图，保留玩家指定的画面内容。'
       : cfg.ratio==='api'||['nai45','official','relay'].includes(cfg.imageService)?'画幅按图片接口决定，不预设比例。':'构图参考画幅 '+cfg.ratio+'；不可因此删除玩家指定的画面内容。',
   ];
   if(adultDetailText)texts.push(adultGateText,PhysicalState.adultInstruction(request.physicalState),adultDetailText);
+  if(adultDetailText&&isSeedream(cfg))texts.push('Seedream 成人画面审美：当本帧有成年角色裸露时，在原有镜头和动作下仍按理想化人像设计其可见身形。把身材设定落实为协调的比例、优美的轮廓与舒展的体态，保留各角色独有的体量和辨识点。男女角色都沿用常规镜头的美型标准。肤色与特殊皮肤特征按人设和本轮剧情，没有肤色依据时默认自然偏白皙，已有肤色及辨识特征优先。未指定特殊皮肤状态时呈现细腻光滑、色泽均匀的肌肤。表情和状态按本帧的动作、情绪和程度呈现，保持自然有美感。剧情确有泛红时按实际范围与强度画，轻微泛红用局部而细腻的肤色变化表现。以柔和的明暗过渡和应景光线保持肌肤质感。入镜的私密部位也采用协调而精致的理想化人体造型。脸若入镜，保持已确立的五官、脸型、辨识点和常规镜头的美感。保持原场景色温。取景、遮挡和衣着状态以本轮方案为准。');
   if(adultDetailText&&cfg.format==='nai45'&&['nai45','official','relay'].includes(cfg.imageService))texts.push(
     '【仅限 NAI 4.5·动作与体位候选标签】符合上述成人画面适用范围，并且玩家本轮明确指定的动作、体位或摩擦方式和标签含义完全吻合时，才可以在 Scene 使用对应英文标签。选最具体的词，每类最多一个，避免同义词堆叠；同帧确有明确体位时可再加一个体位标签。标签只辅助识别动作，短句仍写清执行者、双方姿势、支撑、接触点和玩家指定的动作阶段。只说顶、碰、贴、蹭、摸或提及身体部位时，按字面写实际接触，不据此套入专有动作标签；泛称后入也不推断为特定跪姿。标签与玩家指定细节冲突或含义不确定时，省略标签。',
     '动作候选：footjob、thigh sex、paizuri、handjob、fellatio、cunnilingus。口交泛称未明确具体方式时，不强行选择子类。',
@@ -581,12 +680,14 @@ function buildInstruction(request,ruleCatalog,profiles,{visualOnly=false}={}){
   }
   const shotExample=cfg.shot==='full'?'full-body shot, head-to-toe framing':'medium close-up, waist-up framing';
   const exampleScene=shotExample+(cfg.format==='nai45'?', 1girl':'')+', soft window light, a woman turns toward the window';
-  const example=['<ad-visual id="protocol">','场景：'+exampleScene,...(staticFrame?['描述：她在窗边回过头。']:[]),'人物：'+(character?'目标人物姓名':'角色姓名'),...(character?['登记DNA：{"schema":1,"slots":{"typeAge":"adult woman","hair":"short black hair","eyes":"brown eyes"}}']:[]),'</ad-visual>',...(staticFrame?['','【静态画面】她在柔和的窗光里回过头。']:[])].join('\n');
+  const example=['<ad-visual id="protocol">','场景：'+exampleScene,...(staticFrame?['描述：她在窗边回过头。']:[]),'人物：'+(character?'目标人物姓名':'角色姓名'),...(seedream?['画面外形：An elegant adult woman with a short black bob, expressive eyes and a poised silhouette.']:[]),...(character?['登记DNA：{"schema":1,"slots":{"typeAge":"adult woman","hair":"short black hair","eyes":"brown eyes"}}']:[]),'</ad-visual>',...(staticFrame?['','【静态画面】她在柔和的窗光里回过头。']:[])].join('\n');
   texts.push('【画面输出】'+(!visualOnly?'先写一个 ':'写一个 ')+'<ad-visual> 块，只必填一行英文场景。'+'每位需要独立画出外貌或服装的清晰主体另写一行「人物：姓名」，紧接该人物的可选字段。画外参与者只在场景写真实可见的局部。以下示例只展示格式，请按本轮实际构图填写。');
   texts.push(example);
+  if(seedream)texts.push('Seedream 画面外形字段仅写在同一个 <ad-visual> 块内。每位清晰入镜的成年主体在自己的「人物：姓名」下面写一行「画面外形：」，用一两句具体自然英文。这个字段不进入正文，不输出本条规则的标题或独立外形段落。把档案与本轮真实生效的外貌作为设计依据，直接描述最终要画出的、好看而有辨识度的人。把宽泛人设落实成一眼好看的具体人物：有整体美感的脸部轮廓与五官比例、有神的眼睛、协调而有辨识度的身形。设定较丰满，就让丰满成为优美轮廓的一部分，保留画面可见的体量和比例；高挑与丰满可以同时成立。把未指定的细节组织成理想化的角色设计。镜头与灯光按本轮场景决定，画风无固定色温。同一角色的脸型、眼型、下颌线和独有标记，以已确认特征作固定依据，换镜头时只改变朝向、光线或表情。保留玩家明确指定的外貌背景、发色、年龄感和体型差异，只描写本镜头看得见的部位。这一栏是本轮成图的外形设计，避免罗列原始标签后追加美化指令，也不写进角色档案。');
   texts.push('【容错与预算目的】用简洁英文保留玩家要求、关键动作和本帧状态。省略重复词和无关背景。');
   texts.push('【Aozora数据格式边界】程序数据只写在各自完整闭合的专用标签中：画面使用 <ad-visual>...</ad-visual>，衣着更新使用 <ad-wardrobe>...</ad-wardrobe>，身体设定更新使用 <ad-physical-state>...</ad-physical-state>。按本任务要求输出适用的数据块，不额外增加块。每块独立且只出现一次，不互相嵌套，不放入Markdown代码围栏或其他插件标签内；JSON必须完整且可解析。关闭标签后才能继续正文或其他附加结构。不要只输出裸的“【画面】”“场景：”或人物字段代替完整画面块，不把正文或其他附加结构包进Aozora数据块。');
   if(savedReply)texts.push('【导演记录与正文边界】判定与构思在内部完成，不向正文输出成人判定、规则核对、思考过程、剧情提纲或选景说明。只将已确定的方案结果记在同一个 <ad-visual> 内、场景行之后及人物行之前：本轮事件：正文选景时一句话概括对应事件，独立画面时注明“独立画面，非正文事件”；选定瞬间：一句话说明本图所取的具体一瞬；镜头安排：一句话说明最终机位、景别及裁切。每项只写简短结果，不写分析步骤、比较过程或 Gate 的 PASS/FAIL。三项仅供生成记录中的导演方案查看，不是正文，不进入生图提示词；不新增协议块。关闭视觉块后结束，不输出或修改正文。');
+  if(isSeedream(cfg))texts.push('Seedream 体态：对已设定丰满、结实或肩背宽的角色，画面外形先写入镜的具体体型特征，再写好看的线条和姿态。高挑和丰满是两个同时成立的特征，人物的精致感由姿态、机位、光线和衣料表现，不通过缩小原有体量获得。镜头裁掉的部位保持画外。');
   if(story)texts.push('【Scene 分工】一行只写这张图需要的镜头与裁切、主体动作和彼此位置、必要道具或环境线索。正文已明确地点且当前画幅看得见环境时，保留至少一个具体场所线索和已知主光；近景可把线索放在虚化背景中，用简短背景从句写出场所，重点仍是当前主体与裁切。明确纯色背景、极限特写及不可见环境按原要求。该线索与关键动作一起保留在精简后的 Scene。同一个可见事实只写一次。已登记外貌由人物栏继承；本帧发型等外貌变化交给「本轮外貌」，静态衣着及其变化交给「装备」。衣物、头发或道具本身参与动作时，Scene 只写动作及其必要对象，把颜色、款式等归回对应人物栏。「关系」只补 Scene 未交代且需要指定归属的姿态。省略审美修饰、次要环境和相邻时刻。');
   if(cfg.format==='nai45')texts.push('【NAI 软预算】整份正面提示词建议约512以内（英文词数 ×1.80 粗估），包含画风词和全部人物外貌、装备。'+(story?'给人物栏留空间，普通 Scene 写约55至75个英文词；复杂定格可写长一些，优先保留玩家指定的取景、动作和可见关系。':'用简短英文保留关键可见事实。')+'超出预算仍可出图。');
   if(nextTurn)texts.push('人物栏按需填写：非默认形态写「形态」；未登记人物写英文「外貌」，已登记人物的临时发型等变化必须写在「本轮外貌」一行，使用 JSON 对象，例如 本轮外貌：{"hair":"dark brown hair in a high ponytail"}。保留未变的发色；旧刘海或碎发本帧已不适用时写 "hairDetail":""。汗水、红晕等反应写进 Scene。「装备」只列定格当下相对开场变化或首次确定的部位；省略则沿用，明确脱空用 []。多人动作需要绑定时，用「关系」写英文短语。');
@@ -620,7 +721,7 @@ function generationRecord(record,image,detail=false,events=[]){
  const transport=image.requestAudit?.promptTransportAudit;
  const wire=image.requestAudit?.wireAudit;
  const body=wire?.body;
- const nativeCaptions=image.requestAudit?.captionTransport==='nai45-native-captions';
+ const nativeCaptions=['nai45-native-captions','nai5-native-captions'].includes(image.requestAudit?.captionTransport);
  const positive=body?.input??body?.prompt??(wire?.input||transport?.prompt||image.prompt||'');
  const negative=body?.parameters?.negative_prompt??body?.negative_prompt??body?.nai?.negative_prompt??wire?.v4NegativePrompt?.caption?.base_caption??transport?.negativePrompt??image.options?.negativePrompt??'';
  const captions=nativeCaptions?(body?.parameters?.v4_prompt?.caption?.char_captions||wire?.v4Prompt?.caption?.char_captions||[]):[];
@@ -653,7 +754,7 @@ function generationRecord(record,image,detail=false,events=[]){
  });
 }
 function staticCaption(request,plan={}){const label=clean(plan.description)||clean(request.request)||(request.kind==='character_intro'?clean(request.targetName)+' · '+(clean(request.targetForm)||'默认形态'):'由导演选择当前画面');return '【静态画面】'+escapeHtml(label);}
-const Core={reuseRegisteredIdentity,withoutScenePropsDNA,resolveFragments,VERSION,DEFAULTS,styleFormat,styleMatches,clean,id,fingerprint,settings,imageServiceMode,supportsNaiImageEdit,hasMotionOrigin,seedValue,normalizedPlan,naiClearSubjectTagCount,validateCastLimit,cleanDirectorInput,inputMarker,parseVisual,readSaved,readableBlock,referenceBlock,storyText,escapeHtml,compose,confirmedSeed,buildInstruction,applyShotPreference,staticCaption,generationRecord,redactRecord};
+const Core={reuseRegisteredIdentity,withoutScenePropsDNA,resolveFragments,stripSeedreamAppearanceLeak,VERSION,DEFAULTS,HAMUBOX_MODELS,HAMUBOX_DEFAULT,seedreamSize,SEEDREAM_QUICK_SIZES,GPT_IMAGE_SIZES,GPT_IMAGE_OFFICIAL_ENDPOINT,IMAGE_CONNECTION_PRESETS,gptImageLegacyModel,gptImageSize,isSeedream,isPhotorealDirect,styleFormat,styleMatches,styleSupports,STYLE_FORMAT_LABELS,clean,id,fingerprint,settings,imageServiceMode,supportsNaiImageEdit,supportsReferenceEdit,supportsTextImageEdit,hasMotionOrigin,seedService,imageServiceChange,favoriteSeedService,seedValue,normalizedPlan,naiClearSubjectTagCount,validateCastLimit,cleanDirectorInput,inputMarker,parseVisual,readSaved,readableBlock,referenceBlock,storyText,escapeHtml,compose,confirmedSeed,buildInstruction,applyShotPreference,staticCaption,generationRecord,redactRecord};
 Core.hasUntranslatedPromptText=PromptValidation.hasUntranslatedText;
 Core.frameCompressionPrompt=PromptAdapters.frameCompressionPrompt;
 Core.inspectStoryGrounding=inspectStoryGrounding;
@@ -664,6 +765,9 @@ Core.Wardrobe=Wardrobe;
 Core.PhysicalState=PhysicalState;
 Core.Height=Height;
 Core.DNA=DNA;
+Core.sceneFrame=Projection.readFrame;
+Core.nai5FaceSlots=nai5FaceSlots;
+Core.nai5FaceVisible=nai5FaceVisible;
 Core.sourceScene=(image,styleCatalog=[])=>Projection.cleanSceneStyles(BodyRelations.withoutGeneratedScene(Projection.sourceScene(image),image.scaleAudit),styleCatalog);
 Core.cleanSceneStyles=Projection.cleanSceneStyles;
 Core.neutralBuiltinStyle=neutralBuiltinStyle;

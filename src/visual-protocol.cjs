@@ -1,7 +1,7 @@
 'use strict';
 const DNA=typeof require==='function'?require('./identity-dna.cjs'):DirectorDNA;
 const Equipment=typeof require==='function'?require('./wardrobe.cjs'):DirectorWardrobe;
-const FIELDS={姓名:'name',形态:'form',外貌:'identity',关系:'relation'};
+const FIELDS={姓名:'name',形态:'form',外貌:'identity',画面外形:'portraitAppearance',关系:'relation'};
 const SUMMARY_FIELDS={本轮事件:'event',选定瞬间:'moment',镜头安排:'framing'};
 function sourceExcerpt(value){
  if(typeof value!=='string'||!value.trim()||value.length>2000||/<[^>]*>/.test(value))return undefined;
@@ -78,11 +78,11 @@ function format(plan,requestId){
  const excerpt=sourceExcerpt(plan.sourceExcerpt);if(excerpt!==undefined)lines.push('','正文依据：'+JSON.stringify(excerpt));
  if(summary)for(const [label,key]of Object.entries(SUMMARY_FIELDS))if(summary[key])lines.push('',label+'：'+summary[key]);
  if(Array.isArray(plan.fragments)&&plan.fragments.length)lines.push('','局部参与者：'+JSON.stringify(plan.fragments));
- plan.characters.forEach((c,i)=>{Equipment.normalizeCharacter(c);lines.push('','【人物 '+(i+1)+'】','','姓名：'+c.name,'','形态：'+(c.form||'默认形态'),'','外貌：'+c.identity,...(DNA.snapshot(c.registrationDNA)?['','登记DNA：'+JSON.stringify(DNA.snapshot(c.registrationDNA))]:[]),...(Object.keys(c.appearanceOverrides||{}).length?['','本轮外貌：'+JSON.stringify(c.appearanceOverrides)]:[]),'','装备：'+JSON.stringify(c.equipment),...(frameSelection(c.frameSelection)?['','本帧取用：'+JSON.stringify(frameSelection(c.frameSelection))]:[]),...(c.relation?['','关系：'+relation(c.relation)]:[]));});
+ plan.characters.forEach((c,i)=>{Equipment.normalizeCharacter(c);lines.push('','【人物 '+(i+1)+'】','','姓名：'+c.name,'','形态：'+(c.form||'默认形态'),'','外貌：'+c.identity,...(c.portraitAppearance?['','画面外形：'+c.portraitAppearance]:[]),...(DNA.snapshot(c.registrationDNA)?['','登记DNA：'+JSON.stringify(DNA.snapshot(c.registrationDNA))]:[]),...(Object.keys(c.appearanceOverrides||{}).length?['','本轮外貌：'+JSON.stringify(c.appearanceOverrides)]:[]),'','装备：'+JSON.stringify(c.equipment),...(frameSelection(c.frameSelection)?['','本帧取用：'+JSON.stringify(frameSelection(c.frameSelection))]:[]),...(c.relation?['','关系：'+relation(c.relation)]:[]));});
  lines.push('','</ad-visual>');return lines.join('\n');
 }
 const actorHeading=/^(?:【人物\s*\d+】|人物\s*[：:]\s*(.+))$/;
-const visualLine=/^(?:【画面】|【人物\s*\d+】|<ad-visual(?=[\s/>])[^>]*>|(?:场景|scene|描述|description|正文依据|本轮事件|选定瞬间|镜头安排|局部参与者|人物|姓名|形态|外貌|登记DNA|本轮外貌|本帧取用|装备|关系)\s*[：:])/i;
+const visualLine=/^(?:【画面】|【人物\s*\d+】|<ad-visual(?=[\s/>])[^>]*>|(?:场景|scene|描述|description|正文依据|本轮事件|选定瞬间|镜头安排|局部参与者|人物|姓名|形态|外貌|画面外形|登记DNA|本轮外貌|本帧取用|装备|关系)\s*[：:])/i;
 function readDraft(raw){
  const plan={scene:'',characters:[]};
  let actor=null;

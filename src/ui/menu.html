@@ -2,6 +2,7 @@
 <span class="ad-camera-frame" aria-hidden="true">
 </span>
 <svg class="ad-camera-icon" viewBox="0 0 40 36" fill="none" aria-hidden="true"><g class="ad-cinema-reels"><circle cx="12" cy="9" r="6"/><circle cx="25" cy="8" r="7"/></g><path class="ad-cinema-body" d="M5 16 29 14v17L5 33Z"/><path class="ad-cinema-lens" d="m29 20 9-5v17l-9-5Z"/><path class="ad-cinema-detail" d="m9 21 12-1M9 25l8-1"/><circle class="ad-cinema-reel-hole" cx="12" cy="9" r="1.7"/><circle class="ad-cinema-reel-hole" cx="25" cy="8" r="2"/></svg>
+<span id="ad-launcher-sleep" aria-hidden="true" hidden><span>Z</span><span>Z</span><span>Z</span></span>
 <span id="ad-launcher-badge" aria-hidden="true">
 </span>
 <span id="ad-launcher-caption" aria-hidden="true">
@@ -113,7 +114,7 @@
 
 <div class="studio-paper">
 <section id="studio-home-quick-size" class="studio-home-quick-size" aria-label="常用画面尺寸快捷切换">
-<div class="studio-quick-size-heading"><strong><em>01</em> 快捷小图比例</strong><small id="studio-quick-size-status" role="status" aria-live="polite">点选即保存</small><span class="city-ratio-note">快捷比例可能被 API 设置覆盖</span></div>
+<div class="studio-quick-size-heading"><strong><em>01</em> 快捷尺寸</strong><small id="studio-quick-size-status" role="status" aria-live="polite">点选即保存</small><span class="city-ratio-note">快捷比例可能被 API 设置覆盖</span></div>
 <div class="studio-size-presets studio-size-presets-quick" aria-label="首页快捷尺寸">
 <button type="button" data-studio-size="1216,832" aria-pressed="false"><strong>横图</strong><small>1216 × 832</small></button>
 <button type="button" data-studio-size="832,1216" aria-pressed="false"><strong>竖图</strong><small>832 × 1216</small></button>
@@ -171,6 +172,14 @@
 <span class="studio-toggle" aria-hidden="true">
 </span>
 </label>
+<label class="studio-option-row">
+<input type="checkbox" id="ad-launcher-captions">
+<span class="studio-option-icon" aria-hidden="true">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4zM8 9h8m-8 3h5"/></svg>
+</span>
+<span class="studio-option-label"><b>悬浮图标提示文字</b><small>在图标旁显示任务状态</small></span>
+<span class="studio-toggle" aria-hidden="true"></span>
+</label>
 </div>
 </div>
 </section>
@@ -209,7 +218,7 @@
 <h4>画面尺寸</h4>
 <small id="studio-size-status" role="status" aria-live="polite">自动保存</small>
 </div>
-<p class="city-size-hint">宽高支持 64–2048 px，按 64 px 递增。</p>
+<p class="city-size-hint"><strong>手动设置宽高</strong>　宽高支持 64–2048 px，按 64 px 递增，总像素上限 3,145,728。</p>
 <div class="studio-dimensions">
 <label class="studio-unit-label">宽度<div class="studio-unit-field" id="studio-width-slot">
 <input id="studio-width" type="number" min="64" max="2048" step="64">
@@ -223,7 +232,10 @@
 </div>
 </label>
 </div>
-<div class="studio-size-presets" aria-label="常用画面尺寸"><button type="button" data-studio-size="1216,832" aria-pressed="false"><strong>横图</strong><small>1216 × 832</small></button><button type="button" data-studio-size="832,1216" aria-pressed="false"><strong>竖图</strong><small>832 × 1216</small></button><button type="button" data-studio-size="1024,1024" aria-pressed="false"><strong>方图</strong><small>1024 × 1024</small></button></div>
+<p class="city-size-hint"><strong>快捷尺寸 · Normal（约 1 MP）</strong></p>
+<div class="studio-size-presets" aria-label="快捷尺寸 · Normal"><button type="button" data-studio-size="1216,832" aria-pressed="false"><strong>横图</strong><small>1216 × 832</small></button><button type="button" data-studio-size="832,1216" aria-pressed="false"><strong>竖图</strong><small>832 × 1216</small></button><button type="button" data-studio-size="1024,1024" aria-pressed="false"><strong>方图</strong><small>1024 × 1024</small></button></div>
+<p class="city-size-hint" id="studio-nai-size-billing"></p>
+<p class="city-size-hint">需要其他比例时，可手动输入服务商支持的宽高。实际费用和额度消耗，以所用渠道的计费说明为准。</p>
 </div>
 <label id="local-ratio">
 <span class="ad-field-heading">
@@ -350,13 +362,14 @@
 <div class="city-setting-form">
 <div class="city-setting-field">
 <div class="city-setting-field-head"><label for="local-relay-url"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>API 地址</label><button type="button" id="local-use-official">填入官方地址</button></div>
-<input id="local-relay-url" type="url" autocomplete="off" spellcheck="false" placeholder="https://your-api.example">
+<input id="local-relay-url" type="url" autocomplete="off" spellcheck="false" placeholder="填写 API 地址">
 </div>
 <div class="city-setting-field">
 <div class="city-setting-field-head"><label for="local-relay-key"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4a6 6 0 0 0-5 9l-6 6v2h4l2-2v-2h2l2-2a6 6 0 1 0 1-11z"/><circle cx="16" cy="9" r="1"/></svg>API Key</label><div class="static-api-tools"><button type="button" id="static-api-reveal" aria-pressed="false">显示</button><button type="button" id="static-api-paste">粘贴</button></div></div>
 <input id="local-relay-key" type="password" autocomplete="off" placeholder="填写 API Key">
 <small id="static-api-paste-note" role="status"></small>
 </div>
+<div class="local-actions studio-nai-save"><button type="button" class="ad-primary" data-local-save="">保存 API 设置</button></div>
 </div>
 <div class="static-api-notes">
 <strong><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>使用说明</strong>
@@ -450,9 +463,10 @@
 <ol class="tutorial-steps">
 <li>用<strong>设计人物外观</strong>填写人物姓名和可选形态，再描述想看的外观。</li>
 <li>从生成结果中挑选候选。需要调整时，点卡片上的铅笔图标生成新候选；原图会保留。</li>
-<li>选定后点人物登记图标，确认姓名和形态，再选择头像。</li>
+<li>选定后点画面卡下方的<strong>登记角色</strong>图标，确认姓名和形态，再选择头像。</li>
 <li>在裁切页拖动图片、调整缩放并确认。登记后，这份人物档案会用于后续 CG 的外观延续。</li>
 </ol>
+<p>随时点击画面卡右上角、历史记录左侧的<strong>档案夹</strong>，查看已登记的人物。没有生成画面时也能打开。</p>
 <figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/design-character.png" alt="设计人物外观的填写界面"><figcaption>先描述希望设计的人物外观。</figcaption></figure>
 <div class="tutorial-pair">
 <figure class="tutorial-figure"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/tune-character.png" alt="微调人物候选的界面"><figcaption>微调会新增候选，不覆盖原图。</figcaption></figure>
@@ -464,15 +478,16 @@
 
 <section class="tutorial-chapter" id="tutorial-cards">
 <header><small>03 · 图片卡片</small><h3>这些按钮怎么用？</h3></header>
-<figure class="tutorial-figure tutorial-card-shot"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/card-actions.png" alt="图片卡片及图标操作栏"><figcaption>图片卡片以图标作为主要操作入口。</figcaption></figure>
+<figure class="tutorial-figure tutorial-card-shot"><img loading="lazy" src="/plugins/com.aozora.director/assets/tutorial/card-actions-archive.png" alt="图片卡片及图标操作栏"><figcaption>右上角依次是人物档案、历史记录和设置。</figcaption></figure>
 <ul class="tutorial-icon-list">
+<li><span class="tutorial-action-icon" data-tutorial-icon="profiles" aria-hidden="true"></span><span><strong>查看人物档案</strong>打开已登记角色的列表。暂无画面时也可以使用。</span></li>
 <li><span class="tutorial-action-icon" data-tutorial-icon="history" aria-hidden="true"></span><span><strong>历史记录</strong>回看每一轮的正文和图片。</span></li>
 <li><span class="tutorial-action-icon" data-tutorial-icon="settings" aria-hidden="true"></span><span><strong>设置</strong>选择画风、调整生成设置，也能在这里打开教程。</span></li>
 <li><span class="tutorial-action-icon" data-tutorial-icon="reroll" aria-hidden="true"></span><span><strong>重抽</strong>想画同一个场景，再试一次。</span></li>
 <li><span class="tutorial-action-icon" data-tutorial-icon="add" aria-hidden="true"></span><span><strong>新增 / 补图</strong>已经设置过画面，就按原要求再画一张；之前没有设置画面的回复，会先弹窗让你填写补图要求。</span></li>
 <li><span class="tutorial-action-icon" data-tutorial-icon="tune" aria-hidden="true"></span><span><strong>调整画面</strong>写下哪里想改。人物图可以继续微调，剧情图还可以选择新场景。</span></li>
-<li><span class="tutorial-action-icon" data-tutorial-icon="register" aria-hidden="true"></span><span><strong>登记人物</strong>选中满意的人物图，保存这份外观，供后面出图使用。</span></li>
-<li><span class="tutorial-action-icon" data-tutorial-icon="motion" aria-hidden="true"></span><span><strong>动态 CG</strong>给这张剧情图加一点动作变化。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="register" aria-hidden="true"></span><span><strong>登记角色</strong>在人物候选图下方使用，保存选中的外观，供后续出图沿用。</span></li>
+<li><span class="tutorial-action-icon" data-tutorial-icon="motion" aria-hidden="true"></span><span><strong>动态 CG</strong>用支持动态图的链路，为当前剧情图或人物候选图生成变化帧。</span></li>
 <li><span class="tutorial-action-icon" data-tutorial-icon="delete" aria-hidden="true"></span><span><strong>删除图片</strong>移除当前选中的这一张图。</span></li>
 </ul>
 <p class="tutorial-note"><strong>仅电脑端：</strong>卡片左下角的三颗菱形抓手可拖动卡片位置。手机端没有这个把手。</p>
@@ -513,7 +528,7 @@
 <li>写下想看到的动作变化，例如轻轻转头、眨眼或发梢随动作摆动。</li>
 <li>生成完成后，在卡片或大图中播放循环效果；在大图模式下可以下载 GIF。</li>
 </ol>
-<p class="tutorial-note"><strong>当前支持：</strong>图生图与动态 CG 目前仅支持 NAI 4.5 FULL 链路；四套内置画风也主要针对该模型优化。效果仍在持续迭代中，欢迎反馈体验。</p>
+<p class="tutorial-note"><strong>当前支持：</strong>NAI 4.5、NAI 5、Seedream 和 GPT Image 可用支持编辑的 API 生成图生图或动态变化帧。连接在「动态」页单独填写，具体能力以服务商接口为准。</p>
 </section>
 <button type="button" class="tutorial-back-link" data-tutorial-return>← 回到使用教程</button>
 </section>
@@ -566,15 +581,16 @@
 <section class="city-static-connection" aria-labelledby="city-motion-connection-title">
 <div class="city-setting-field-head static-api-summary">
 <svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a4 4 0 0 0 6 0l4-4a4 4 0 0 0-6-6l-2 2m2 6a4 4 0 0 0-6 0l-4 4a4 4 0 0 0 6 6l2-2"/></svg>
-<div><h3 id="city-motion-connection-title">动态 API 连接</h3><p>用 NAI 4.5 FULL 为静态 CG 生成变化帧。</p></div>
+<div><h3 id="city-motion-connection-title">动态 API 连接</h3><p id="city-motion-connection-description">用于编辑原图和生成动态变化帧。</p></div>
 <small id="studio-motion-connection-state" role="status" data-state="empty">未配置</small>
 </div>
 <div id="local-motion-connection" class="city-setting-form">
 <div class="city-setting-field">
 <div class="city-setting-field-head"><label for="local-motion-url"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>API 地址</label><button type="button" id="local-motion-official">填入官方地址</button></div>
-<input id="local-motion-url" type="url" autocomplete="off" spellcheck="false" placeholder="https://your-api.example" aria-describedby="local-motion-url-hint">
+<input id="local-motion-url" type="url" autocomplete="off" spellcheck="false" placeholder="填写 API 地址" aria-describedby="local-motion-url-hint">
 <small id="local-motion-url-hint">请按服务商文档填写图生图专用地址。</small>
 </div>
+<div class="city-setting-field" id="local-motion-model-field" hidden><div class="city-setting-field-head"><label for="local-motion-model">模型 ID</label></div><input id="local-motion-model" class="city-api-input" type="text" autocomplete="off" spellcheck="false"></div>
 <div class="city-setting-field">
 <div class="city-setting-field-head"><label for="local-motion-key"><svg class="static-api-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4a6 6 0 0 0-5 9l-6 6v2h4l2-2v-2h2l2-2a6 6 0 1 0 1-11z"/><circle cx="16" cy="9" r="1"/></svg>API Key</label><div class="static-api-tools"><button type="button" id="motion-api-reveal" aria-pressed="false">显示</button><button type="button" id="motion-api-paste">粘贴</button></div></div>
 <input id="local-motion-key" type="password" autocomplete="off" placeholder="填写 API Key">
@@ -583,6 +599,7 @@
 </div>
 </div>
 </section>
+<p id="local-motion-photo-note" class="city-size-hint" hidden>编辑幅度由原图和修改描述决定。输出尺寸沿用当前链路的图片尺寸设置。</p>
 <section id="local-motion-advanced" aria-labelledby="motion-advanced-title">
 <header class="motion-advanced-heading">
 <div><strong id="motion-advanced-title" class="ad-field-title">进阶参数</strong>
@@ -655,8 +672,6 @@
 </div>
 <div id="ad-style-editor" hidden="">
 <header class="ad-style-detail-heading studio-editor-tools">
-<span id="ad-style-model-badge" hidden="">
-</span>
 <h3 id="ad-style-editor-title" class="ad-page-title studio-hidden-heading">
 </h3>
 
@@ -671,12 +686,11 @@
 <span class="ad-field-title">适配格式</span>
 <select id="ad-style-format">
 <option value="nai45">NAI 4.5 Full</option>
-<option value="generic">通用</option>
+<option value="nai5">NAI 5 Full</option>
+<option value="generic">通用 · Tavo</option>
+<option value="gpt-image">GPT Image</option>
+<option value="seedream">Seedream 5.5</option>
 </select>
-</label>
-<label>
-<span class="ad-field-title">模型备注</span>
-<input id="ad-style-basis" placeholder="如 NAI 4.5 Full、GPT Image 2、通用" maxlength="120">
 </label>
 </div>
 <label>
@@ -816,8 +830,7 @@
 <h3 id="ad-favorite-title">收藏 Seed</h3>
 <p id="ad-favorite-value"></p>
 <label id="ad-favorite-seed-field" hidden>Seed<input id="ad-favorite-seed" inputmode="numeric" maxlength="32" disabled placeholder="粘贴或输入 Seed 编号"></label>
-<label>所属模型 · 必填<input id="ad-favorite-model" required="" maxlength="100" placeholder="例如 NAI 4.5 Full">
-</label>
+<p id="ad-favorite-model"></p>
 <label>备注<input id="ad-favorite-note" maxlength="200">
 </label>
 <p id="ad-favorite-error" role="alert">

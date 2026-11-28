@@ -77,7 +77,8 @@ function normalizeEquipment(raw,complete=true){
 function normalizeCharacter(c){
  if(!c||!c.equipment||SLOTS.some(slot=>!Object.hasOwn(c.equipment,slot)))throw Error('只支持完整的八部位装备快照，请新建对话测试');
  const out={name:clean(c.name),form:clean(c.form)||'默认形态',equipmentVersion:2,equipment:normalizeEquipment(c.equipment)};
- if(c.registrationDNA!==undefined)out.registrationDNA=structuredClone(c.registrationDNA);if(c.appearanceOverrides!==undefined)out.appearanceOverrides=structuredClone(c.appearanceOverrides);if(c.frameSelection!==undefined)out.frameSelection=structuredClone(c.frameSelection);if(c.identity!==undefined)out.identity=clean(c.identity);if(c.relation!==undefined)out.relation=clean(c.relation);if(c.source!==undefined)out.source=clean(c.source);if(c.messageId!==undefined)out.messageId=String(c.messageId);if(c.aliases!==undefined)out.aliases=[...c.aliases];return out;
+ if(c.nai5Face&&typeof c.nai5Face==='object')out.nai5Face=structuredClone(c.nai5Face);
+ if(c.registrationDNA!==undefined)out.registrationDNA=structuredClone(c.registrationDNA);if(c.appearanceOverrides!==undefined)out.appearanceOverrides=structuredClone(c.appearanceOverrides);if(c.frameSelection!==undefined)out.frameSelection=structuredClone(c.frameSelection);if(c.identity!==undefined)out.identity=clean(c.identity);if(c.portraitAppearance)out.portraitAppearance=clean(c.portraitAppearance).slice(0,600);if(c.relation!==undefined)out.relation=clean(c.relation);if(c.source!==undefined)out.source=clean(c.source);if(c.messageId!==undefined)out.messageId=String(c.messageId);if(c.aliases!==undefined)out.aliases=[...c.aliases];return out;
 }
 function normalizeRows(rows=[]){if(!Array.isArray(rows))throw Error('装备人物列表无效');const seen=new Set();return rows.map(raw=>{const c=normalizeCharacter(raw),id=key(c);c.equipment=withoutSceneProps(c.equipment);if(seen.has(id))throw Error('装备人物身份重复');seen.add(id);return c;});}
 function canonicalIdentity(c,state=[],profiles=[]){

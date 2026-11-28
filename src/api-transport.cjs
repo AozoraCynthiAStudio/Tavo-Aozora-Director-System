@@ -16,10 +16,31 @@ function route(url,format='auto',motion=false){
   }else if(!u.pathname.endsWith('/ai/generate-image'))u.pathname+='/ai/generate-image';
   return {kind,url:u.toString()};
 }
+function nai5Route(address){
+  const u=new URL(address);
+  if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash)throw Error('请填写不含密钥的 HTTPS 生图地址');
+  u.pathname=u.pathname.replace(/\/+$/,'');
+  const hamu=u.hostname==='api.hamubox.com',rinko=['ynai.rinko.ai','nai.rinko.ai'].includes(u.hostname);
+  if(u.hostname==='image.novelai.net'&&['','/ai'].includes(u.pathname))u.pathname='/ai/generate-image';
+  if(hamu&&u.pathname==='/v1/novelai')u.pathname+='/ai/generate-image';
+  if(rinko&&u.pathname==='/native')u.pathname+='/ai/generate-image';
+  if((hamu||rinko)&&u.pathname==='/v1')u.pathname+='/images/generations';
+  let kind;
+  if(hamu&&u.pathname==='/v1/novelai/tasks')kind='nai-task';
+  else if(/\/ai\/generate-image$/.test(u.pathname))kind='native';
+  else if(/\/nai\/generate-image$/.test(u.pathname))kind='native-json';
+  else if(/\/images\/generations$/.test(u.pathname))kind='openai';
+  else throw Error(/\/tasks(?:\/|$)/.test(u.pathname)
+    ?'这是任务接口。请在同站文档找 NovelAI 原生生成，复制 POST 后的完整地址。'
+    :'请在服务商 API 文档查找 NovelAI 原生生成，复制基础地址或 POST 后的完整生图地址。');
+  return {kind,url:u.href};
+}
 function body(native,kind,url){
+  if(kind==='nai-task')return {model:native.model,operation:'generation',payload:native};
   if(kind!=='openai')return native;
   const p=native.parameters,request={model:native.model,prompt:native.input,size:p.width+'x'+p.height,n:1,response_format:'b64_json'};
-  if(new URL(url).hostname==='nai.rinko.ai')request.nai={action:native.action,...p};
+  if(p.params_version===4)request.nai=p;
+  else if(new URL(url).hostname==='nai.rinko.ai')request.nai={action:native.action,...p};
   else Object.assign(request,{seed:p.seed,negative_prompt:p.negative_prompt,steps:p.steps,scale:p.scale,sampler:p.sampler,noise_schedule:p.noise_schedule});
   return request;
 }
@@ -36,4 +57,4 @@ async function jsonImage(response,signal){
   }else {const b64=raw.replace(/^data:image\/[^;,]+;base64,/i,'');bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));}
   return {bytes,seed:seed(item)??seed(value),responseFields:Object.keys(value),imageFields:item&&typeof item==='object'?Object.keys(item):[],jobId:value.job?.job_id||null};
 }
-module.exports={route,body,jsonImage,seed};
+module.exports={route,nai5Route,body,jsonImage,seed};

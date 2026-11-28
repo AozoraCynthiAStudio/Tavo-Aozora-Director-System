@@ -180,3 +180,46 @@ test('incomplete new-scene output preserves existing pictures without submitting
   assert.deepEqual(f.messages.get(2),original);
  }finally{f.app.close();}
 });
+
+for(const [imageService,format] of [['nai5','nai45'],['nai45','nai45'],['generic','generic'],['gpt-image','generic'],['seedream','generic']])test(imageService+' edits a saved frame and selects a new scene via text-to-image',async()=>{
+ const f=fixture();await f.app.load();
+ try{
+  await f.app.saveConfig({imageService,format,naiTransport:'tavo',nai5Transport:'tavo',gptImageTransport:'tavo',seedreamTransport:'tavo'});
+  await turn(f,{mid:2,body,plan:scenePlan()});
+  const source=(await f.app.readRecord(2)).images[0];
+  const original=structuredClone(f.messages.get(2));
+  assert.equal(Core.supportsTextImageEdit(source),true);
+  assert.equal(Core.supportsTextImageEdit({...source,plan:null}),false);
+  assert.equal(Core.supportsNaiImageEdit(source,f.app.snapshot().config),imageService==='nai45');
+  f.tavo.generate=async()=>JSON.stringify({scene:'A woman holds an umbrella outside a bookstore, viewed from the front.'});
+  await f.app.tune(2,source.id,'改成正面镜头');
+  installDirector(f,()=>scenePlan('A woman walks down a rainy street holding an umbrella.'));
+  await f.app.tune(2,source.id,'画她沿街走远',{method:'new-scene',shot:'near'});
+  const record=await f.app.readRecord(2);
+  assert.equal(record.images.length,3);
+  assert.deepEqual(record.images[0].plan,source.plan);
+  assert.deepEqual(f.messages.get(2),original);
+  assert.match(record.images[1].prompt,/viewed from the front/i);
+  assert.match(record.images[2].prompt,/walks down a rainy street/i);
+  assert.ok(record.images.every(image=>image.config.imageService===imageService&&image.syntax===source.syntax));
+ }finally{f.app.close();}
+});
+
+test('new scene requires confirmation before using a different image service',async()=>{
+ const f=fixture();await f.app.load();
+ try{
+  await f.app.saveConfig({imageService:'nai5',format:'nai45',nai5Transport:'tavo'});
+  await turn(f,{mid:2,body,plan:scenePlan()});
+  const source=(await f.app.readRecord(2)).images[0];
+  await f.app.saveConfig({imageService:'seedream',format:'generic',seedreamTransport:'tavo'});
+  await assert.rejects(f.app.tune(2,source.id,'画她沿街走远',{method:'new-scene'}),{code:'NEW_SCENE_SERVICE_CONFIRMATION_REQUIRED'});
+  assert.equal(f.textCalls,0);
+  assert.equal(f.calls,1);
+  assert.equal((await f.app.readRecord(2)).images.length,1);
+  installDirector(f,()=>scenePlan('A woman walks down a rainy street holding an umbrella.'));
+  await f.app.tune(2,source.id,'画她沿街走远',{method:'new-scene',confirmedService:'seedream'});
+  const updated=await f.app.readRecord(2);
+  assert.equal(updated.images.length,2);
+  assert.equal(updated.images[1].config.imageService,'seedream');
+ }finally{f.app.close();}
+});

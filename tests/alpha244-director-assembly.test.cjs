@@ -44,7 +44,7 @@ test('generic output preserves actor pose without leaking NAI interaction marker
 
 test('director gives a fixed NAI limit and keeps the main subject and visible contact in focus',()=>{
  const instruction=Core.buildInstruction({kind:'story_cg',config:{format:'nai45',maxActors:6}},rules,[]);
- assert.match(instruction,/最多两位清晰主体/);
+ assert.doesNotMatch(instruction,/最多两位清晰主体/);
  assert.match(instruction,/优先选一位/);
  assert.match(instruction,/背景只用最少线索/);
  assert.match(instruction,/【可选局部参与者】/);

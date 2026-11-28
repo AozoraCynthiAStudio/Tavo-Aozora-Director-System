@@ -5,6 +5,55 @@
   const studioCoverCatalog=__AD_STUDIO_COVERS__;
   const $=id=>document.getElementById(id),dock=$('adirector-cg-dock'),memory=window.ADirectorImageMemory||host.ADirectorImageMemory;
   if(!dock)return;
+  $('ad-format').add(new Option('NAI 5 Full','nai5'));
+  $('ad-format').add(new Option('Seedream 5.5','seedream'));
+  $('ad-format').add(new Option('GPT Image','gpt-image'));
+  const hamuboxFields=document.createElement('div');
+  hamuboxFields.id='studio-hamubox-fields';
+  hamuboxFields.dataset.studioPanel='seedream';
+  hamuboxFields.className='photo-api-panel pp-static-form';
+  hamuboxFields.hidden=true;
+  const photoForm=document.querySelector('#studio-static-fields .city-static-connection').cloneNode(true);
+  const photoIds={'city-static-connection-title':'studio-photo-connection-title','studio-static-connection-state':'studio-photo-state','local-relay-url':'studio-seedream-endpoint','local-use-official':'studio-photo-official','local-relay-key':'studio-hamubox-key','static-api-paste':'studio-photo-paste','static-api-paste-note':'studio-photo-paste-note'};
+  photoForm.querySelector('#static-api-reveal').remove();
+  photoForm.querySelector('.studio-nai-save').remove();
+  for(const node of photoForm.querySelectorAll('[id],[for],[aria-labelledby]'))for(const attr of ['id','for','aria-labelledby']){
+    const value=node.getAttribute(attr);
+    if(photoIds[value])node.setAttribute(attr,photoIds[value]);
+  }
+  photoForm.setAttribute('aria-labelledby','studio-photo-connection-title');
+  const gptTransportField=document.createElement('div');
+  gptTransportField.className='city-setting-field studio-transport-field';
+  gptTransportField.hidden=true;
+  gptTransportField.innerHTML='<div class="city-setting-field-head"><label for="studio-gpt-transport">调用方式</label></div><select id="studio-gpt-transport"><option value="direct">插件直连</option><option value="tavo">跟随 Tavo</option></select>';
+  photoForm.querySelector('.static-api-summary').after(gptTransportField);
+  photoForm.querySelector('#studio-seedream-endpoint').type='text';
+  photoForm.querySelector('#studio-seedream-endpoint').setAttribute('inputmode','url');
+  const modelField=document.createElement('div');
+  modelField.className='city-setting-field';
+  modelField.innerHTML='<div class="city-setting-field-head"><label for="studio-hamubox-model">模型 ID</label></div><input id="studio-hamubox-model" autocomplete="off" spellcheck="false" placeholder="填写服务商的模型 ID">';
+  photoForm.querySelector('#studio-hamubox-key').closest('.city-setting-field').before(modelField);
+  photoForm.querySelector('.static-api-notes ul').id='studio-photo-api-help';
+  hamuboxFields.append(photoForm);
+  const photoActions=document.createElement('div');
+  photoActions.className='local-actions';
+  photoActions.innerHTML='<button id="studio-hamubox-save" type="button" class="ad-primary pp-photo-save">保存 API 设置</button>';
+  photoForm.querySelector('.static-api-notes').before(photoActions);
+  $('studio-home').after(hamuboxFields);
+  const photoModeHelp=document.createElement('p');
+  photoModeHelp.className='studio-photo-mode-note';
+  photoModeHelp.hidden=true;
+  $('studio-home').querySelector('.film-mode').after(photoModeHelp);
+  const seedreamSize=document.createElement('div');
+  seedreamSize.id='studio-seedream-dimensions';
+  seedreamSize.hidden=true;
+  seedreamSize.innerHTML='<label for="studio-hamubox-resolution">分辨率</label><select id="studio-hamubox-resolution"><option value="1k">1K</option><option value="1.5k">1.5K</option><option value="2k">2K</option><option value="4k">4K</option></select><small id="studio-gpt-actual-size"></small><p class="city-size-hint">不同分辨率的价格和可用档位因渠道而异，请核对当前 API 的报价。</p>';
+  $('studio-frame-size').querySelector('.studio-dimensions').after(seedreamSize);
+  const presetRatios={'1216,832':'16:9','832,1216':'2:3','1024,1024':'1:1'};
+  let gptConnectionModel='';
+  const hamuboxModel=$('studio-hamubox-model');
+  const hamuboxKey=$('studio-hamubox-key');
+  for(const field of [hamuboxKey,hamuboxModel,$('studio-seedream-endpoint')])for(const event of ['keydown','keyup','keypress','paste','copy','cut','contextmenu'])field.addEventListener(event,e=>e.stopPropagation());
   const motionImage=document.createElement('img');motionImage.id='addock-motion-image';motionImage.alt='动态变化帧';motionImage.hidden=true;$('addock-main-image').after(motionImage);
   const motionPlayButton=document.createElement('button');motionPlayButton.id='addock-motion-play';motionPlayButton.type='button';motionPlayButton.className='addock-motion-play';motionPlayButton.hidden=true;motionPlayButton.setAttribute('aria-label','播放动态');motionPlayButton.title='播放动态';motionPlayButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg><span>播放动态</span>';$('addock-stage').append(motionPlayButton);
   const motionButton=document.createElement('button');motionButton.id='addock-motion';motionButton.type='button';motionButton.className='addock-btn';motionButton.title='以当前静态图申请动态';motionButton.setAttribute('aria-label','申请动态');motionButton.innerHTML='<svg class="addock-line-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h3l2-5 4 10 2-5h5"/></svg><span class="addock-action-caption">动态</span>';$('addock-add').after(motionButton);
@@ -51,7 +100,7 @@
   let registrationState=null;const registrationDefaultIcon=$('addock-dna-open').querySelector('svg')?.innerHTML||'';
   function paintRegistration(){const r=registrationState,match=r&&String(r.mid)===String(mid)&&r.imageId===active()?.id&&r.state==='busy'&&Date.now()<r.noticeUntil;if(match){const node=$('ad-card-state');node.hidden=false;node.dataset.phase='preparing';node.querySelector('.ad-phase-label').textContent='登记中';}const button=$('addock-dna-open'),item=active(),registered=!!item&&!!app?.snapshot().profiles.some(p=>String(p.sourceMessageId)===String(mid)&&p.sourceImageId===item.id);button.disabled=r?.state==='busy';button.dataset.registered=String(registered);button.title=registered?'已登记角色':'登记角色';button.setAttribute('aria-label',button.title);const icon=button.querySelector('svg');if(icon)icon.innerHTML=registered?'<path d="M2 21v-3a7 7 0 0 1 14 0M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M17 14l3 3 4-6"/>':registrationDefaultIcon;const caption=button.querySelector('.addock-action-caption');if(caption)caption.textContent=registered?'已登记':'登记';}
   const fallbackAttempts=new WeakMap();
-  let styleEditing='',favoriteImage=null,lastImage='',lastMotionImage='',lastViewerImage='',lastViewerMotionImage='',thumbSignature='',zoom=1,pan={x:0,y:0},pointer=null,motionPlaying=false,viewerMotionPlaying=false,selectedImageId='';const logs=[],bindings=[];
+  let styleEditing='',favoriteImage=null,favoriteService='',lastImage='',lastMotionImage='',lastViewerImage='',lastViewerMotionImage='',thumbSignature='',zoom=1,pan={x:0,y:0},pointer=null,motionPlaying=false,viewerMotionPlaying=false,selectedImageId='';const logs=[],bindings=[];
   let deleteTarget=null,displayLoading=false,displayError='',lastGlobalPhase='',seedImageId='',settingsStageContext=null,canSupplementBody=false,canRecoverPlan=false;
   const bind=(node,event,fn)=>{if(!node)return;const listener=e=>{try{if(host.__ADirectorApp!==app)connect();Promise.resolve(fn(e)).catch(handleUiError);}catch(error){handleUiError(error);}};node.addEventListener(event,listener);bindings.push([node,event,listener]);};
   function dismissEditing(){const active=document.activeElement;if(active?.matches('input,textarea,[contenteditable=true]'))active.blur();}
@@ -98,11 +147,18 @@
   function active(){if(galleryViewer)return galleryViewer.item;const selected=record?.images?.[imageIndex],images=stageImages();return images.find(image=>image.id===selected?.id)||images.find(image=>image.id===record?.currentImageId)||images[0]||null;}
   function motionOrigin(item,images=record?.images||[]){return !!core?.hasMotionOrigin?.(item,images);}
   function genericModeSelected(config=app?.snapshot()?.config){if(config&&core?.imageServiceMode)return core.imageServiceMode(config)==='generic';if(config)return config.imageService==='generic'||config.format==='generic';return $('ad-format').value==='generic';}
+  function supportsMotionSettings(cfg=app?.snapshot()?.config){return !genericModeSelected(cfg)||!!core?.supportsReferenceEdit(cfg);}
   function supportsImageEditing(item){if(!item||!app||!core?.supportsNaiImageEdit)return false;const sourceConfig={...(record?.config||{}),...(item.config||{})};return core.supportsNaiImageEdit({...item,config:sourceConfig},app.snapshot().config);}
-  function supportsMotionRequest(item,kind=record?.kind){return supportsImageEditing(item)&&(item?.kind||kind)!=='character_intro'&&!item?.motion?.sourcePointer;}
+  const photoMode=value=>['seedream','gpt-image'].includes(value?.imageService);
+  function supportsTune(item){return core?.supportsTextImageEdit(item);}
+  function supportsReferenceEdit(item){return !!item?.pointer&&!!item.plan&&core?.supportsReferenceEdit(app?.snapshot()?.config);}
+  function supportsMotionRequest(item){return (supportsImageEditing(item)||supportsReferenceEdit(item))&&!item?.motion?.sourcePointer;}
   function syncNaiOnlyNavigation(generic=genericModeSelected()){
     for(const button of document.querySelectorAll('[data-studio-nav="api"],[data-studio-nav="frame"],[data-studio-nav="params"],#ad-tabs [data-page="api"]')){
-      if(button.hidden!==generic)button.hidden=generic;
+      const motion=button.dataset.studioNav==='api'||button.dataset.page==='api';
+      const cfg=app?.snapshot()?.config;
+      const hidden=motion?!supportsMotionSettings(cfg):generic&&!(photoMode(cfg)&&button.dataset.studioNav==='frame');
+      if(button.hidden!==hidden)button.hidden=hidden;
     }
   }
   let cardPosition=null,cardDrag=null;
@@ -185,7 +241,11 @@
       const viewed=viewedCompletions.get(completedMessage);
       if(imageId&&viewed===imageId)global=core.Status.describe({phase:'idle'});
     }
-    root.dataset.phase=launcherState.phase;root.title='Aozora导演系统 · '+launcherState.label;root.setAttribute('aria-label',root.title);paintLauncherBadge(launcherState.phase);paintLauncherCaption(cardNotice?phaseLabel(cardNotice):global.phase==='idle'?'':phaseLabel(global));
+    root.dataset.phase=launcherState.phase;root.title='Aozora导演系统 · '+launcherState.label;root.setAttribute('aria-label',root.title);paintLauncherBadge(launcherState.phase);const sleeping=launcherState.phase==='no-director';
+    $('ad-launcher-sleep').hidden=!sleeping;
+    const showCaption=app?.snapshot()?.config?.launcherCaptions!==false;
+    paintLauncherCaption(!showCaption||sleeping?'':cardNotice?phaseLabel(cardNotice):global.phase==='idle'?'':phaseLabel(global));
+    if(!showCaption||sleeping)root.removeAttribute('title');
     if(lastGlobalPhase!==launcherState.phase){$('ad-launcher-live').textContent=launcherState.label;lastGlobalPhase=launcherState.phase;}
     const regenerating=app.isRegenerating?.(mid);
     const same=running&&(running.messageId?String(running.messageId)===mid:follow&&!mid),recordState=core.Status.fromRecord(record),local=same&&running.busy?running:recordState.busy?recordState:same&&running.phase!=='idle'?running:recordState;
@@ -224,7 +284,7 @@
     $('addock-fullview').dataset.directorPhase=state.phase;
     $('addock-story-state').textContent=state.label;$('addock-story-state').dataset.phase=state.phase;const notice=$('addock-fullview-notice'),image=active(),mismatch=viewer&&state.phase==='done'&&image?.verification?.seedMismatch===true;notice.hidden=true;if(mismatch){const key=[mid,image.id,image.requestedSeed,image.seed].join('|');if(!viewerNotices.has(key)){viewerNotices.set(key,Date.now()+4000);if(viewerNotices.size>80)viewerNotices.delete(viewerNotices.keys().next().value);setTimeout(()=>{if(!disposed)paintState();},4050);}notice.textContent='Seed 未按设定返回，详见生成记录';notice.hidden=Date.now()>=viewerNotices.get(key);}else notice.textContent='';
     if(viewer&&exportNotice){notice.textContent=exportNotice.message;notice.hidden=false;}
-    const sourceImage=active(),canEditSource=supportsImageEditing(sourceImage),canApplyMotion=supportsMotionRequest(sourceImage,record?.kind);
+    const sourceImage=active(),canEditSource=supportsTune(sourceImage),canApplyMotion=supportsMotionRequest(sourceImage);
     for(const id of ['addock-generate','addock-add','addock-motion','addock-tune'])$(id).disabled=state.busy;
     $('addock-generate').disabled=state.busy||awaitingNewReply||(!record?.plan&&!sourceImage?.plan);
     $('addock-add').disabled=state.busy||awaitingNewReply||(!record?.plan&&!sourceImage?.plan&&!canSupplementBody&&!canRecoverPlan);
@@ -251,7 +311,7 @@
     const failed=!!row.error||row.status==='failed',code=$('ad-log-detail-code');
     $('ad-log-reason-title').textContent=failed?'失败原因':'任务结果';
     code.textContent=failed?errorLabel(row):'';code.hidden=!failed||code.textContent==='未返回错误代码';
-    $('ad-log-detail-reason').textContent=failed?(row.error||row.diagnostics?.errorDetail||'未返回具体错误信息。'):row.warning||(row.status==='uncertain'?'结果待确认，可导出记录协助排查。':badge.textContent);
+    $('ad-log-detail-reason').textContent=failed?(row.diagnostics?.errorCode==='GPT_IMAGE_CONTENT_REJECTED'?core.Status.imageFailure({errorCode:row.diagnostics.errorCode,error:row.error||row.diagnostics.errorDetail}).hint:row.error||row.diagnostics?.errorDetail||'未返回具体错误信息。'):row.warning||(row.status==='uncertain'?'结果待确认，可导出记录协助排查。':badge.textContent);
   }
   function renderLogs(){
     const list=$('ad-log-list'),focused=document.activeElement?.closest('.ad-log-entry')?.taskRecord;
@@ -270,7 +330,7 @@
     function writeLog(event){
     let value,key,phase,title,diagnostics;
     if(event.type==='activity'){value=event.task||event.activity;if(!value?.operationId||String(value.operationId).startsWith('restored:'))return;phase=value.phase;if(!taskStatuses[phase])return;key=value.operationId;title=value.taskType||'生成画面';diagnostics=value.diagnostics;}
-    else if(event.type==='record'){const r=event.record;if(!r||!['queued','ready','generating','failed','uncertain'].includes(r.status)&&!event.imageCompleted)return;value={messageId:event.messageId,requestId:r.requestId,chatId:r.chatId,error:r.error,warning:r.warning};key=r.jobId||'text:'+r.generationId;phase=event.imageCompleted?'done':r.status;title='生成画面';const image=r.images?.find(i=>i.id===r.currentImageId)||r.images?.at(-1);diagnostics={seedVerification:image?.seedVerification||{status:image?.seed==null?'not-returned':image.seed===image.requestedSeed?'matched':'mismatch',requestedSeed:image?.requestedSeed??null,returnedSeed:image?.seed??null,source:image?.seedSource||null},requestAudit:image?.requestAudit,metadataStorage:image?.metadata?.metadataStorage,budgetAudit:event.imageCompleted?image?.budgetAudit:r.budgetAudit,timings:r.timings,errorSource:r.errorSource,errorCode:r.errorCode,errorStatus:r.errorStatus,errorDetail:r.errorDetail,verification:image?.verification,providerFields:image?.providerFields};}
+    else if(event.type==='record'){const r=event.record;if(!r||!['queued','ready','generating','failed','uncertain'].includes(r.status)&&!event.imageCompleted)return;value={messageId:event.messageId,requestId:r.requestId,chatId:r.chatId,error:r.error,errorCode:r.errorCode,warning:r.warning};key=r.jobId||'text:'+r.generationId;phase=event.imageCompleted?'done':r.status;title='生成画面';const image=r.images?.find(i=>i.id===r.currentImageId)||r.images?.at(-1);diagnostics={seedVerification:image?.seedVerification||{status:image?.seed==null?'not-returned':image.seed===image.requestedSeed?'matched':'mismatch',requestedSeed:image?.requestedSeed??null,returnedSeed:image?.seed??null,source:image?.seedSource||null},requestAudit:image?.requestAudit,metadataStorage:image?.metadata?.metadataStorage,budgetAudit:event.imageCompleted?image?.budgetAudit:r.budgetAudit,timings:r.timings,errorSource:r.errorSource,errorCode:r.errorCode,errorStatus:r.errorStatus,errorDetail:r.errorDetail,verification:image?.verification,providerFields:image?.providerFields};}
     else if(event.type==='registration'){const job=event.job;if(!job?.id)return;value={messageId:job.sourceMessageId,error:job.error};key=job.id;phase=job.status;title='登记角色 · '+job.name;}
     else if(event.type==='closed'){for(const row of logs)if(!row.finishedAt){row.status='cancelled';row.finishedAt=row.updatedAt=Date.now();row.stages.push({phase:'cancelled',at:row.finishedAt});}return;}
     else return;
@@ -321,7 +381,7 @@
     if(item?.id!==selectedImageId){selectedImageId=item?.id||'';motionPlaying=false;viewerMotionPlaying=false;}
     syncMotionControls();
     $('addock-placeholder').hidden=!!item;$('addock-main-image').hidden=!item;$('addock-motion-image').hidden=!(motionPlaying&&hasMotion);$('addock-motion-play').hidden=!hasMotion;$('addock-motion-play').setAttribute('aria-label',motionPlaying?'查看静态图片':'播放动态');$('addock-motion-play').title=motionPlaying?'查看静态图片':'播放动态';$('addock-motion-play').querySelector('span').textContent=motionPlaying?'查看静态':'播放动态';$('addock-motion-play').querySelector('svg').innerHTML=motionPlaying?'<path d="M7 5h3v14H7zM14 5h3v14h-3z"/>':'<path d="M8 5.5v13l10-6.5z"/>';
-    $('addock-ui-status').hidden=true;$('addock-prev').hidden=$('addock-next').hidden=count<2;$('addock-dna-open').hidden=!item||item.kind!=='character_intro';$('addock-tune').hidden=!supportsImageEditing(item);$('addock-motion').hidden=!supportsMotionRequest(item,record?.kind);
+    $('addock-ui-status').hidden=true;$('addock-prev').hidden=$('addock-next').hidden=count<2;$('addock-dna-open').hidden=!item||item.kind!=='character_intro';$('addock-tune').hidden=!supportsTune(item);$('addock-motion').hidden=!supportsMotionRequest(item);
     $('addock-keep').disabled=!item;$('addock-keep').title='删除图片';$('addock-status').textContent=busy?'图片任务处理中，收起面板仍继续；阶段耗时见记录':(recordFailureAcknowledged()?'':record?.error)||'';
     if(!item){renderEpoch++;displayError='';displayLoading=false;motionPlaying=false;viewerMotionPlaying=false;for(const id of ['addock-main-image','addock-motion-image','addock-fullview-image','addock-fullview-motion-image'])memory?.clear($(id));$('addock-motion-play').hidden=true;$('addock-fullview-motion-play').hidden=true;if(viewer)closeViewer(false);lastImage='';lastMotionImage='';lastViewerImage='';lastViewerMotionImage='';paintState();return;}
     const current=++renderEpoch;
@@ -482,12 +542,12 @@
   async function performReaderAction(action,messageId,imageId){
     if(action==='supplement'){openSupplement(messageId);return;}
     if(['add','reroll','tune','motion'].includes(action)){
-      const target=await app.readRecord(messageId),selected=target?.images?.find(i=>i.id===imageId),canEdit=supportsImageEditing(selected);
+      const target=await app.readRecord(messageId),selected=target?.images?.find(i=>i.id===imageId),canEdit=supportsTune(selected);
       if(motionOrigin(selected,target?.images||[])&&['add','reroll'].includes(action))return;
       if(action==='add')return app.generate(messageId,true,imageId);
       if(action==='reroll')return target?.recoverableImage?app.recover(messageId):app.generate(messageId,true,imageId,null,imageId?'replace':'append');
       if(action==='tune'&&!canEdit)return;
-      if(action==='motion'&&!supportsMotionRequest(selected,target?.kind))return;
+      if(action==='motion'&&!supportsMotionRequest(selected))return;
     }
     const saved=captureCardContext(),epoch=++contextEpoch;let keepViewer=false;follow=false;
     try{
@@ -502,7 +562,7 @@
   }
   async function openHistory(){dismissEditing();beginHistorySession();if(reader)await reader.openCatalog(mid||app.snapshot().latestMessageId);}
   function nextDialog(kind){if(!app)return;requestKind=kind==='character_intro'?'character_intro':'story_cg';const character=requestKind==='character_intro';$('ad-next-form').reset();$('ad-target').value='';$('ad-form').value='默认形态';$('ad-request-label').textContent=character?'人物特征调整 · 可选':'画面要求 · 可选';$('ad-request').placeholder=character?'例如：头发改成短发、气质更成熟、眉形更明显；留空按角色设定设计':'留空由导演根据剧情决定';$('ad-request-hint').textContent=character?'主要用于调整人物外貌与气质，也可补充姿势、服装或镜头要求。':'可指定场景、动作或镜头；留空自动导演。';$('ad-target-row').hidden=$('ad-form-row').hidden=!character;$('ad-target').required=character;$('ad-target').disabled=$('ad-form').disabled=!character;$('ad-next-title').textContent=character?'设计人物外观':'导演下一幕';$('ad-request').value='';$('ad-next-error').textContent='';const s=app.snapshot();document.querySelectorAll('[name=ad-shot]').forEach(n=>n.checked=n.value===s.config.shot);show('ad-next');}
-  function selectOptions(node,values,current){node.replaceChildren();for(const value of values){const option=document.createElement('option');option.value=value.id;option.textContent=value.name;node.append(option);}node.value=current||values[0]?.id||'';}
+  function selectOptions(node,values,current){node.replaceChildren();if(node.id==='ad-active-style'&&!current)node.add(new Option('不使用画风',''));for(const value of values){const option=document.createElement('option');option.value=value.id;option.textContent=value.name;node.append(option);}node.value=node.id==='ad-active-style'?current:current||values[0]?.id||'';}
 
   let relayReturn='settings',connectionProvider='thirdparty',motionParameters={},motionConnectionUrl='',motionConnectionConfigured=false,motionSettingsReady=false,motionSettingsLoadEpoch=0,motionSaveTimer=0,motionSaveRevision=0,motionSaveQueue=Promise.resolve(),motionLastSavedSignature='';
   function motionFieldVisibility(){}
@@ -513,18 +573,43 @@
     return Number(Math.max(Number(input.min),Math.min(Number(input.max),value)).toFixed(2));
   }
   function motionParameterSignature(value){return JSON.stringify(value);}
-  function syncSizePresets(){const value=$('studio-width').value+','+$('studio-height').value;document.querySelectorAll('[data-studio-size]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.studioSize===value)));}
+  function syncSizePresets(){const cfg=app?.snapshot()?.config,seedream=photoMode(cfg),gpt=cfg?.imageService==='gpt-image',value=$('studio-width').value+','+$('studio-height').value;
+    document.querySelectorAll('[data-studio-size]').forEach(button=>{
+      const ratio=presetRatios[button.dataset.studioSize],home=!!button.closest('#studio-home-quick-size');
+      button.setAttribute('aria-pressed',String(seedream?ratio===(gpt?cfg.gptImageRatio:cfg.seedreamRatio)&&(!home||(gpt?cfg.gptImageResolution:cfg.hamuboxResolution)==='1k'):button.dataset.studioSize===value));
+      const hint=button.querySelector('small');
+      if(hint)hint.textContent=seedream?(home?'1K · ':'')+ratio:button.dataset.studioSize.replace(',',' × ');
+    });}
   function staticConnectionState(state){const node=$('studio-static-connection-state');node.dataset.state=state;node.textContent=({saved:'已保存',dirty:'待保存',saving:'保存中…',error:'保存失败',unchanged:'未修改',empty:'未配置'})[state];$('local-relay-key').dataset.connectionState=state;}
   function motionConnectionState(state){const node=$('studio-motion-connection-state');node.dataset.state=state;node.textContent=({saved:'已保存',dirty:'待保存',saving:'保存中…',error:'保存失败',unchanged:'未修改',empty:'未配置'})[state];$('local-motion-key').dataset.connectionState=state;}
   function updateMotionConnectionDirty(){const changed=$('local-motion-url').value.trim()!==motionConnectionUrl||!!$('local-motion-key').value.trim();motionConnectionState(changed?'dirty':motionConnectionConfigured?'unchanged':'empty');}
-  function officialAddressFeedback(kind){if(kind==='static')staticConnectionState('dirty');else motionConnectionState('dirty');const motion=kind==='motion',input=$(motion?'local-motion-url':'local-relay-url'),button=$(motion?'local-motion-official':'local-use-official');input.classList.add('studio-address-filled');button.textContent='✓ 已填入';status(motion?'已填入 NAI 官方地址，填写 API Key 后自动保存':'已填入 NAI 官方地址，保存后生效');clearTimeout(button._feedbackTimer);button._feedbackTimer=setTimeout(()=>{input.classList.remove('studio-address-filled');button.textContent='填入官方地址';},2200);}
+  function officialAddressFeedback(kind){if(kind==='static')staticConnectionState('dirty');else motionConnectionState('dirty');const motion=kind==='motion',input=$(motion?'local-motion-url':'local-relay-url'),button=$(motion?'local-motion-official':'local-use-official');input.classList.add('studio-address-filled');button.textContent='✓ 已填入';status(motion?'已填入官方地址，配置完整后自动保存':'已填入 NAI 官方地址，保存后生效');clearTimeout(button._feedbackTimer);button._feedbackTimer=setTimeout(()=>{input.classList.remove('studio-address-filled');button.textContent='填入官方地址';},2200);}
   function directorVisibility(){
     const cfg=app.snapshot().config,generic=genericModeSelected(cfg),service=generic?'generic':cfg.imageService||(cfg.format==='nai45'?'official':'generic');
-    $('ad-format').value=generic?'generic':'nai45';$('local-ratio').hidden=!generic;$('local-official-size').hidden=true;$('local-relay-entry').hidden=generic;$('local-connection-title').textContent='NAI 4.5 Full API 配置';$('local-width').value=cfg.width||1216;$('local-height').value=cfg.height||832;
+    const seedream=photoMode(cfg),gpt=cfg.imageService==='gpt-image';
+    if(photoModeHelp.hidden===seedream)photoModeHelp.hidden=!seedream;
+    if(seedream){$('studio-service').disabled=false;if($('studio-service-summary').textContent==='跟随 Tavo')$('studio-service-summary').textContent=photoFollowsTavo(cfg)?'跟随 Tavo':'插件直连';}
+    photoModeHelp.textContent=gpt?'GPT Image · 自然肤质与克制的电影调色，可按场景选择生图模型。':'Seedream 5.5 · 精修人像质感与贴合人设的体态，可按场景选择生图模型。';
+    if(seedreamSize.hidden===seedream)seedreamSize.hidden=!seedream;
+    for(const field of $('studio-frame-size').querySelectorAll(':scope > .studio-dimensions,:scope > .city-size-hint'))if(field.hidden!==seedream)field.hidden=seedream;
+    const quickHeading=$('studio-home-quick-size').querySelector('.ratio-heading h2');if(quickHeading){
+      quickHeading.textContent=seedream?'快捷 1K':'快捷尺寸';
+      if(!generic){const label=document.createElement('span');label.className='studio-quick-size-tier';label.textContent='Normal · 约 1 MP';quickHeading.append(label);}
+    }
+    $('studio-nai-size-billing').textContent=cfg.imageService==='nai5'?'Normal（约 1 MP）是 NAI 5 的日常推荐尺寸，适合大多数剧情画面。想用更高或更低的分辨率，可按 NovelAI 官网或当前 API 支持的档位手动设置。':'使用 NovelAI 官方 Opus（月费 25 美元）时，NAI 4.5 在 Normal 档及以下、28 步以内，每次生成一张纯文生图，可免额外扣除 Anlas。';
+    const seedRow=document.querySelector('.studio-home-seed-panel');if(seedRow.hidden!==seedream)seedRow.hidden=seedream;
+    const tier=$('studio-hamubox-resolution');
+    const legacy=gpt&&core.gptImageLegacyModel(gptConnectionModel);
+    [...tier.options].forEach(option=>{option.hidden=gpt?(option.value==='1.5k'||(legacy&&option.value!=='1k')):option.value==='4k';option.disabled=option.hidden;});
+    tier.value=gpt?(legacy?'1k':cfg.gptImageResolution):cfg.hamuboxResolution;
+    $('studio-gpt-actual-size').textContent=gpt?core.gptImageSize(gptConnectionModel,cfg.gptImageResolution,cfg.gptImageRatio).replace('x',' × ')+' px':'';
+    if($('studio-gpt-actual-size').hidden===gpt)$('studio-gpt-actual-size').hidden=!gpt;
+
+    $('ad-format').value=seedream?cfg.imageService:generic?'generic':cfg.imageService==='nai5'?'nai5':'nai45';$('local-ratio').hidden=!generic||seedream;$('local-official-size').hidden=true;$('local-relay-entry').hidden=generic;$('local-connection-title').textContent=(cfg.imageService==='nai5'?'NAI 5 Full':'NAI 4.5 Full')+' API 配置';$('local-width').value=cfg.width||1216;$('local-height').value=cfg.height||832;
     syncNaiOnlyNavigation(generic);
-    if(generic){if($('addock-motion-dialog').open)hide('addock-motion-dialog');if($('addock-tune-dialog').open)hide('addock-tune-dialog');}
+    if(generic&&!core.supportsReferenceEdit(cfg)&&$('addock-motion-dialog').open)hide('addock-motion-dialog');
     const frameOpen=!$('studio-frame-panel').hidden,paramsOpen=!$('local-relay-page').hidden&&$('local-relay-page').dataset.filmView==='params';
-    if(generic&&($('ad-settings').dataset.currentPage==='api'||frameOpen||paramsOpen))page('settings');
+    if(generic&&((!core.supportsReferenceEdit(cfg)&&$('ad-settings').dataset.currentPage==='api')||(!seedream&&frameOpen)||paramsOpen))page('settings');
     const heading=document.querySelector('[data-ad-page="settings"] .ad-seed-heading');/* Help copy belongs below the Seed input, not inside the heading. */$('local-seed-hint').hidden=false;
   }
   function syncMotionConnection(connection,clearKey=true,state='unchanged'){
@@ -537,18 +622,38 @@
     motionConnectionState(state);
   }
   async function refreshOfficialApi(provider){
+    const cfg=app.snapshot().config,service=cfg.imageService,reference=core.supportsReferenceEdit(cfg),photo=reference&&service!=='nai5';
     const epoch=++motionSettingsLoadEpoch;motionSettingsReady=false;motionConnectionState('unchanged');
     await motionSaveQueue;
-    if(epoch!==motionSettingsLoadEpoch)return;
+    if(epoch!==motionSettingsLoadEpoch||app.snapshot().config.imageService!==service)return;
+    $('local-motion-model-field').hidden=!photo;
+    $('local-motion-photo-note').hidden=!photo;
+    $('local-motion-advanced').hidden=photo;
+    $('city-motion-connection-description').textContent='用 '+(core.STYLE_FORMAT_LABELS[service]||'NAI 4.5')+' 编辑原图和生成动态变化帧。';
     try{
+      if(reference){
+        const connection=await app.referenceEditConnection(service);
+        if(epoch!==motionSettingsLoadEpoch||app.snapshot().config.imageService!==service)return;
+        syncMotionConnection({...connection,url:connection.endpoint});
+        $('local-motion-model').value=connection.model;
+        $('local-motion-url-hint').textContent=service==='gpt-image'?'请填写支持 JSON 参考图的 /images/edits 地址。':'请按服务商文档填写支持参考图的编辑地址。';
+        if(!photo){
+          const p=connection.parameters;motionParameters=p;
+          $('local-strength').value=Number(p.strength).toFixed(2);$('local-noise').value=p.noise;
+          $('local-schedule').value=({exponential:'Exponential',native:'Native',karras:'Karras',polyexponential:'Polyexponential'})[p.noiseSchedule];
+          motionLastSavedSignature=motionParameterSignature(readMotionFields());
+        }
+        return;
+      }
+      $('local-motion-model').value='';$('local-motion-url-hint').textContent='请按服务商文档填写图生图专用地址。';
       const connection=await app.motionConnectionStatus();if(epoch!==motionSettingsLoadEpoch)return;syncMotionConnection(connection);
       const result=await app.officialApiStatus(provider),p=result.parameters;if(epoch!==motionSettingsLoadEpoch)return;
       motionParameters=p;$('local-motion-provider').value=result.provider==='thirdparty'?'relay':'official';$('local-official-connect').hidden=true;$('local-official-link').hidden=result.provider!=='official';$('local-relay-connect').hidden=result.provider!=='thirdparty';const key=document.querySelector('#local-official-connect input');key.value='';key.placeholder=result.configured?'已保存；填写新密钥可替换':'填写 API Key';$('local-strength').value=Number(p.strength).toFixed(2);$('local-noise').value=p.noise;const names={exponential:'Exponential',native:'Native',karras:'Karras',polyexponential:'Polyexponential'};$('local-schedule').value=names[p.noiseSchedule]||'Exponential';motionLastSavedSignature=motionParameterSignature(readMotionFields());
     }finally{if(epoch===motionSettingsLoadEpoch)motionSettingsReady=true;}
   }
   let relayLoadEpoch=0;
-  async function openRelay(from,provider,view="connection"){connectionProvider=provider||(from==='api'?($('local-motion-provider').value==='official'?'official':'thirdparty'):(app.snapshot().config.imageService==='official'?'official':'thirdparty'));relayReturn=from;page('settings');const epoch=relayLoadEpoch;const relay=$('local-relay-page');relay.dataset.filmView=view;if(view==='params')$('local-static-advanced').closest('details').open=true;$('local-director-main').hidden=true;relay.hidden=false;$('ad-settings').dataset.studioView='detail';studioUpdateHeading();const data=await app.generationSettings(),r=data.relay;if(epoch!==relayLoadEpoch)return;connectionProvider=data.connection.provider;$('local-connection-heading').textContent='NAI 4.5 Full API';$('local-relay-url').value=data.connection.url;$('local-relay-key').value='';$('local-relay-key').placeholder=data.connection.configured?'已保存；填写新密钥可替换':'填写 API Key';staticConnectionState('unchanged');$('local-relay-width').value=r.width;$('local-relay-height').value=r.height;const fields=$('local-static-advanced').querySelectorAll('input');fields[0].value=r.steps;fields[1].value=r.scale;const sampler=$('local-static-advanced').querySelector('select');sampler.value=r.sampler;$('ad-workspace-content').scrollTo(0,0);}
-  function page(name,preserveMotionProvider=false,panel="home"){if(name==='api'&&genericModeSelected())name='settings';if(name==='settings'&&genericModeSelected()&&panel!=='home')panel='home';relayLoadEpoch++;flushStyleDraft();clearSettingsNotice();const previousPage=$('ad-settings').dataset.currentPage;$('film-quick').close();$('local-relay-page').removeAttribute('data-film-view');dismissEditing();const motionProvider=preserveMotionProvider&&name==='api'?($('local-motion-provider').value==='relay'?'thirdparty':'official'):null;document.querySelectorAll('#local-official-connect input[type=password],#local-relay-key,#local-motion-key').forEach(i=>i.value='');$('local-director-main').hidden=false;$('local-relay-page').hidden=true;if(name==='api')refreshOfficialApi(motionProvider||undefined).catch(e=>status(e.message));if(name!=='profiles'){releaseProfiles();$('ad-settings').dataset.profileEditing='false';}$('ad-settings').dataset.currentPage=name;document.querySelectorAll('#ad-tabs [data-page]').forEach(n=>n.setAttribute('aria-selected',String(n.dataset.page===name)));if(previousPage==='gallery'&&name!=='gallery')gallery.close();if(previousPage!==name)$('ad-workspace-content')?.scrollTo(0,0);document.querySelectorAll('[data-ad-page]').forEach(n=>n.hidden=n.dataset.adPage!==name);studioRoute(name,panel);if(name==='settings')directorVisibility();if(name==='profiles')renderProfiles();if(name==='styles')styleView(false);if(name==='seeds')renderSeeds();if(name==='logs')renderLogs();if(name==='gallery')gallery.enter();const tab=document.querySelector('#ad-tabs [data-page="'+name+'"]');if(matchMedia('(max-width:900px), (max-aspect-ratio:1/1)').matches)tab?.scrollIntoView({block:'nearest',inline:'nearest'});}
+  async function openRelay(from,provider,view="connection"){connectionProvider=provider||(from==='api'?($('local-motion-provider').value==='official'?'official':'thirdparty'):(app.snapshot().config.imageService==='official'?'official':'thirdparty'));relayReturn=from;page('settings');const epoch=relayLoadEpoch;const relay=$('local-relay-page');relay.dataset.filmView=view;if(view==='params')$('local-static-advanced').closest('details').open=true;$('local-director-main').hidden=true;relay.hidden=false;$('ad-settings').dataset.studioView='detail';studioUpdateHeading();const data=await app.generationSettings(),r=data.relay;if(epoch!==relayLoadEpoch)return;connectionProvider=data.connection.provider;$('local-connection-heading').textContent=naiStaticModelLabel()+' API';naiConnection.querySelector('.static-api-summary p').textContent='用于 '+naiStaticModelLabel()+' 静态生图与重抽';$('local-relay-url').value=data.connection.url;$('local-relay-key').value='';$('local-relay-key').placeholder=data.connection.configured?'已保存；填写新密钥可替换':'填写 API Key';staticConnectionState('unchanged');updateNaiTransport();resetNaiImport();$('local-relay-width').value=r.width;$('local-relay-height').value=r.height;const fields=$('local-static-advanced').querySelectorAll('input');fields[0].value=r.steps;fields[1].value=r.scale;const sampler=$('local-static-advanced').querySelector('select');sampler.value=r.sampler;$('ad-workspace-content').scrollTo(0,0);}
+  function page(name,preserveMotionProvider=false,panel="home"){closeApiGuide(false);if(name==='api'&&!supportsMotionSettings())name='settings';if(name==='settings'&&genericModeSelected()&&!photoMode(app.snapshot().config)&&panel!=='home')panel='home';relayLoadEpoch++;flushStyleDraft();clearSettingsNotice();const previousPage=$('ad-settings').dataset.currentPage;$('film-quick').close();$('local-relay-page').removeAttribute('data-film-view');dismissEditing();const motionProvider=preserveMotionProvider&&name==='api'?($('local-motion-provider').value==='relay'?'thirdparty':'official'):null;document.querySelectorAll('#local-official-connect input[type=password],#local-relay-key,#local-motion-key,#studio-hamubox-key').forEach(i=>i.value='');$('local-director-main').hidden=false;$('local-relay-page').hidden=true;if(name==='api'){resetMotionImport();refreshOfficialApi(motionProvider||undefined).catch(e=>status(e.message));}if(name!=='profiles'){releaseProfiles();$('ad-settings').dataset.profileEditing='false';}$('ad-settings').dataset.currentPage=name;document.querySelectorAll('#ad-tabs [data-page]').forEach(n=>n.setAttribute('aria-selected',String(n.dataset.page===name)));if(previousPage==='gallery'&&name!=='gallery')gallery.close();if(previousPage!==name)$('ad-workspace-content')?.scrollTo(0,0);document.querySelectorAll('[data-ad-page]').forEach(n=>n.hidden=n.dataset.adPage!==name);studioRoute(name,panel);if(name==='settings')directorVisibility();if(name==='profiles')renderProfiles();if(name==='styles')styleView(false);if(name==='seeds')renderSeeds();if(name==='logs')renderLogs();if(name==='gallery')gallery.enter();const tab=document.querySelector('#ad-tabs [data-page="'+name+'"]');if(matchMedia('(max-width:900px), (max-aspect-ratio:1/1)').matches)tab?.scrollIntoView({block:'nearest',inline:'nearest'});}
   let settingsFieldsDirty=true;
   function settingsDialog(name){
     if(!app)return;
@@ -556,9 +661,9 @@
     const remembered=$('ad-settings').dataset.currentPage||'settings';
     const resume=name===undefined&&$('ad-settings').dataset.studioVisited==='true'&&validPages.includes(remembered);
     let target=name===undefined?(validPages.includes(remembered)?remembered:'settings'):name;
-    const s=app.snapshot(),cfg=s.config;if(genericModeSelected(cfg)&&target==='api')target='settings';
+    const s=app.snapshot(),cfg=s.config;if(target==='api'&&!supportsMotionSettings(cfg))target='settings';
     if(!cfg.imageService){const change={imageService:cfg.format==='nai45'?'official':'generic',width:1216,height:832};Object.assign(cfg,change);app.saveConfig(change).catch(e=>status(e.message));}
-    if(settingsFieldsDirty){$('ad-ratio').value=cfg.ratio;selectOptions($('ad-active-style'),app.availableStyles(),cfg.styleId);syncSeedControls(cfg,true);$('ad-auto-generate').checked=cfg.autoGenerate;$('ad-auto-expand').checked=cfg.autoExpand;settingsFieldsDirty=false;}
+    if(settingsFieldsDirty){$('ad-ratio').value=cfg.ratio;selectOptions($('ad-active-style'),app.availableStyles(),cfg.styleId);syncSeedControls(cfg,true);$('ad-auto-generate').checked=cfg.autoGenerate;$('ad-auto-expand').checked=cfg.autoExpand;$('ad-launcher-captions').checked=cfg.launcherCaptions!==false;settingsFieldsDirty=false;}
     // Do not overwrite unsaved style-editor input when simply reopening the dialog.
     if(target==='styles'&&(!resume||$('ad-style-editor').hidden))editStyle(s.styles.some(x=>x.id===styleEditing)?styleEditing:cfg.styleId,false);
     if(resume){
@@ -584,7 +689,7 @@
   bind($('ad-profile-delete'),'click',()=>{if(profileEditing)requestProfileDelete(profileEditing);});
   function requestStyleDelete(p){if(!p)return;confirmManagement('删除画风？','删除“'+p.name+'”。正在使用时会切换至当前格式下可用的默认画风。',async()=>{const wasEditing=!$('ad-style-editor').hidden&&styleEditing===p.id;await app.deleteStyle(p.id);if(wasEditing)styleView(false);else renderStyleCards();paintStyleSelection(app.snapshot().config.styleId);status('画风已删除');});}
   bind($('ad-style-delete'),'click',()=>requestStyleDelete(app.snapshot().styles.find(s=>s.id===styleEditing)));
-  bind($('ad-style-restore'),'click',()=>confirmManagement('重置内置画风','仅恢复四款 NAI 4.5 内置画风的默认内容，并补回已删除的内置画风。你自建、复制和导入的画风会全部保留，不会删除或重置；通用基础模板也保持不变。对四款内置画风本身的修改会被覆盖，如需保留请先复制。',async()=>{await app.restoreDefaultStyles();settingsDialog('styles');styleView(false);status('四款内置画风已恢复，你的自建画风已保留');}));
+  bind($('ad-style-restore'),'click',()=>confirmManagement('重置内置画风','恢复所有内置默认画风。你自建的画风不受影响。',async()=>{await app.restoreDefaultStyles();settingsDialog('styles');styleView(false);status('内置画风已恢复');}));
   bind($('ad-profile-portrait'),'click',async()=>{const p=profileEditing,epoch=profileEpoch;if(!p)return;const rec=await app.readRecord(p.sourceMessageId),source=rec?.images?.find(i=>i.id===p.sourceImageId);if(!source?.pointer)throw Error('登记画面已不可用');if(epoch!==profileEpoch||disposed)return;await performReaderAction('viewer',p.sourceMessageId,source.id);});
   let styleBrowseScroll=0;
   function styleView(editing){if(!editing)flushStyleDraft();const content=$('ad-workspace-content'),wasEditing=!$('ad-style-editor').hidden;if(editing&&!wasEditing)styleBrowseScroll=content.scrollTop;$('ad-style-browse').hidden=editing;$('ad-style-editor').hidden=!editing;$('ad-style-library-toolbar').hidden=editing;if(!editing)renderStyleCards();if(wasEditing!==editing)content.scrollTop=editing?0:styleBrowseScroll;}
@@ -596,7 +701,7 @@
       &&['positive','negative'].every(key=>prompt(style[key])===prompt(canonical[key]));
   }
   function studioBuiltinCover(style){
-    if(!studioCanonicalStyle(style))return '';
+    if(style.id!=='seedream_soft_portrait'&&!studioCanonicalStyle(style))return '';
     return studioCoverCatalog[style.id]||'';
   }
   function studioStyleArtwork(style){
@@ -609,15 +714,15 @@
   function resourceEmpty(kind,title,copy){
     return '<div class="ad-resource-empty" data-kind="'+kind+'"><span class="ad-resource-empty-mark" aria-hidden="true"></span><strong>'+title+'</strong><p>'+copy+'</p></div>';
   }
-  function renderStyleCards(){const list=$('ad-style-cards'),s=app.snapshot(),scope=$('ad-style-scope'),rows=scope.value==='all'?s.styles:app.availableStyles();$('city-style-scope').textContent=scope.selectedOptions[0].textContent;$('ad-style-current-format').textContent='当前：'+(s.config.format==='nai45'?'NAI 4.5':'通用');list.replaceChildren();if(!rows.length){list.innerHTML=resourceEmpty("styles","此范围暂无画风","可新建或导入画风，也可以切换显示范围。");return;}rows.forEach((p,i)=>{const wrapper=document.createElement('div');wrapper.className='ad-style-preset';const card=document.createElement('button');card.type='button';card.className='ad-style-preset-card';card.dataset.styleId=p.id;wrapper.dataset.coverKind=p.cover||studioBuiltinCover(p)?'image':'empty';const compatible=core.styleMatches(p,s.config.format);card.disabled=!compatible;card.title=compatible?'使用此画风':'请先在导演设置中切换到对应格式';card.dataset.active=String(p.id===s.config.styleId);card.setAttribute('aria-label','使用画风：'+p.name);if(p.id===s.config.styleId)card.setAttribute('aria-current','true');card.innerHTML=studioStyleArtwork(p)+'<span class="ad-style-card-top"><small class="ad-style-model">'+esc((core.styleFormat(p)==='nai45'?'NAI 4.5':core.styleFormat(p)==='generic'?'通用':core.styleFormat(p))+(p.basis&&p.basis!==(core.styleFormat(p)==='nai45'?'NAI 4.5':core.styleFormat(p)==='generic'?'通用':core.styleFormat(p))?' · '+p.basis:''))+'</small></span><strong>'+esc(p.name)+'</strong><span class="ad-style-card-number" aria-hidden="true">'+String(i+1).padStart(2,'0')+'</span>';card.onclick=()=>selectStyleCard(p.id,p.name);wrapper.onclick=event=>{if(event.target===wrapper&&!card.disabled)card.click();};const edit=document.createElement('button');edit.type='button';edit.className='ad-style-edit';edit.title='编辑画风';edit.setAttribute('aria-label','编辑画风：'+p.name);edit.onclick=()=>editStyle(p.id);const remove=document.createElement('button');remove.type='button';remove.className='ad-style-remove';remove.title='删除画风';remove.setAttribute('aria-label','删除画风：'+p.name);remove.onclick=()=>requestStyleDelete(p);const actions=document.createElement('div');actions.className='city-style-actions';edit.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6 4 4M4 20l1-5L17 3l4 4L9 19z"/></svg><span>编辑</span>';remove.innerHTML=trashIcon+'<span>删除</span>';actions.append(edit,remove);wrapper.append(card,actions);if(!studioBuiltinCover(p)){const cover=document.createElement('button');cover.type='button';cover.className='city-style-cover-upload';cover.setAttribute('aria-label',(p.cover?'更换封面：':'上传封面：')+p.name);cover.title=p.cover?'更换封面':'上传封面';if(!p.cover)cover.innerHTML='<span aria-hidden="true">＋</span><small>上传封面</small>';cover.onclick=()=>{styleCoverTarget=p.id;$('city-style-cover-error').hidden=true;$('city-style-cover-file').click();};wrapper.append(cover);}list.append(wrapper);});}
+  function renderStyleCards(){const list=$('ad-style-cards'),s=app.snapshot(),scope=$('ad-style-scope'),rows=scope.value==='all'?s.styles.filter(p=>!photoMode(s.config)||p.id!=='generic_quality'):app.availableStyles();$('city-style-scope').textContent=scope.selectedOptions[0].textContent;$('ad-style-current-format').textContent='当前：'+(s.config.imageService==='gpt-image'?'GPT Image':s.config.imageService==='seedream'?'Seedream 5.5':s.config.format==='nai45'?naiStaticModelLabel():'通用');list.replaceChildren();if(!rows.length){list.innerHTML=resourceEmpty("styles","此范围暂无画风","可新建或导入画风，也可以切换显示范围。");return;}rows.forEach((p,i)=>{const wrapper=document.createElement('div');wrapper.className='ad-style-preset';const card=document.createElement('button');card.type='button';card.className='ad-style-preset-card';card.dataset.styleId=p.id;wrapper.dataset.coverKind=p.cover||studioBuiltinCover(p)?'image':'empty';const compatible=core.styleSupports(p,s.config.format,s.config.imageService);card.disabled=!compatible;card.title=compatible?'使用此画风':'请先在导演设置中切换到对应格式';card.dataset.active=String(p.id===s.config.styleId);card.setAttribute('aria-label','使用画风：'+p.name);if(p.id===s.config.styleId)card.setAttribute('aria-current','true');card.innerHTML=studioStyleArtwork(p)+'<span class="ad-style-card-top"><small class="ad-style-model">'+esc(core.STYLE_FORMAT_LABELS[core.styleFormat(p)]||core.styleFormat(p))+'</small></span><strong>'+esc(p.name)+'</strong><span class="ad-style-card-number" aria-hidden="true">'+String(i+1).padStart(2,'0')+'</span>';card.onclick=()=>selectStyleCard(p.id,p.name);wrapper.onclick=event=>{if(event.target===wrapper&&!card.disabled)card.click();};const edit=document.createElement('button');edit.type='button';edit.className='ad-style-edit';edit.title='编辑画风';edit.setAttribute('aria-label','编辑画风：'+p.name);edit.onclick=()=>editStyle(p.id);const remove=document.createElement('button');remove.type='button';remove.className='ad-style-remove';remove.title='删除画风';remove.setAttribute('aria-label','删除画风：'+p.name);remove.onclick=()=>requestStyleDelete(p);const actions=document.createElement('div');actions.className='city-style-actions';edit.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6 4 4M4 20l1-5L17 3l4 4L9 19z"/></svg><span>编辑</span>';remove.innerHTML=trashIcon+'<span>删除</span>';actions.append(edit,remove);wrapper.append(card,actions);if(!studioBuiltinCover(p)){const cover=document.createElement('button');cover.type='button';cover.className='city-style-cover-upload';cover.setAttribute('aria-label',(p.cover?'更换封面：':'上传封面：')+p.name);cover.title=p.cover?'更换封面':'上传封面';if(!p.cover)cover.innerHTML='<span aria-hidden="true">＋</span><small>上传封面</small>';cover.onclick=()=>{styleCoverTarget=p.id;$('city-style-cover-error').hidden=true;$('city-style-cover-file').click();};wrapper.append(cover);}list.append(wrapper);});}
 
   let styleCoverTarget='';
-  function editStyle(id,open=true){flushStyleDraft();styleEditing=id;const s=app.snapshot().styles.find(x=>x.id===id);if(!s)return;$('city-style-save-state').textContent='修改后自动保存';if(![...$('ad-style-format').options].some(o=>o.value===core.styleFormat(s))){const option=document.createElement('option');option.value=core.styleFormat(s);option.textContent=core.styleFormat(s);$('ad-style-format').append(option);}$('ad-style-format').value=core.styleFormat(s);$('ad-style-name').value=s.name;$('ad-style-basis').value=s.basis||'通用';$('ad-style-positive').value=s.positive;$('ad-style-negative').value=s.negative;$('ad-style-use-negative').checked=s.useNegative;$('ad-style-model-badge').textContent=s.basis||'未标注';$('ad-style-editor-title').textContent=s.name;if(open)styleView(true);}
+  function editStyle(id,open=true){flushStyleDraft();styleEditing=id;const s=app.snapshot().styles.find(x=>x.id===id);if(!s)return;$('city-style-save-state').textContent='修改后自动保存';if(![...$('ad-style-format').options].some(o=>o.value===core.styleFormat(s))){const option=document.createElement('option');option.value=core.styleFormat(s);option.textContent=core.styleFormat(s);$('ad-style-format').append(option);}$('ad-style-format').value=core.styleFormat(s);$('ad-style-name').value=s.name;$('ad-style-positive').value=s.positive;$('ad-style-negative').value=s.negative;$('ad-style-use-negative').checked=s.useNegative;$('ad-style-editor-title').textContent=s.name;if(open)styleView(true);}
 
   let styleDraft=null,styleDraftTimer,styleSaveQueue=Promise.resolve(true);
   function captureStyleDraft(){
     return {id:styleEditing,name:$('ad-style-name').value,format:$('ad-style-format').value,
-      basis:$('ad-style-basis').value,positive:$('ad-style-positive').value,
+      positive:$('ad-style-positive').value,
       negative:$('ad-style-negative').value,useNegative:$('ad-style-use-negative').checked};
   }
   function scheduleStyleSave(){
@@ -674,10 +779,12 @@
 
   function renderSeeds(){
     const list=$('ad-seed-list'),snapshot=app.snapshot();
+    const service=core.seedService(snapshot.config),favorites=snapshot.favorites.filter(item=>core.favoriteSeedService(item)===service);
     list.replaceChildren();
-    $('city-seed-count').textContent=snapshot.favorites.length+' 条';
-    if(!snapshot.favorites.length){list.innerHTML=resourceEmpty("seed","还没有收藏的 Seed","可以添加 Seed，也可以从 CG 或导演首页收藏。");return;}
-    for(const favorite of snapshot.favorites){
+    $('city-seed-count').textContent=favorites.length+' 条';
+    if(!favorites.length){list.innerHTML=resourceEmpty('seed',core.STYLE_FORMAT_LABELS[service]+' 暂无 Seed 收藏','可以手动添加，也可以从图片收藏。');return;}
+    for(const favorite of favorites){
+      const model=favorite.model||core.STYLE_FORMAT_LABELS[service];
       const row=document.createElement('article');
       row.className='city-seed-row';
       const active=snapshot.config.seedFixed&&String(snapshot.config.seedValue)===String(favorite.seed);
@@ -685,21 +792,21 @@
       const note=favorite.note?.trim();
       const seedIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7m0 3C4 17 4 10 4 7c7 0 8 4 8 7 0-4 1-7 8-7 0 5-2 9-8 10"/></svg>';
       row.innerHTML='<span class="city-seed-row-icon" aria-hidden="true">'+seedIcon+'</span><div class="city-seed-row-copy">'+
-        (note||favorite.model?'<div class="city-seed-row-meta">'+
+        (note||model?'<div class="city-seed-row-meta">'+
           (note?'<strong class="city-seed-note" title="'+esc(note)+'">'+esc(note)+'</strong>':'')+
-          (favorite.model?'<small class="city-seed-model" title="'+esc(favorite.model)+'">'+esc(favorite.model)+'</small>':'')+'</div>':'')+
+          (model?'<small class="city-seed-model" title="'+esc(model)+'">'+esc(model)+'</small>':'')+'</div>':'')+
         '<span class="city-seed-row-number">'+esc(favorite.seed)+'</span></div>';
       const use=document.createElement('button');
       use.type='button';use.className='city-seed-use';use.textContent=active?'已固定':'使用';
       use.onclick=async()=>{try{core.seedValue(favorite.seed,app.snapshot().config.format);await app.saveConfig({seedValue:String(favorite.seed),seedFixed:true});syncSeedControls(app.snapshot().config);renderSeeds();status('已使用 Seed：'+favorite.seed);}catch(error){status(error.message);}};
       const remove=document.createElement('button');
       remove.type='button';remove.className='city-seed-remove';remove.setAttribute('aria-label','删除收藏：'+favorite.seed);remove.innerHTML=trashIcon;
-      remove.onclick=async()=>{try{await app.saveFavorites(app.snapshot().favorites.filter(item=>!(String(item.seed)===String(favorite.seed)&&item.model===favorite.model)));renderSeeds();status('Seed 收藏已移除');}catch(error){status(error.message);}};
+      remove.onclick=async()=>{try{await app.saveFavorites(app.snapshot().favorites.filter(item=>!(String(item.seed)===String(favorite.seed)&&core.favoriteSeedService(item)===service)));renderSeeds();status('Seed 收藏已移除');}catch(error){status(error.message);}};
       row.append(use,remove);list.append(row);
     }
   }
 
-  function openFavorite(item,allowModelEntry=false){if(item&&!allowModelEntry&&app.snapshot().favorites.some(f=>String(f.seed)===String(item.seed))){status('这个 Seed 已收藏，可在种子收藏中管理');seedCollectState();return;}favoriteImage=structuredClone(item);
+  function openFavorite(item,updateNote=false){const snapshot=app.snapshot();favoriteService=item?.service||core.seedService(item?.config||snapshot.config,item?.syntax);if(item&&!updateNote&&snapshot.favorites.some(f=>String(f.seed)===String(item.seed)&&core.favoriteSeedService(f)===favoriteService)){status('这个 Seed 已收藏，可在种子收藏中管理');seedCollectState();return;}favoriteImage=structuredClone(item);
     const manual=!item,field=$('ad-favorite-seed');
     $('ad-favorite-title').textContent=manual?'添加 Seed':'收藏 Seed';
     $('ad-favorite-submit').textContent=manual?'添加到收藏':'收藏';
@@ -707,8 +814,8 @@
     $('ad-favorite-value').innerHTML=manual?'':'<span class="seed-value-label">Seed</span><strong>'+esc(item.seed)+'</strong>';
     $('ad-favorite-seed-field').hidden=!manual;
     field.value='';field.disabled=!manual;field.required=manual;
-    $('ad-favorite-model').value='';$('ad-favorite-note').value='';$('ad-favorite-error').textContent='';show('ad-seed-favorite');}
-  function favorite(){const item=active();if(item?.seed===null||item?.seed===undefined)return;openFavorite(item,true);}
+    $('ad-favorite-model').textContent=core.STYLE_FORMAT_LABELS[favoriteService];$('ad-favorite-note').value=snapshot.favorites.find(f=>String(f.seed)===String(item?.seed)&&core.favoriteSeedService(f)===favoriteService)?.note||'';$('ad-favorite-error').textContent='';show('ad-seed-favorite');}
+  function favorite(){const item=active();if(item?.seed===null||item?.seed===undefined)return;const source=galleryViewer?.entry?.record||record;openFavorite({...item,config:item.config||source?.config},true);}
   let promptImage=null;
   function promptSections(summary,page){
     if(page==='final'){
@@ -873,12 +980,12 @@
     const request=$('addock-scene-request').value.trim();
     return submitImageDialog('addock-scene-dialog','addock-scene-submit',()=>app.supplement(target.mid,request),draftKey('scene',target),{request});
   });
-  bind($('addock-motion'),'click',()=>{const item=active();if(!supportsMotionRequest(item,record?.kind))return;motionTarget={mid,imageId:item.id};$('addock-motion-request').value=imageDrafts.get(draftKey('motion',motionTarget))?.request||'';$('ad-motion-error').hidden=true;show('addock-motion-dialog');});
+  bind($('addock-motion'),'click',()=>{const item=active();if(!supportsMotionRequest(item))return;motionTarget={mid,imageId:item.id};$('addock-motion-request').value=imageDrafts.get(draftKey('motion',motionTarget))?.request||'';$('ad-motion-error').hidden=true;show('addock-motion-dialog');});
   bind($('addock-motion-cancel'),'click',()=>hide('addock-motion-dialog'));
   bind($('addock-motion-dialog'),'close',()=>{if(!$('addock-motion-dialog').open)motionTarget=null;});
   bind($('addock-motion-submit'),'click',()=>{
     const target=motionTarget;if(!target)return;
-    if(!supportsMotionRequest(active(),record?.kind)){hide('addock-motion-dialog');motionTarget=null;return;}
+    if(!supportsMotionRequest(active())){hide('addock-motion-dialog');motionTarget=null;return;}
     const request=$('addock-motion-request').value.trim();
     if(!request){invalidField('addock-motion-request','请填写想看的动作变化');return;}
     return submitImageDialog('addock-motion-dialog','addock-motion-submit',()=>app.animate(target.mid,target.imageId,request),draftKey('motion',target),{request});
@@ -902,30 +1009,30 @@
   bind($('addock-dna-submit'),'click',async()=>{if(!registrationTarget||registrationState?.state==='busy')return;const sourceTarget=registrationTarget,target={mid:sourceTarget.mid,imageId:sourceTarget.imageId},name=$('addock-dna-name').value.trim(),form=$('addock-dna-form').value.trim()||'默认形态';if(!name){invalidField('addock-dna-name','请填写人物姓名');return;}$('addock-dna-submit').disabled=true;try{await sourceTarget.avatarReady;}finally{$('addock-dna-submit').disabled=false;}if(registrationTarget!==sourceTarget||!$('addock-dna-dialog').open)return;target.avatar=sourceTarget.avatar;const task={mid:target.mid,imageId:target.imageId,state:'busy',text:'正在登记 · '+name,noticeUntil:Date.now()+3000};registrationState=task;registrationTarget=null;hide('addock-dna-dialog');paintRegistration();setTimeout(()=>{if(registrationState===task&&!disposed)paintRegistration();},3050);try{const job=await app.registerCharacter(target.mid,target.imageId,name,form);await app.confirmRegistration(job.id,job.proposal.identity,target.avatar);if(registrationState!==task)return;task.state='done';task.text='登记完成 · '+name;await render();paintRegistration();$('ad-registration-result-title').textContent='登记完成';const result=$('ad-registration-result-text'),person=document.createElement('strong'),shape=document.createElement('span'),message=document.createElement('span');person.className='ad-registered-name';person.textContent=name;shape.className='ad-registered-form';shape.textContent=form;message.className='ad-registered-message';message.textContent=job.usedOriginalDNA?'精简未通过校验，已按原外貌登记':'已保存到角色档案';const identity=document.createElement('div');identity.className='ad-registration-identity';identity.append(person,shape);result.replaceChildren(identity,message);show('ad-registration-result');}catch(error){if(registrationState!==task)return;task.state='failed';task.text='登记失败 · '+error.message;paintRegistration();$('ad-registration-result-title').textContent='登记失败';$('ad-registration-result-text').textContent=error.message;show('ad-registration-result');}});
 
   function syncTuneMethod(){
-    const character=tuneTarget?.character===true,canEditSource=supportsImageEditing(active());let method=tuneTarget?.method||'text2img';
-    if(!canEditSource&&method==='img2img'){method='text2img';if(tuneTarget)tuneTarget.method=method;}
+    const character=tuneTarget?.character===true,canEditSource=supportsTune(active());let method=tuneTarget?.method||'text2img';
+    if(method==='img2img'&&!(supportsImageEditing(active())||supportsReferenceEdit(active()))){method='text2img';if(tuneTarget)tuneTarget.method=method;}
     const img=method==='img2img',newScene=method==='new-scene';
     $('addock-tune-method').checked=img;
     $('addock-tune-new-scene').checked=newScene;
-    $('addock-tune-switch').hidden=character||!canEditSource;
+    $('addock-tune-switch').hidden=!(supportsImageEditing(active())||supportsReferenceEdit(active()));
     $('addock-tune-new-scene-switch').hidden=character||!canEditSource;
-    $('addock-tune-method-hint').hidden=character||!canEditSource;
+    $('addock-tune-method-hint').hidden=(character&&!img)||!canEditSource;
     $('addock-character-tune-hint').hidden=!character;
     const shotField=$('addock-tune-shot-field');
     shotField.hidden=img;shotField.dataset.newScene=String(newScene);
     if(newScene)shotField.querySelector('[value=near]').checked=true;
-    $('addock-tune-method-hint').textContent=img?'基于所选图片调整，需配置动态API':newScene?'从当前剧情选景，也可指定独立画面':'基于当前场景调整画面';
+    $('addock-tune-method-hint').textContent=img?(supportsReferenceEdit(active())?'使用所选原图作为参考，请在动态页配置编辑 API':'基于所选图片调整，需配置动态API'):newScene?'从当前剧情选景，也可指定独立画面':'基于当前场景调整画面';
     $('addock-tune-request').placeholder=character?'例如：把眼睛改成灰绿色':newScene?'重新选一个想看的场景画出来吧':'例如：让她转头看向窗外';
   }
   for(const [id,method] of [['addock-tune-method','img2img'],['addock-tune-new-scene','new-scene']])bind($(id),'change',event=>{
-    if(!tuneTarget||tuneTarget.character)return;
-    if(!supportsImageEditing(active())){tuneTarget.method='text2img';syncTuneMethod();return;}
+    if(!tuneTarget||(tuneTarget.character&&method==='new-scene'))return;
+    if(!supportsTune(active())){tuneTarget.method='text2img';syncTuneMethod();return;}
     tuneTarget.method=event.currentTarget.checked?method:'text2img';
     if(tuneTarget.method==='new-scene')$('addock-tune-shot-field').querySelector('[value=near]').checked=true;
     syncTuneMethod();
   });
   bind($('addock-tune'),'click',()=>{
-    const item=active();if(!supportsImageEditing(item))return;
+    const item=active();if(!supportsTune(item))return;
     const character=(item.kind||record?.kind)==='character_intro';
     tuneTarget={mid,imageId:item.id,character,method:'text2img'};
     $('addock-tune-title').textContent=character?'微调人物':'调整剧情画面';
@@ -944,7 +1051,28 @@
     const request=$('addock-tune-request').value.trim(),method=target.method;
     if(!request&&method!=='new-scene'){invalidField('addock-tune-request','请填写要调整的内容');return;}
     const shot=method==='img2img'?undefined:$('addock-tune-shot-field').querySelector('input:checked')?.value;
-    return submitImageDialog('addock-tune-dialog','addock-tune-submit',()=>app.tune(target.mid,target.imageId,request,{method,shot}),draftKey('tune',target),{request,method,shot});
+    const submit=confirmedService=>submitImageDialog('addock-tune-dialog','addock-tune-submit',
+      ()=>app.tune(target.mid,target.imageId,request,{method,shot,confirmedService}),draftKey('tune',target),{request,method,shot});
+    const snapshot=app.snapshot();
+    const change=core.imageServiceChange(active(),snapshot.config,record?.config);
+    const currentService=core.seedService(snapshot.config);
+    const warnV5Edit=method==='img2img'&&currentService==='nai5';
+    if(!change&&!warnV5Edit)return submit();
+    const labels=core.STYLE_FORMAT_LABELS;
+    const style=snapshot.styles.find(item=>item.id===snapshot.config.styleId)?.name;
+    const destination=labels[currentService]+(style?' · '+style:'');
+    const reference=method==='img2img'?'本次会使用原图作为参考。':'';
+    const routeNotice=change?'原图使用 '+labels[change.source]+'。本次将使用 '+destination+'，画风可能与原图不同。':'';
+    const costNotice=warnV5Edit?'NAI 5 图生图费用可能较高，实际费率以所选渠道为准。效果尚未经过大量验证，请先确认费率，并按需调整动态参数。':'';
+    const description=[routeNotice,reference,costNotice].filter(Boolean).join(' ');
+    confirmManagement(change?'确认跨链路生成':'确认 NAI 5 图生图',description,async()=>{
+      const latest=app.snapshot().config;
+      if(target!==tuneTarget||core.seedService(latest)!==currentService||latest.styleId!==snapshot.config.styleId){
+        throw Error('当前图片、生图服务或画风已变化，请返回重新确认。');
+      }
+      hide('ad-manage-confirm');
+      try{await submit(change?.current);}catch(error){handleUiError(error);}
+    });
   });
 
   function requestDelete(){const item=active();if(!item)return;deleteTarget=galleryViewer?{gallery:galleryViewer,pointer:item.pointer}:{messageId:mid,imageId:item.id};$('ad-image-delete-error').textContent='';show('ad-image-delete');}
@@ -953,13 +1081,14 @@
   for(const id of ['addock-cover','addock-fullview-cover','addock-members','addock-history-all','addock-history-cg','addock-history-order','addock-story-expand'])if($(id))$(id).hidden=true;
   bind($('ad-next-cancel'),'click',()=>hide('ad-next'));bind($('ad-next-form'),'submit',async e=>{e.preventDefault();await app.queueNext({kind:requestKind,request:$('ad-request').value,targetName:requestKind==='character_intro'?$('ad-target').value:'',targetForm:requestKind==='character_intro'?$('ad-form').value:'',shot:document.querySelector('[name=ad-shot]:checked').value});hide('ad-next');});
 
-  bind($('local-motion-official'),'click',()=>{$('local-motion-url').value='https://image.novelai.net/ai/generate-image';$('local-motion-key').value='';$('local-motion-key').placeholder='填写 API Key';officialAddressFeedback('motion');});bind($('local-motion-provider'),'change',()=>refreshOfficialApi($('local-motion-provider').value==='relay'?'thirdparty':'official'));
+  bind($('local-motion-official'),'click',()=>{const service=app.snapshot().config.imageService,endpoint=({seedream:'https://ark.cn-beijing.volces.com/api/v3/images/generations','gpt-image':'https://api.openai.com/v1/images/edits'})[service]||'https://image.novelai.net/ai/generate-image';if($('local-motion-url').value!==endpoint)$('local-motion-model').value='';$('local-motion-url').value=endpoint;$('local-motion-key').value='';$('local-motion-key').placeholder='填写 API Key';officialAddressFeedback('motion');});bind($('local-motion-provider'),'change',()=>refreshOfficialApi($('local-motion-provider').value==='relay'?'thirdparty':'official'));
   for(const id of ['local-relay-url','local-relay-key'])bind($(id),'input',()=>{staticConnectionState('dirty');clearSettingsNotice();});
-  for(const id of ['local-motion-url','local-motion-key'])bind($(id),'input',()=>{updateMotionConnectionDirty();clearSettingsNotice();});
+  for(const id of ['local-motion-url','local-motion-key','local-motion-model'])bind($(id),'input',()=>{updateMotionConnectionDirty();clearSettingsNotice();});
   bind($('local-motion-url'),'blur',()=>{if($('local-motion-key').value.trim())queueMotionAutoSave('connection',180);});
   bind($('local-motion-key'),'blur',()=>{if($('local-motion-key').value.trim())queueMotionAutoSave('connection',180);});
+  bind($('local-motion-model'),'blur',()=>{if($('local-motion-model').value.trim()&&($('local-motion-key').value.trim()||motionConnectionConfigured))queueMotionAutoSave('connection',180);});
   // Preserve native editing defaults and keep clipboard events away from host shortcuts.
-  for(const id of ['local-relay-url','local-relay-key','local-motion-url','local-motion-key']){const input=$(id);for(const event of ['keydown','keyup','keypress','paste','copy','cut','contextmenu'])bind(input,event,e=>e.stopPropagation());}
+  for(const id of ['local-relay-url','local-relay-key','local-motion-url','local-motion-key','local-motion-model']){const input=$(id);for(const event of ['keydown','keyup','keypress','paste','copy','cut','contextmenu'])bind(input,event,e=>e.stopPropagation());}
   for (const [prefix, keySelector] of [['static-api', '#local-relay-key'], ['motion-api', '#local-motion-key']]) {
     const keyField = document.querySelector(keySelector);
     const revealKey = document.querySelector('#' + prefix + '-reveal');
@@ -1004,7 +1133,7 @@
   bind($('local-noise'),'input',()=>queueMotionAutoSave('parameters',500));
   bind($('local-noise'),'change',()=>queueMotionAutoSave('parameters',120));
   bind($('local-schedule'),'change',()=>queueMotionAutoSave('parameters',120));
-  bind($('local-motion-reset'),'click',()=>{$('local-strength').value='0.85';$('local-noise').value='0';$('local-schedule').selectedIndex=0;queueMotionAutoSave('parameters',160);});
+  bind($('local-motion-reset'),'click',()=>{$('local-strength').value='0.85';$('local-noise').value='0';$('local-schedule').value=app.snapshot().config.imageService==='nai5'?'Karras':'Exponential';queueMotionAutoSave('parameters',160);});
   for(const b of document.querySelectorAll('[data-local-size]'))bind(b,'click',async()=>{const [w,h]=b.dataset.localSize.split(',').map(Number),relay=!!b.closest('#local-relay-page');$(relay?'local-relay-width':'local-width').value=w;$(relay?'local-relay-height':'local-height').value=h;if(!relay){await app.saveConfig({width:w,height:h,imageService:'official'});status('分辨率已自动保存');}});
   for(const id of ['local-width','local-height'])bind($(id),'change',async()=>{const change={width:Number($('local-width').value),height:Number($('local-height').value),imageService:'official'};validateSize(change);await app.saveConfig(change);status('分辨率已自动保存');});
   function validateSize(value){for(const k of ['width','height'])if(!Number.isInteger(value[k])||value[k]<64||value[k]>2048||value[k]%64)throw Error('宽高须为64–2048之间的64倍数');if(value.width*value.height>3145728)throw Error('尺寸总像素超出限制');}
@@ -1015,19 +1144,21 @@
   function queueMotionAutoSave(kind='parameters',delay=450){
     if(!motionSettingsReady||!app)return;
     clearTimeout(motionSaveTimer);
-    const revision=++motionSaveRevision,epoch=motionSettingsLoadEpoch,snapshot={url:$('local-motion-url').value.trim(),key:$('local-motion-key').value.trim(),parameters:readMotionFields()};
+    const cfg=app.snapshot().config,service=cfg.imageService,reference=core.supportsReferenceEdit(cfg);
+    const revision=++motionSaveRevision,epoch=motionSettingsLoadEpoch,snapshot={url:$('local-motion-url').value.trim(),key:$('local-motion-key').value.trim(),model:$('local-motion-model').value.trim(),parameters:readMotionFields()};
     const signature=motionParameterSignature(snapshot.parameters);
     motionConnectionState('dirty');
     motionSaveTimer=setTimeout(()=>{
       motionSaveQueue=motionSaveQueue.catch(()=>{}).then(async()=>{
-        if(revision!==motionSaveRevision)return;
+        if(revision!==motionSaveRevision||app.snapshot().config.imageService!==service)return;
         if(kind==='connection'){
           const changedUrl=snapshot.url!==motionConnectionUrl;
           if(!snapshot.url)throw Error('请填写有效的 HTTPS API 地址');
           if(changedUrl&&!snapshot.key)throw Error('更换 API 地址后请填写对应的 API Key');
           if(!snapshot.key&&!motionConnectionConfigured){if(epoch===motionSettingsLoadEpoch)motionConnectionState('empty');return;}
           if(epoch===motionSettingsLoadEpoch)motionConnectionState('saving');
-          const connection=await app.saveMotionConnection(snapshot.key||undefined,snapshot.url,snapshot.parameters,'auto');
+          const connection=reference?await app.saveReferenceEditConnection(service,snapshot.url,snapshot.model,snapshot.key,service==='nai5'?snapshot.parameters:undefined):await app.saveMotionConnection(snapshot.key||undefined,snapshot.url,snapshot.parameters,'auto');
+          if(reference)connection.url=connection.endpoint;
           if(revision!==motionSaveRevision||epoch!==motionSettingsLoadEpoch)return;
           const fieldsUnchanged=$('local-motion-url').value.trim()===snapshot.url&&$('local-motion-key').value.trim()===snapshot.key;
           motionConnectionUrl=connection.url;motionConnectionConfigured=!!connection.configured;
@@ -1037,8 +1168,11 @@
         }
         if(signature===motionLastSavedSignature){if(epoch===motionSettingsLoadEpoch)updateMotionConnectionDirty();return;}
         if(epoch===motionSettingsLoadEpoch)motionConnectionState('saving');
-        if(snapshot.url===motionConnectionUrl&&motionConnectionConfigured)await app.saveMotionConnection(undefined,snapshot.url,snapshot.parameters,'auto');
-        else await app.saveMotionParameters(snapshot.parameters);
+        if(service==='nai5')await app.saveNai5EditParameters(snapshot.parameters);
+        else if(!reference){
+          if(snapshot.url===motionConnectionUrl&&motionConnectionConfigured)await app.saveMotionConnection(undefined,snapshot.url,snapshot.parameters,'auto');
+          else await app.saveMotionParameters(snapshot.parameters);
+        }
         if(revision!==motionSaveRevision||epoch!==motionSettingsLoadEpoch)return;
         motionParameters=snapshot.parameters;motionLastSavedSignature=signature;
         const connectionDirty=$('local-motion-url').value.trim()!==motionConnectionUrl||!!$('local-motion-key').value.trim();
@@ -1050,10 +1184,337 @@
       });
     },Math.max(0,delay));
   }
-  for(const b of document.querySelectorAll('[data-local-save]'))bind(b,'click',async()=>{const started=startSaveFeedback(b);let saveError;clearSettingsNotice();try{if(b.closest('#local-relay-page')){const fields=$('local-static-advanced').querySelectorAll('input'),sampler=$('local-static-advanced').querySelector('select'),value={apiFormat:'auto',width:Number($('local-relay-width').value),height:Number($('local-relay-height').value),steps:Number(fields[0].value),scale:Number(fields[1].value),sampler:sampler.value};validateSize(value);if($('local-relay-page').dataset.filmView==='params'){const current=await app.generationSettings();await app.saveGenerationSettings(value,undefined,current.connection.url,current.connection.provider);staticConnectionState('saved');settingsNotice('生成参数已保存');return;}const key=$('local-relay-key').value.trim(),address=$('local-relay-url').value.trim(),provider=staticProviderFor(address),saved=await app.officialApiStatus(provider);if(!key&&provider!==connectionProvider)throw Error('切换 API 服务后请填写对应密钥');if(!key&&!saved.configured)throw Error('请填写当前服务的 API Key');await app.saveGenerationSettings(value,key||undefined,address,provider);connectionProvider=provider;staticConnectionState('saved');$('local-relay-key').value='';$('local-relay-key').placeholder='已保存；填写新密钥可替换';await studioSummary();}}catch(error){if(b.closest('#local-relay-page'))staticConnectionState('error');saveError=error;}finally{finishSaveFeedback(b,started,saveError);}});
+  for(const b of document.querySelectorAll('[data-local-save]'))bind(b,'click',async()=>{const started=startSaveFeedback(b);let saveError;clearSettingsNotice();try{if(b.closest('#local-relay-page')){const fields=$('local-static-advanced').querySelectorAll('input'),sampler=$('local-static-advanced').querySelector('select'),value={apiFormat:'auto',width:Number($('local-relay-width').value),height:Number($('local-relay-height').value),steps:Number(fields[0].value),scale:Number(fields[1].value),sampler:sampler.value};validateSize(value);if($('local-relay-page').dataset.filmView==='params'){const current=await app.generationSettings();await app.saveGenerationSettings(value,undefined,current.connection.url,current.connection.provider);staticConnectionState('saved');settingsNotice('生成参数已保存');return;}const key=$('local-relay-key').value.trim(),address=$('local-relay-url').value.trim(),provider=staticProviderFor(address),saved=(await app.generationSettings(provider)).connection;if(!key&&(provider!==connectionProvider||provider==='thirdparty'&&address.replace(/\/+$/,'')!==saved.url))throw Error('更换 API 地址后请填写对应密钥');if(!key&&!saved.configured)throw Error('请填写当前服务的 API Key');await app.saveGenerationSettings(value,key||undefined,address,provider);connectionProvider=provider;staticConnectionState('saved');$('local-relay-key').value='';$('local-relay-key').placeholder='已保存；填写新密钥可替换';await studioSummary();}}catch(error){if(b.closest('#local-relay-page'))staticConnectionState('error');saveError=error;}finally{finishSaveFeedback(b,started,saveError);}});
   bind($('ad-settings'),'close',()=>{gallery.close();flushStyleDraft();document.querySelectorAll('#ad-settings input[type=password]').forEach(i=>i.value='');releaseProfiles();const saved=settingsStageContext;settingsStageContext=null;if(saved)restoreSettingsStage(saved).catch(handleUiError);});bind($('ad-settings-close'),'click',()=>{releaseProfiles();hide('ad-settings');});document.querySelectorAll('#ad-tabs button').forEach(n=>bind(n,'click',()=>page(n.dataset.page)));
-  for(const [id,key]of [['ad-format','format'],['ad-ratio','ratio'],['ad-active-style','styleId']])bind($(id),'change',async()=>{const service=$('ad-format').value,value=$(id).value;await app.saveConfig(key==='format'?{format:service==='generic'?'generic':'nai45',imageService:service==='generic'?'generic':'nai45',width:app.snapshot().config.width||1216,height:app.snapshot().config.height||832}:{[key]:value});if(key==='format'){directorVisibility();studioSummary().catch(e=>status(e.message));selectOptions($('ad-active-style'),app.availableStyles(),app.snapshot().config.styleId);styleEditing=app.snapshot().config.styleId;renderStyleCards();}status('设置已自动保存');});
-  for(const [id,key]of [['ad-auto-generate','autoGenerate'],['ad-auto-expand','autoExpand']])bind($(id),'change',async()=>{const checked=$(id).checked;await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));await app.saveConfig({[key]:checked});status('设置已自动保存');});
+  function photoFollowsTavo(cfg){return (cfg.imageService==='gpt-image'?cfg.gptImageTransport:cfg.seedreamTransport)==='tavo';}
+  function photoApiView(config){
+    const gpt=config.imageService==='gpt-image',viaTavo=photoFollowsTavo(config);
+    const transport=$('studio-gpt-transport');
+    gptTransportField.hidden=false;
+    transport.value=viaTavo?'tavo':'direct';
+    photoForm.querySelector('.city-setting-form').hidden=viaTavo;
+    photoActions.hidden=viaTavo;
+    const title=photoForm.querySelector('.static-api-summary p');
+    title.textContent='用于 '+(gpt?'GPT Image':'Seedream 5.5')+' 静态生图与重抽';
+    if(viaTavo)$('studio-photo-state').textContent='跟随 Tavo';
+    const notes=viaTavo?[
+      '在 Tavo 的「生图 API」配置服务商、Key 和所用 '+(gpt?'GPT Image':'Seedream 5.5')+' 模型。',
+      '画幅与分辨率请在导演工作台的「尺寸」中设置，实际出图以服务商支持为准。'
+    ]:[
+      '在哪里找：打开服务商控制台的「API 文档 / 模型广场」，进入所选模型的「图片生成 / 文生图」，查看调用示例。',
+      gpt?'填什么：复制 OpenAI Images 生图示例里的 POST 地址或 API Base URL。聊天接口地址无法用于此处。'
+        :'填什么：同步渠道可用常规 API 地址；异步渠道复制「创建图片任务」的 POST 提交地址，插件会查询结果。',
+      '模型 ID 复制示例里的 model 值，Key 从同一站获取。已知地址会自动补全，首次出图请等待结果。'
+    ];
+    const help=$('studio-photo-api-help');
+    help.replaceChildren(...notes.map(text=>{const item=document.createElement('li');item.textContent=text;return item;}));
+    if(viaTavo){
+      const item=document.createElement('li'),warning=document.createElement('strong');
+      warning.className='studio-photo-parameter-warning';
+      warning.textContent='请勿在 Tavo 的生图 API 里另设画幅、尺寸等生成参数。渠道或宿主可能覆盖导演系统的设置，请优先在导演工作台调整。';
+      item.append(warning);
+      help.prepend(item);
+    }
+  }
+  bind($('studio-gpt-transport'),'change',async()=>{
+    const key=app.snapshot().config.imageService==='gpt-image'?'gptImageTransport':'seedreamTransport';await app.saveConfig({[key]:$('studio-gpt-transport').value});
+    const config=app.snapshot().config;
+    photoApiView(config);
+    if(!photoFollowsTavo(config))await loadSeedreamConnection(config.seedreamProtocol);
+    await studioSummary();
+    settingsNotice('调用方式已保存');
+  });
+  async function loadSeedreamConnection(protocol){
+    const mode=app.snapshot().config.imageService;
+    const data=mode==='gpt-image'?await app.gptImageConnection():await app.seedreamConnection(protocol);
+    if(app.snapshot().config.imageService!==mode)return;
+    if(hamuboxFields.hidden||photoFollowsTavo(app.snapshot().config))return;
+    $('studio-seedream-endpoint').value=data.endpoint;
+    resetPhotoImport();hamuboxModel.value=data.model;
+    hamuboxKey.value='';
+    hamuboxKey.placeholder=data.configured?'已保存；填写新密钥可替换':'填写 API Key';
+    $('studio-photo-state').textContent=data.configured?'未修改':'未配置';
+  }
+  let photoSizeQueue=Promise.resolve(),photoSizeRevision=0;
+  function savePhotoSize(change){
+    const revision=++photoSizeRevision;
+    const tell=(text,error=false)=>{
+      if(revision!==photoSizeRevision)return;
+      for(const id of ['studio-size-status','studio-quick-size-status']){
+        $(id).textContent=text;
+        $(id).dataset.error=String(error);
+      }
+    };
+    tell('保存中…');
+    photoSizeQueue=photoSizeQueue.then(async()=>{
+      try{
+        await app.saveConfig(change);
+        if(revision!==photoSizeRevision)return;
+        directorVisibility();
+        await studioSummary();
+        tell('已保存');
+      }catch(error){
+        tell('保存失败',true);
+        settingsNotice(error.message,true);
+      }
+    });
+    return photoSizeQueue;
+  }
+  bind($('studio-hamubox-resolution'),'change',()=>{
+    const key=app.snapshot().config.imageService==='gpt-image'?'gptImageResolution':'hamuboxResolution';
+    return savePhotoSize({[key]:$('studio-hamubox-resolution').value});
+  });
+  bind($('studio-photo-official'),'click',()=>{
+    const preset=core.IMAGE_CONNECTION_PRESETS[app.snapshot().config.imageService]?.[0];
+    if(!preset)return;
+    $('studio-seedream-endpoint').value=preset.url;
+    hamuboxModel.value=preset.model;
+    hamuboxKey.value='';
+    hamuboxKey.placeholder='填写该服务商的 API Key';
+    $('studio-photo-state').textContent='待保存';
+  });
+  for(const field of [$('studio-seedream-endpoint'),hamuboxModel,hamuboxKey])
+    bind(field,'input',()=>{$('studio-photo-state').textContent='待保存';});
+  const naiTransportField=gptTransportField.cloneNode(true);
+  naiTransportField.hidden=false;
+  naiTransportField.querySelector('label').htmlFor='studio-nai-transport';
+  naiTransportField.querySelector('select').id='studio-nai-transport';
+  const naiTransportHelp=document.createElement('small');
+  naiTransportHelp.className='studio-nai-transport-help';
+  naiTransportHelp.hidden=true;
+  naiTransportHelp.textContent='在 Tavo 的「生图 API」中选择 NovelAI 模型并配置连接。';
+  naiTransportField.append(naiTransportHelp);
+  const naiConnection=$('local-relay-url').closest('.city-static-connection');
+  naiConnection.querySelector('.static-api-summary').after(naiTransportField);
+  function naiStaticModelLabel(){return app.snapshot().config.imageService==='nai5'?'NAI 5 Full':'NAI 4.5 Full';}
+  function naiFollowsTavo(cfg){return (cfg.imageService==='nai5'?cfg.nai5Transport:cfg.naiTransport)==='tavo';}
+  function updateNaiTransport(){
+    const viaTavo=naiFollowsTavo(app.snapshot().config);
+    $('studio-nai-transport').value=viaTavo?'tavo':'direct';
+    naiTransportHelp.hidden=!viaTavo;
+    naiConnection.querySelector('.city-setting-form').hidden=viaTavo;
+    naiConnection.querySelector('.static-api-notes').hidden=true;
+    const relay=$('local-relay-page');
+    relay.dataset.followTavo=String(viaTavo);
+    if(viaTavo)$('studio-static-connection-state').textContent='跟随 Tavo';
+  }
+  bind($('studio-nai-transport'),'change',async()=>{
+    const key=app.snapshot().config.imageService==='nai5'?'nai5Transport':'naiTransport';
+    await app.saveConfig({[key]:$('studio-nai-transport').value});
+    await openRelay(relayReturn,connectionProvider);
+    settingsNotice('调用方式已保存');
+  });
+  function parseImageApiExample(text){
+    const source=text.replace(/&(?:#x20|#32|nbsp);/gi,' ').replace(/\\(?=[:\-])/g,'').trim().replace(/^\x60{3}[^\n]*\n|\n\x60{3}$/g,'').trim();
+    const line=source.match(/^(?:POST\s+|Base URL\s*[:：]\s*)(https:\/\/\S+)/i);
+    if(line)return {address:line[1]};
+    if(!/^(?:\$\s*)?curl(?:\.exe)?\s/i.test(source))return null;
+    const tokens=source.replace(/(?:\\|\^|\x60)\r?\n/g,' ').match(/(?:"(?:\\.|[^"\\])*"|'[^']*'|[^\s"'])+/g)||[];
+    const unquote=value=>value.replace(/^'(.*)'$/s,'$1').replace(/^"(.*)"$/s,(_,inner)=>inner.replace(/\\(["\\])/g,'$1'));
+    let address='',model='',method='',hasData=false;
+    for(let i=tokens[0]==='$'?2:1;i<tokens.length;i++){
+      const option=tokens[i].match(/^(--[\w-]+)=(.*)$/s);
+      const name=option?.[1]||tokens[i];
+      if(['--url','--request','-X','--header','-H','--data','--data-raw','--data-binary','--json','-d','--output','-o','--user','-u','--referer','-e'].includes(name)){
+        const value=unquote(option?.[2]??tokens[++i]??'');
+        if(name==='--url')address=value;
+        else if(name==='-X'||name==='--request')method=value.toUpperCase();
+        else if(name.startsWith('--data')||name==='--json'||name==='-d'){
+          hasData=true;
+          try{const payload=JSON.parse(value);if(typeof payload?.model==='string')model=payload.model.trim();}catch{}
+        }
+      }else if(!address&&/^https:\/\//i.test(unquote(tokens[i])))address=unquote(tokens[i]);
+    }
+    if(method?method!=='POST':!hasData)return {};
+    try{
+      const url=new URL(address);
+      if(url.protocol==='https:'&&!url.username&&!url.password&&!url.search&&!url.hash)return {address:url.href,model};
+    }catch{}
+    return {};
+  }
+  function imageApiQuestion(service){
+    if(service.endsWith('-edit')){
+      const name=service==='nai5-edit'?'NovelAI V5 Full':service==='seedream-edit'?'Seedream 5.5':'GPT Image';
+      const format=service==='nai5-edit'?'原生 img2img 请求或 HamuBox 的 NovelAI 异步任务':service==='seedream-edit'?'接受图片 Data URL 的参考图生成接口':'支持 JSON images[].image_url（Base64 Data URL）的 /images/edits 接口';
+      return '我想在第三方插件中使用贵站 '+name+' 进行图生图。请提供'+format+'的完整 POST 地址、模型 ID、含占位 Key 和原图的 cURL 示例，以及文档链接。';
+    }
+    if(service==='motion')return '我想用第三方插件调用贵站的 NovelAI Diffusion V4.5 Full 图生图（img2img）。插件需要接受 NovelAI 原生请求体（含原图与 strength），并直接返回 ZIP 或含图片的 NovelAI JSON。请提供完整 POST 地址、文档链接，以及带占位 Key 和原图的 img2img cURL 示例。请将候选 POST 地址单独列一行，并说明是否支持原生图生图。';
+    const name=service==='nai5'?'NovelAI Diffusion V5 Full':service==='nai45'?'NovelAI Diffusion V4.5 Full':service==='gpt-image'?'GPT Image':'Seedream 5.5';
+    const formats={
+      nai5:'优先 NovelAI 原生文生图（ZIP 或 NovelAI JSON）。也支持带 nai 参数的 OpenAI Images。部分任务接口已适配，例如 HamuBox 的 NovelAI 任务接口。',
+      nai45:'优先 NovelAI 原生文生图（ZIP 或 NovelAI JSON）。也支持已适配的 OpenAI Images 接口。',
+      'gpt-image':'支持 OpenAI Images 文生图，请给出直接返回图片的接口。',
+      seedream:'支持直接返回图片的 /images/generations，也支持已适配的 /image/generations 任务提交和查询。'
+    };
+    return '我想在第三方插件中使用 '+name+' 做文生图。'+formats[service]
+      +'\n请根据服务商文档告诉我该打开哪个栏目，并给出完整的 POST 生图地址、准确的模型 ID、带占位 Key 的 cURL 示例和文档链接。'
+      +'如果先返回任务编号，请同时给出查询结果的完整地址和示例。请将每条候选 POST 地址单独列一行。';
+  }
+  function apiQuestionButton(feedback,currentService){
+    const button=document.createElement('button');
+    button.type='button';button.className='studio-api-action studio-api-action-primary';
+    button.textContent='复制问题，去问 AI 或客服';
+    button.onclick=async()=>{
+      const question=imageApiQuestion(currentService());
+      try{
+        await navigator.clipboard.writeText(question);
+        feedback.replaceChildren();settingsNotice('问题已复制，发给 AI 或客服后，把回复贴回连接设置。');
+      }catch{
+        const copy=document.createElement('textarea');
+        copy.value=question;copy.readOnly=true;
+        feedback.replaceChildren(copy);copy.select();
+        if(document.execCommand('copy')){feedback.replaceChildren();settingsNotice('问题已复制，发给 AI 或客服后，把回复贴回连接设置。');}
+        else copy.setAttribute('aria-label','请手动复制问题');
+      }
+    };
+    return button;
+  }
+  function findImageApiAddress(text,service){
+    const input=text.replace(/&(?:#x20|#32|nbsp);/gi,' ').replace(/\\(?=[:\-])/g,'');
+    const urls=input.match(/https:\/\/[^\s<>"'\x60，。；）】]+/gi)||[];
+    const examples=[...input.matchAll(/(?:^|\n)\s*(?:\$\s*)?curl(?:\.exe)?\s[\s\S]*?(?=\n\s*(?:\$\s*)?curl(?:\.exe)?\s|\x60{3}|$)/gi)]
+      .map(match=>parseImageApiExample(match[0])).filter(example=>example?.address);
+    const plain=parseImageApiExample(input);
+    if(plain?.address)examples.unshift(plain);
+    const candidates=[];
+    for(const value of [...examples.map(example=>example.address),...urls]){
+      try{
+        let url=new URL(value.replace(/[),.;]+$/,''));
+        if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)continue;
+        const model=examples.find(example=>example.address===url.href)?.model;
+        const path=url.pathname.replace(/\/+$/,''),native=/\/(?:ai|nai)\/generate-image$/.test(path),images=/\/images\/generations$/.test(path);
+        let priority=0;
+        if(service==='gpt-image-edit'){
+          if(/\/images\/edits$/.test(path))priority=4;
+          else if(url.hostname==='api.openai.com'&&['','/v1'].includes(path)){url.pathname='/v1/images/edits';priority=1;}
+        }else if(service==='seedream-edit'){
+          if(/\/images?\/generations$/.test(path))priority=3;
+        }else if(service==='nai5'||service==='nai5-edit'){
+          const route=app.analyzeNai5Address(url.href);
+          if(service==='nai5-edit'&&route.kind==='openai')continue;
+          url=new URL(route.url);
+          priority=route.kind==='native'?4:route.kind==='native-json'?3:route.kind==='openai'?2:1;
+        }else if(service==='nai45'||service==='motion'){
+          const route=app.analyzeNai5Address(url.href);
+          if(route.kind==='nai-task'||service==='motion'&&route.kind==='openai')continue;
+          url=new URL(route.url);priority=route.kind==='native'?4:route.kind==='native-json'?3:2;
+        }else if(images)priority=3;
+        else if(service==='seedream'&&/\/image\/generations$/.test(path))priority=2;
+        else if(!native&&(['','/v1'].includes(path)||service==='seedream'&&/\/api\/v3$/.test(path))&&urls.length<=1)priority=1;
+        if(priority)candidates.push({address:url.href,model,priority});
+      }catch{}
+    }
+    return candidates.sort((a,b)=>b.priority-a.priority)[0];
+  }
+  function bindImageApiPaste(field,modelField,keyField,form,source,id,mode){
+    const currentService=()=>typeof mode==='function'?mode():mode||app.snapshot().config.imageService;
+    const panel=document.createElement('div');
+    panel.className='studio-nai-import';
+    panel.innerHTML='<p>系统会从你粘贴的内容中识别当前模型可用的生图地址，并帮你填到下方。</p>'
+      +'<div class="studio-api-entry-actions"></div><div class="studio-api-copy-feedback" role="status"></div>'
+      +'<label for="'+id+'">粘贴找到的地址或回复</label>'
+      +'<textarea id="'+id+'" rows="3" autocomplete="off" spellcheck="false" placeholder="可粘贴整段回复，系统会优先找当前模型可用的地址。"></textarea>'
+      +'<div class="studio-nai-import-actions"><small role="status"></small><button type="button" class="studio-api-action studio-api-trailing">分析并填入</button></div>';
+    form.prepend(panel);
+    const input=panel.querySelector('textarea'),result=panel.querySelector('small'),feedback=panel.querySelector('.studio-api-copy-feedback');
+    const actions=panel.querySelector('.studio-api-entry-actions');
+    const guide=document.createElement('button');
+    guide.type='button';guide.className='studio-api-action studio-api-guide-link';guide.textContent='查看地址示例';
+    actions.append(apiQuestionButton(feedback,currentService));
+    actions.append(guide);bind(guide,'click',()=>openApiGuide(source,guide,currentService()));
+    function reset(){
+      input.value='';result.textContent='';feedback.textContent='';delete result.dataset.error;guide.hidden=currentService().endsWith('-edit');
+    }
+    for(const event of ['keydown','keyup','keypress','paste','copy','cut','contextmenu'])bind(input,event,e=>e.stopPropagation());
+    bind(input,'input',()=>{result.textContent='';delete result.dataset.error;});
+    bind(panel.querySelector('.studio-api-trailing'),'click',()=>{
+      const service=currentService();
+      const targetModel=modelField&&!modelField.closest('[hidden]')?modelField:null;
+      const example=findImageApiAddress(input.value,service);
+      if(!example){
+        result.textContent=service.endsWith('-edit')?'未找到可用编辑地址，请向 AI 或客服索取完整 POST 地址。':'未找到可用地址，请向 AI 或客服索取完整 POST 生图地址。';
+        result.dataset.error='true';return;
+      }
+      if(field.value.trim()!==example.address){
+        keyField.value='';keyField.placeholder='填写该服务商的 API Key';
+        if(modelField)modelField.value='';
+      }
+      field.value=example.address;
+      if(targetModel&&example.model)targetModel.value=example.model;
+      field.dispatchEvent(new Event('input'));
+      reset();
+      const model=service==='nai5'||service==='nai5-edit'?'nai-diffusion-5-full':'nai-diffusion-4-5-full';
+      result.textContent=!targetModel&&example.model&&example.model!==model
+        ?'地址已填入，示例与当前模型不同，请核对。'
+        :targetModel&&example.model?'已填入地址和模型 ID，请核对 Key 后保存。':'已填入地址，请核对配置后保存。';
+    });
+    return reset;
+  }
+  const resetNaiImport=bindImageApiPaste($('local-relay-url'),null,$('local-relay-key'),naiConnection.querySelector('.city-setting-form'),$('local-relay-page'),'studio-nai-example');
+  const resetPhotoImport=bindImageApiPaste($('studio-seedream-endpoint'),hamuboxModel,hamuboxKey,photoForm.querySelector('.city-setting-form'),hamuboxFields,'studio-photo-example');
+
+  const motionAddress=$('local-motion-url');
+  const resetMotionImport=bindImageApiPaste(motionAddress,$('local-motion-model'),$('local-motion-key'),motionAddress.closest('.city-setting-form'),motionAddress.closest('[data-ad-page]'),'studio-motion-example',()=>{const cfg=app.snapshot().config;return core.supportsReferenceEdit(cfg)?cfg.imageService+'-edit':'motion';});
+  const apiGuide=document.createElement('section');
+  apiGuide.className='studio-api-guide';
+  apiGuide.hidden=true;
+  hamuboxFields.after(apiGuide);
+  let guideSource=null,guideTrigger=null;
+  function closeApiGuide(restore=true){
+    if(apiGuide.hidden)return;
+    apiGuide.hidden=true;
+    if(restore&&guideSource){
+      guideSource.hidden=false;
+      studioUpdateHeading();
+      guideTrigger?.focus();
+    }
+    guideSource=guideTrigger=null;
+  }
+  function openApiGuide(source,trigger,service){
+    const motion=service==='motion',nai=service==='nai5'||service==='nai45'||motion;
+    const model=service==='nai5'?'nai-diffusion-5-full':(service==='nai45'||motion)?'nai-diffusion-4-5-full':service==='gpt-image'?'gpt-image-1':'你的 Seedream 模型 ID';
+    const address=nai?'https://api.example.com/native/ai/generate-image':'https://api.example.com/v1/images/generations';
+    const heading=document.createElement('h2');
+    heading.textContent=motion?'为 NAI 4.5 图生图找到 API 地址':'为 '+(nai?naiStaticModelLabel():service==='gpt-image'?'GPT Image':'Seedream 5.5')+' 找到生图地址';
+    heading.tabIndex=-1;
+    const ask=document.createElement('section');
+    ask.innerHTML='<h3>也可以请 AI 或客服帮你找</h3><p>复制问题发给对方，再把地址或回复贴回连接设置。</p><div class="studio-api-copy-feedback" role="status"></div>';
+    ask.insertBefore(apiQuestionButton(ask.lastElementChild,()=>service),ask.lastElementChild);
+    apiGuide.replaceChildren(heading,ask);
+    function example(title,description,sample){
+      const section=document.createElement('section'),h=document.createElement('h3'),p=document.createElement('p'),code=document.createElement('pre');
+      h.textContent=title;p.textContent=description;code.textContent=sample;
+      const frame=document.createElement('div'),badge=document.createElement('span');
+      frame.className='studio-api-sample';badge.textContent='示例';
+      frame.append(code,badge);section.append(h,p,frame);apiGuide.append(section);
+    }
+    example('文档给了基础地址',
+      nai?'打开服务商的 API 文档，找「NovelAI 原生」或「第三方原生客户端配置」。复制 Base URL 那一行。系统能补全已知的基础地址，其他站点可继续找完整 POST 地址。'
+      :'在 API 文档中搜索你选的模型，打开「文生图」或「图像生成」。复制这一节的 Base URL，并记下示例里的模型 ID。',
+      nai?'YesNovelAI 文档\nhttps://ynai.rinko.ai/docs\n\nNovelAI 原生 Base URL\nhttps://ynai.rinko.ai/native':'Base URL: https://api.example.com/v1');
+    example('模型页给了 POST 地址',
+      service==='nai5'?'复制整行 POST 地址。可用的格式有 NovelAI 原生、NovelAI JSON、支持 nai 参数的 OpenAI 图像接口，以及部分已适配的任务接口。'
+      :motion?'找 NovelAI 原生图生图（img2img）的示例。即使文生图用同一个地址，也要确认服务商支持原图、strength 和图片返回。'
+      :nai?'优先找「NovelAI 原生生成」并复制 POST 行。也可以使用已适配的 NovelAI JSON 和 OpenAI 图像接口。'
+      :service==='gpt-image'?'找「OpenAI 兼容 → 图像生成」。选生成图片的 POST 示例。'
+      :'找 Seedream 模型页的生图示例。插件可识别同步 /images/generations 和兼容的异步 /image/generations。',
+      'POST '+address+(service==='nai5'?'\n\n例如 HamuBox 的任务提交地址\nPOST https://api.hamubox.com/v1/novelai/tasks':service==='seedream'?'\nPOST https://api.example.com/v1/image/generations':''));
+    const fields=nai?{model,action:motion?'img2img':'generate',input:'a quiet street',parameters:{params_version:service==='nai5'?4:3,...(motion?{image:'SOURCE_IMAGE_BASE64',strength:0.6,noise:0}:{}),width:832,height:1216,steps:28,scale:5,sampler:'k_euler_ancestral',noise_schedule:'karras',n_samples:1,seed:42,v4_prompt:{caption:{base_caption:'a quiet street',char_captions:[]}},v4_negative_prompt:{caption:{base_caption:'',char_captions:[]}}}}:{model,prompt:'a quiet street',size:'1024x1024'};
+    example('文档给了一整段 cURL',
+      '在同一节选择 cURL 示例。看到以 curl 开头的命令，就可以整段复制。系统会提取网址，有模型 ID 字段时也会提取模型。示例里的 Key 保留占位符即可。',
+      "curl -X POST '"+address+"' \\\n  -H 'Authorization: Bearer YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '"+JSON.stringify(fields)+"'");
+    source.after(apiGuide);guideSource=source;guideTrigger=trigger;source.hidden=true;apiGuide.hidden=false;
+    studioUpdateHeading();
+    $('ad-workspace-content').scrollTo(0,0);
+    heading.focus();
+  }
+  bind($('studio-photo-paste'),'click',async()=>{
+    try{hamuboxKey.value=(await navigator.clipboard.readText()).trim();hamuboxKey.dispatchEvent(new Event('input'));}
+    catch{$('studio-photo-paste-note').textContent='可在输入框手动粘贴';hamuboxKey.focus();}
+  });
+  bind($('studio-hamubox-save'),'click',async()=>{const field=$('studio-hamubox-key');try{const args=[$('studio-seedream-endpoint').value,hamuboxModel.value,field.value];const gpt=app.snapshot().config.imageService==='gpt-image';const data=gpt?await app.saveGptImageConnection(...args):await app.saveSeedreamConnection(undefined,...args);$('studio-seedream-endpoint').value=data.endpoint;hamuboxModel.value=data.model;$('studio-photo-state').textContent='已保存';field.value='';field.placeholder='已保存；填写新密钥可替换';settingsNotice('生图连接已保存');await studioSummary();}catch(error){settingsNotice(error.message,true);}});
+  for(const [id,key]of [['ad-format','format'],['ad-ratio','ratio'],['ad-active-style','styleId']])bind($(id),'change',async()=>{const service=$('ad-format').value,value=$(id).value;await app.saveConfig(key==='format'?{format:['nai45','nai5'].includes(service)?'nai45':'generic',imageService:service,width:app.snapshot().config.width||1216,height:app.snapshot().config.height||832}:{[key]:value});if(key==='format'){directorVisibility();studioSummary().catch(e=>status(e.message));selectOptions($('ad-active-style'),app.availableStyles(),app.snapshot().config.styleId);styleEditing=app.snapshot().config.styleId;renderStyleCards();}status('设置已自动保存');});
+  for(const [id,key]of [['ad-auto-generate','autoGenerate'],['ad-auto-expand','autoExpand'],['ad-launcher-captions','launcherCaptions']])bind($(id),'change',async()=>{const checked=$(id).checked;await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));await app.saveConfig({[key]:checked});status('设置已自动保存');});
   bind($('ad-style-scope'),'change',renderStyleCards);
   bind($('city-style-cover-file'),'change',async()=>{
     const input=$('city-style-cover-file'),file=input.files[0],id=styleCoverTarget,error=$('city-style-cover-error');
@@ -1077,7 +1538,7 @@
       renderStyleCards();
     }catch(e){error.textContent=e.message;error.hidden=false;}
   });
-  for(const id of ['ad-style-name','ad-style-basis','ad-style-positive','ad-style-negative'])bind($(id),'input',scheduleStyleSave);
+  for(const id of ['ad-style-name','ad-style-positive','ad-style-negative'])bind($(id),'input',scheduleStyleSave);
   for(const id of ['ad-style-format','ad-style-use-negative'])bind($(id),'change',scheduleStyleSave);
   bind($('ad-style-apply'),'click',async()=>{
     const id=styleEditing,button=$('ad-style-apply');
@@ -1090,24 +1551,37 @@
       $('city-style-save-state').textContent=applied===id?'已应用画风：'+(app.snapshot().styles.find(x=>x.id===id)?.name||'当前画风'):'请先切换到对应模式';
     }catch(error){$('city-style-save-state').textContent='应用失败';settingsNotice(error.message,true);}
     finally{button.disabled=false;}
-  });bind($('ad-style-copy'),'click',()=>duplicateSelectedStyle());bind($('ad-style-new'),'click',async()=>{const id=core.id('style');await app.saveStyles([...app.snapshot().styles,{id,name:'新画风',positive:'',negative:'',useNegative:app.snapshot().config.format==='nai45',format:app.snapshot().config.format,basis:app.snapshot().config.format==='nai45'?'NAI 4.5':'通用'}]);styleEditing=id;settingsDialog('styles');editStyle(id);dismissEditing();status('新画风已创建');});
+  });bind($('ad-style-copy'),'click',()=>duplicateSelectedStyle());bind($('ad-style-new'),'click',async()=>{const {format:promptFormat,imageService}=app.snapshot().config,format=core.STYLE_FORMAT_LABELS[imageService]?imageService:promptFormat,id=core.id('style');await app.saveStyles([...app.snapshot().styles,{id,name:'新画风',positive:'',negative:'',useNegative:app.snapshot().config.format==='nai45',format}]);styleEditing=id;settingsDialog('styles');editStyle(id);dismissEditing();status('新画风已创建');});
   bind($('ad-style-export'),'click',async()=>{const data=app.snapshot().styles.find(x=>x.id===app.snapshot().config.styleId);if(!data)throw Error('请先选择一款画风');const path=await tavo.file.save('ad_style_'+core.id()+'.json',JSON.stringify(data,null,2),{encoding:'utf8',scope:'chat'});await tavo.file.export(path);status('已发起画风导出');});
-  bind($('ad-style-import'),'click',async()=>{const paths=await tavo.file.import({scope:'chat',extensions:['json'],multiple:false});if(!paths.length)return;const data=JSON.parse(await tavo.file.load(paths[0],{encoding:'utf8'}));if(!data||typeof data.name!=='string'||typeof data.positive!=='string')throw Error('画风文件缺少名称或正面词');const id=core.id('style');await app.saveStyles([...app.snapshot().styles,{...data,id}]);styleEditing=id;settingsDialog('styles');editStyle(id);status('画风已导入');});
-  function seedCollectState(){for(const [inputId,buttonId]of [['ad-director-seed','ad-director-seed-save'],['ad-seed','ad-seed-save']]){const value=$(inputId).value.trim(),button=$(buttonId);let valid=false,seed;try{seed=core.seedValue(value,app.snapshot().config.format);valid=true;}catch{}const saved=valid&&app.snapshot().favorites.some(f=>String(f.seed)===String(seed));button.disabled=!valid;button.dataset.saved=String(saved);button.setAttribute('aria-pressed',String(saved));button.setAttribute('aria-label',saved?'这个 Seed 已收藏':'收藏 Seed');button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>'+(saved?'已收藏':'收藏');}}
+  bind($('ad-style-import'),'click',async()=>{
+    const [file]=await tavo.file.import({scope:'chat',extensions:['json'],multiple:false});
+    if(!file)return;
+    const path=core.clean(typeof file==='string'?file:file.path);
+    if(!path)throw Error('所选画风文件没有可读取的路径，请重新选择。');
+    const content=await tavo.file.load(path,{encoding:'utf8'});
+    let data;
+    try{data=JSON.parse(String(content??'').replace(/^\uFEFF/,''));}
+    catch{throw Error('无法解析画风文件，请选择有效的画风 JSON。');}
+    if(typeof data?.name!=='string'||typeof data?.positive!=='string')throw Error('画风文件缺少名称或正面词');
+    const id=core.id('style');
+    await app.saveStyles([...app.snapshot().styles,{...data,id}]);
+    styleEditing=id;settingsDialog('styles');editStyle(id);status('画风已导入');
+  });
+  function seedCollectState(){for(const [inputId,buttonId]of [['ad-director-seed','ad-director-seed-save'],['ad-seed','ad-seed-save']]){const value=$(inputId).value.trim(),button=$(buttonId);let valid=false,seed;try{seed=core.seedValue(value,app.snapshot().config.format);valid=true;}catch{}const snapshot=app.snapshot(),service=core.seedService(snapshot.config);const saved=valid&&snapshot.favorites.some(f=>String(f.seed)===String(seed)&&core.favoriteSeedService(f)===service);button.disabled=!valid;button.dataset.saved=String(saved);button.setAttribute('aria-pressed',String(saved));button.setAttribute('aria-label',saved?'这个 Seed 已收藏':'收藏 Seed');button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>'+(saved?'已收藏':'收藏');}}
 
-  function syncSeedControls(cfg,followLatest=false){const latest=app.snapshot().latestImage,value=followLatest&&!cfg.seedFixed&&latest?(latest.seed==null?'':String(latest.seed)):cfg.seedValue;for(const prefix of ['ad-seed','ad-director-seed']){$(prefix).value=value;$(prefix+'-fixed').checked=cfg.seedFixed;}const emptyLabel=followLatest&&!cfg.seedFixed&&latest&&latest.seed==null?'图片未返回 Seed':'—';$('ad-seed').placeholder=emptyLabel;$('ad-director-seed').placeholder=emptyLabel;for(const id of ['city-seed-lock-label','city-collection-seed-lock-label'])$(id).textContent=cfg.seedFixed?'已锁定':'锁定';$('ad-director-seed-error').hidden=true;seedCollectState();}
+  let seedControlsService='';
+  function syncSeedControls(cfg,followLatest=false){seedControlsService=core.seedService(cfg);const head=app.snapshot().latestImage,latest=head?.service===core.seedService(cfg)?head:null,value=followLatest&&!cfg.seedFixed&&latest?(latest.seed==null?'':String(latest.seed)):cfg.seedValue;for(const prefix of ['ad-seed','ad-director-seed']){$(prefix).value=value;$(prefix+'-fixed').checked=cfg.seedFixed;}const emptyLabel=followLatest&&!cfg.seedFixed&&latest&&latest.seed==null?'图片未返回 Seed':'—';$('ad-seed').placeholder=emptyLabel;$('ad-director-seed').placeholder=emptyLabel;for(const id of ['city-seed-lock-label','city-collection-seed-lock-label'])$(id).textContent=cfg.seedFixed?'已锁定':'锁定';$('ad-director-seed-error').hidden=true;seedCollectState();}
   function refreshLatestSeed(){const snapshot=app.snapshot(),id=snapshot.latestImage?.id||'';if(id===seedImageId)return;seedImageId=id;if(!snapshot.config.seedFixed)syncSeedControls(snapshot.config,true);}
 
   async function saveSeedConfig(prefix='ad-seed'){const cfg=app.snapshot().config,value=$(prefix).value.trim(),fixed=$(prefix+'-fixed').checked;try{if(fixed&&!value)throw Error('暂无可锁定的 Seed，请先生成图片或使用已收藏的 Seed。');if(value||fixed)core.seedValue(value,cfg.format);await app.saveConfig({seedFixed:fixed,seedValue:value});syncSeedControls(app.snapshot().config,!fixed&&cfg.seedFixed);if($('ad-settings').dataset.currentPage==='seeds')renderSeeds();status(fixed?'已固定当前 Seed':'Seed 设置已更新');}catch(error){for(const name of ['ad-seed-fixed','ad-director-seed-fixed'])$(name).checked=cfg.seedFixed;settingsNotice(error.message);throw error;}}
   for(const prefix of ['ad-seed','ad-director-seed']){bind($(prefix+'-fixed'),'change',()=>saveSeedConfig(prefix));}
-  bind($('ad-director-seed-save'),'click',()=>{const value=$('ad-director-seed').value.trim();if(!value){settingsNotice('暂无可收藏的 Seed，请先生成图片或选用已收藏的 Seed。');return;}const seed=core.seedValue(value,app.snapshot().config.format),latest=app.snapshot().latestImage;openFavorite(latest?.seed!==null&&latest?.seed!==undefined&&String(latest.seed)===value?latest:{seed,seedSource:'manual'});});
+  bind($('ad-director-seed-save'),'click',()=>{const value=$('ad-director-seed').value.trim();if(!value){settingsNotice('暂无可收藏的 Seed，请先生成图片或选用已收藏的 Seed。');return;}const seed=core.seedValue(value,app.snapshot().config.format),latest=app.snapshot().latestImage;openFavorite(!app.snapshot().config.seedFixed&&latest?.service===core.seedService(app.snapshot().config)&&latest.seed!=null&&String(latest.seed)===value?latest:{seed,seedSource:'manual'});});
   bind($('ad-seed-save'),'click',()=>{const value=$('ad-seed').value.trim();if(!value){settingsNotice('暂无可收藏的 Seed，请先生成图片或选用已收藏的 Seed。');return;}const seed=core.seedValue(value,app.snapshot().config.format);openFavorite({seed,seedSource:'manual'});});
   bind($('ad-seed-add'),'click',()=>openFavorite(null));
   bind($('ad-favorite-cancel'),'click',()=>hide('ad-seed-favorite'));bind($('ad-seed-favorite-form'),'submit',async e=>{e.preventDefault();const button=e.currentTarget.querySelector('[type=submit]');button.disabled=true;try{
-    const model=$('ad-favorite-model').value.trim();
-    const item=favoriteImage??{seed:core.seedValue($('ad-favorite-seed').value)};
-    if(!favoriteImage&&app.snapshot().favorites.some(f=>String(f.seed)===String(item.seed)&&f.model===model))throw Error('这个模型下已收藏该 Seed。');
-    await app.favorite(item,model,$('ad-favorite-note').value);hide('ad-seed-favorite');renderSeeds();status('Seed 已收藏');}catch(error){$('ad-favorite-error').textContent=error.message;}finally{button.disabled=false;}});
+    const item=favoriteImage??{seed:core.seedValue($('ad-favorite-seed').value,['nai45','nai5'].includes(favoriteService)?'nai45':'generic')};
+    if(!favoriteImage&&app.snapshot().favorites.some(f=>String(f.seed)===String(item.seed)&&core.favoriteSeedService(f)===favoriteService))throw Error('当前链路已收藏该 Seed。');
+    await app.favorite({...item,service:favoriteService},$('ad-favorite-note').value);hide('ad-seed-favorite');renderSeeds();status('Seed 已收藏');}catch(error){$('ad-favorite-error').textContent=error.message;}finally{button.disabled=false;}});
   bind($('ad-prompt-close'),'click',()=>hide('ad-prompt'));
   bind($('ad-prompt'),'close',()=>{promptImage=null;});
   bind($('ad-prompt-download'),'click',()=>exportGenerationRecord());
@@ -1159,7 +1633,7 @@
     reader?.refresh(event).catch(error=>status(error.message));
     if(['record','removed','ready'].includes(event.type))refreshLatestSeed();
     writeLog(event);
-    if(event.type==='settings'){seedCollectState();studioSummary().catch(e=>status(e.message));}
+    if(event.type==='settings'){const cfg=app.snapshot().config;if(seedControlsService!==core.seedService(cfg))syncSeedControls(cfg,true);else seedCollectState();if($('ad-settings').dataset.currentPage==='seeds')renderSeeds();studioSummary().catch(e=>status(e.message));}
     if(event.type==='notice'){if($('ad-settings').open&&needsSettingsAttention(event.message))settingsNotice(event.message);else status(event.message);}
     if(event.type==='message'||event.type==='ready'||(event.type==='removed'&&!event.replaced))Promise.resolve(followCurrentReply()).catch(handleUiError);
     if(event.type==='record'&&((follow&&String(event.messageId)===String(currentCardMessage()))||String(event.messageId)===String(mid))){
@@ -1194,22 +1668,39 @@
     if(!studioReady)return;
     const panelBefore=[...document.querySelectorAll('[data-studio-panel]')].find(p=>!p.hidden)?.dataset.studioPanel;
     $('ad-settings').dataset.studioView=name==='home'&&$('ad-settings').dataset.currentPage==='settings'?'home':'detail';
-    for(const n of document.querySelectorAll('[data-studio-panel]'))n.hidden=n.dataset.studioPanel!==name;
+    for(const n of document.querySelectorAll('[data-studio-panel]')){const hidden=n.dataset.studioPanel!==name;if(n.hidden!==hidden)n.hidden=hidden;}
     if(panelBefore!==name)$('ad-workspace-content').scrollTop=0;
   }
   async function studioSummary(refreshFields=false){
     if(!app||!studioReady)return;const epoch=++studioEpoch,s=app.snapshot(),cfg=s.config;
     const style=s.styles.find(x=>x.id===cfg.styleId);
     $('studio-style-name').textContent=style?.name||'选择画风';
-    const cover=$('city-home-style-cover'),art=style?.cover;
+    const cover=$('city-home-style-cover'),art=style?.cover||(['seedream_soft_portrait','nai5_signature_cg','nai5_soft_gradient_anime'].includes(style?.id)?studioBuiltinCover(style):'');
     cover.hidden=!art;
     if(art&&cover.getAttribute('src')!==art)cover.src=art;
-    const generic=genericModeSelected(cfg);const data=await app.generationSettings(cfg.imageService==='official'?'official':cfg.imageService==='relay'?'thirdparty':undefined);if(epoch!==studioEpoch)return;studioUpdateHeading();
-    $('studio-frame-summary').textContent=(generic?'跟随通用 API':data.relay.width+' × '+data.relay.height+' px');
-    $('studio-service-summary').textContent=generic?'跟随 Tavo':data.connection.configured?'已配置':'未配置';
+    const generic=genericModeSelected(cfg);
+    if(photoMode(cfg)){
+      const gpt=cfg.imageService==='gpt-image';
+      const connection=gpt?await app.gptImageConnection():await app.seedreamConnection(cfg.seedreamProtocol);
+      if(epoch!==studioEpoch)return;
+      const viaTavo=photoFollowsTavo(cfg);
+      if(gpt){gptConnectionModel=viaTavo?'':connection.model;directorVisibility();}
+      $('studio-service-summary').textContent=viaTavo?'跟随 Tavo':connection.configured?'直连 · 已配置':'直连 · 去配置';
+      $('studio-service').dataset.configured=String(connection.configured);
+      $('studio-service').disabled=false;$('film-params').hidden=true;
+      if($('studio-frame-size').hidden)$('studio-frame-size').hidden=false;
+      if($('studio-home-quick-size').hidden)$('studio-home-quick-size').hidden=false;
+      $('studio-frame-summary').textContent=gpt?core.gptImageSize(gptConnectionModel,cfg.gptImageResolution,cfg.gptImageRatio).replace('x',' × '):cfg.hamuboxResolution.toUpperCase()+' · '+cfg.seedreamRatio;
+      syncSizePresets();
+      studioUpdateHeading();return;
+    }
+    const data=await app.generationSettings(cfg.imageService==='official'?'official':cfg.imageService==='relay'?'thirdparty':undefined);if(epoch!==studioEpoch)return;studioUpdateHeading();
+    $('studio-frame-summary').textContent=(cfg.imageService==='hamubox'?(cfg.hamuboxModel===core.HAMUBOX_DEFAULT?cfg.hamuboxResolution.toUpperCase():'1K'):generic?'跟随通用 API':data.relay.width+' × '+data.relay.height+' px');
+    $('studio-service-summary').textContent=cfg.imageService==='hamubox'?'Hamubox 直连':generic||naiFollowsTavo(cfg)?'跟随 Tavo':data.connection.configured?'已配置':'未配置';
     $('studio-service').dataset.configured=String(!generic&&data.connection.configured);
     $('studio-service').disabled=generic;$('film-params').hidden=generic;
-    $('studio-frame-size').hidden=generic;$('studio-home-quick-size').hidden=generic;
+    if($('studio-frame-size').hidden!==generic)$('studio-frame-size').hidden=generic;
+    if($('studio-home-quick-size').hidden!==generic)$('studio-home-quick-size').hidden=generic;
     if(refreshFields||$('studio-frame-panel').hidden){$('studio-width').value=data.relay.width;$('studio-height').value=data.relay.height;}syncSizePresets();
   }
   function studioRoute(name,panel){
@@ -1223,11 +1714,11 @@
   let studioHeadingObserver;
   function studioUpdateHeading(){
     if(!studioReady)return;const selected=$('ad-settings').dataset.currentPage;let title='导演工作台';
-    if(!$('local-relay-page').hidden)title=$('local-relay-page').dataset.filmView==='params'?'生成参数':'静态 API 设置';else if(!$('studio-frame-panel').hidden)title='图片尺寸';else if(selected==='resources')title='资源';else if(selected==='gallery')title='本地图库';else if(selected==='tutorial')title='使用教程';else if(selected==='tutorial-motion')title='动态 CG 示例';else if(selected==='api')title='动态设置';else if(selected==='logs')title='运行记录';else if(selected==='profiles')title=$('ad-profile-editor').hidden?'人物档案':'编辑角色';else if(selected==='styles')title=$('ad-style-editor').hidden?'画风管理':'编辑画风';else if(selected==='seeds')title='种子收藏';
+    if(!apiGuide.hidden)title='查找生图地址';else if(!hamuboxFields.hidden)title='静态 API 设置';else if(!$('local-relay-page').hidden)title=$('local-relay-page').dataset.filmView==='params'?'生成参数':'静态 API 设置';else if(!$('studio-frame-panel').hidden)title='图片尺寸';else if(selected==='resources')title='资源';else if(selected==='gallery')title='本地图库';else if(selected==='tutorial')title='使用教程';else if(selected==='tutorial-motion')title='动态 CG 示例';else if(selected==='api')title='动态设置';else if(selected==='logs')title='运行记录';else if(selected==='profiles')title=$('ad-profile-editor').hidden?'人物档案':'编辑角色';else if(selected==='styles')title=$('ad-style-editor').hidden?'画风管理':'编辑画风';else if(selected==='seeds')title='种子收藏';
     const navPage=selected==='tutorial-motion'?'tutorial':selected;for(const b of document.querySelectorAll('[data-studio-nav]'))b.setAttribute('aria-selected',String(b.dataset.studioNav===(title==='图片尺寸'?'frame':title==='生成参数'?'params':navPage)));
     if($('studio-page-title').textContent!==title)$('studio-page-title').textContent=title;
     const headings={
-      '导演工作台':['home','DIRECTOR’S DESK'],'静态 API 设置':['static','STATIC API'],'生成参数':['params','GENERATION'],
+      '导演工作台':['home','DIRECTOR’S DESK'],'静态 API 设置':['static','STATIC API'],'查找生图地址':['static','API GUIDE'],'生成参数':['params','GENERATION'],
       '图片尺寸':['size','IMAGE SIZE'],'资源':['resources','ASSETS'],'动态设置':['motion','DYNAMIC CG'],'运行记录':['logs','RUNTIME LOGS'],
       '人物档案':['profiles','CHARACTERS'],'编辑角色':['profile','EDIT CHARACTER'],'画风管理':['styles','STYLE PRESETS'],
       '编辑画风':['style','EDIT STYLE'],'种子收藏':['seed','SEED LIBRARY'],'本地图库':['gallery','LOCAL GALLERY'],'使用教程':['tutorial','QUICK GUIDE'],'动态 CG 示例':['motionGuide','DYNAMIC CG']
@@ -1240,10 +1731,16 @@
     const editingStyle=selected==='styles'&&!$('ad-style-editor').hidden,editingProfile=selected==='profiles'&&!$('ad-profile-editor').hidden;const showResources=false;if($('studio-resources').hidden===showResources)$('studio-resources').hidden=!showResources;
     $('ad-settings').dataset.resourceTabs=String(showResources);$('studio-global-back').setAttribute('aria-label',editingStyle?'返回画风列表':editingProfile?'返回角色列表':!$('local-relay-page').hidden&&relayReturn==='api'?'返回动态设置':'返回上一级');
     if($('ad-style-delete').hidden===editingStyle)$('ad-style-delete').hidden=!editingStyle;if($('ad-profile-delete').hidden===editingProfile)$('ad-profile-delete').hidden=!editingProfile;
-    const generic=genericModeSelected();$('city-mode').textContent=$('ad-format').selectedOptions[0]?.textContent||'';syncNaiOnlyNavigation(generic);if($('studio-static-fields').hidden!==generic)$('studio-static-fields').hidden=generic;if($('studio-generic-note').hidden===generic)$('studio-generic-note').hidden=!generic;
+    const generic=genericModeSelected();$('city-mode').textContent=$('ad-format').selectedOptions[0]?.textContent||'';syncNaiOnlyNavigation(generic);if($('studio-static-fields').hidden!==generic)$('studio-static-fields').hidden=generic;const hamubox=photoMode(app?.snapshot()?.config);
+    const note=$('studio-generic-note'),hideNote=!generic||hamubox;
+    // The workbench observes hidden attributes. Only write on a visibility change.
+    if(note.hidden!==hideNote)note.hidden=hideNote;
+
   }
   function studioBack(){
+    if(!apiGuide.hidden){closeApiGuide();return;}
     const selected=$('ad-settings').dataset.currentPage;
+    if(!hamuboxFields.hidden){hamuboxKey.value='';studioPanel('home');studioSummary().catch(handleUiError);return;}
     if(selected==='gallery'&&gallery.back())return;
     if(!$('local-relay-page').hidden){page(relayReturn,relayReturn==='api');return;}
     if(selected==='tutorial-motion'){page('tutorial');return;}
@@ -1277,7 +1774,8 @@
     for(const b of document.querySelectorAll('[data-studio-resource]'))bind(b,'click',()=>page(b.dataset.studioResource));
     for(const b of document.querySelectorAll('[data-studio-nav]'))bind(b,'click',async()=>{
       const route=b.dataset.studioNav;
-      if(genericModeSelected()&&['api','frame','params'].includes(route))return;
+      if(route==='api'&&!supportsMotionSettings())return;
+      if(genericModeSelected()&&['frame','params'].includes(route)&&!(route==='frame'&&photoMode(app.snapshot().config)))return;
       if(route==='frame'){page('settings',false,'frame');studioUpdateHeading();return;}
       if(route==='params'){await openRelay('settings',undefined,'params');return;}
       if($('ad-settings').open){
@@ -1323,7 +1821,16 @@
         const button=document.createElement('button');
         button.type='button';button.textContent=option.textContent;
         button.setAttribute('aria-pressed',String(option.selected));
-        bind(button,'click',()=>{
+        bind(button,'click',async()=>{
+          if(select.id==='ad-format'){
+            closePicker();
+            const mode=option.value;
+            await app.saveConfig({format:['nai45','nai5'].includes(mode)?'nai45':'generic',imageService:mode});
+            directorVisibility();
+            await studioSummary();
+            if(mode==='gpt-image'&&app.snapshot().config.gptImageTransport!=='tavo'&&!(await app.gptImageConnection()).configured)await openPhotoApi();
+            return;
+          }
           select.value=option.value;
           select.dispatchEvent(new Event('change',{bubbles:true}));
           studioUpdateHeading();
@@ -1361,13 +1868,28 @@
     for(const b of document.querySelectorAll('[data-tutorial-home]'))bind(b,'click',()=>page('settings'));
     for(const b of document.querySelectorAll('[data-tutorial-motion]'))bind(b,'click',()=>page('tutorial-motion'));
     for(const b of document.querySelectorAll('[data-tutorial-return]'))bind(b,'click',()=>page('tutorial'));
-    bind($('studio-service'),'click',()=>openRelay('settings'));
+    async function openPhotoApi(){
+      const cfg=app.snapshot().config;
+      if(!photoMode(cfg))return;
+      photoApiView(cfg);
+
+      studioPanel('seedream');
+      await loadSeedreamConnection(cfg.seedreamProtocol);
+    }
+    bind($('studio-service'),'click',()=>photoMode(app.snapshot().config)?openPhotoApi():openRelay('settings'));
     bind($('film-params'),'click',()=>openRelay('settings',undefined,'params'));
     bind($('studio-logs'),'click',()=>page('logs'));
     for(const b of document.querySelectorAll('.studio-back,.studio-home-return'))bind(b,'click',()=>{page('settings');});
     let sizeSaveQueue=Promise.resolve(),sizeSaveRevision=0;
     function autoSaveSize(quiet=false){const value={width:Number($('studio-width').value),height:Number($('studio-height').value)},revision=++sizeSaveRevision,labels=[$('studio-size-status'),$('studio-quick-size-status')];const tell=(msg,error=false)=>{for(const node of labels){node.textContent=msg;node.dataset.error=String(error);}};try{validateSize(value);}catch(error){tell('尺寸无效',true);settingsNotice(error.message,true);return Promise.resolve();}tell('保存中…');sizeSaveQueue=sizeSaveQueue.catch(()=>{}).then(async()=>{const cfg=app.snapshot().config,d=await app.generationSettings(cfg.imageService==='official'?'official':cfg.imageService==='relay'?'thirdparty':undefined);if(d.relay.width===value.width&&d.relay.height===value.height){if(revision===sizeSaveRevision)tell('未修改');return;}await app.saveGenerationSettings({...d.relay,...value},undefined,d.connection.url,d.connection.provider);if(revision===sizeSaveRevision){await studioSummary();tell('尺寸已保存 · '+value.width+' × '+value.height);if(!quiet)status('已应用 '+value.width+' × '+value.height);}}).catch(error=>{if(revision===sizeSaveRevision){tell('保存失败，请重试',true);settingsNotice(error.message,true);}});return sizeSaveQueue;}
-    for(const b of document.querySelectorAll('[data-studio-size]'))bind(b,'click',async()=>{const [w,h]=b.dataset.studioSize.split(',');$('studio-width').value=w;$('studio-height').value=h;syncSizePresets();await autoSaveSize(!!b.closest('#studio-home-quick-size'));});
+    for(const b of document.querySelectorAll('[data-studio-size]'))bind(b,'click',async()=>{
+      if(photoMode(app.snapshot().config)){
+        const gpt=app.snapshot().config.imageService==='gpt-image';
+        const quick=!!b.closest('#studio-home-quick-size');
+        await savePhotoSize({[gpt?'gptImageRatio':'seedreamRatio']:presetRatios[b.dataset.studioSize],...(quick?{[gpt?'gptImageResolution':'hamuboxResolution']:'1k'}:{})});
+        return;
+      }
+      const [w,h]=b.dataset.studioSize.split(',');$('studio-width').value=w;$('studio-height').value=h;syncSizePresets();await autoSaveSize(!!b.closest('#studio-home-quick-size'));});
     for(const id of ['studio-width','studio-height']){bind($(id),'input',()=>{syncSizePresets();$('studio-size-status').textContent='待保存';$('studio-size-status').dataset.error='false';});bind($(id),'change',()=>autoSaveSize());}
     studioReady=true;studioUpdateHeading();
   }

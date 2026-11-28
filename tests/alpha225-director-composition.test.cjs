@@ -11,10 +11,10 @@ function prompt({shot='near',format='nai45',maxActors=2,kind='story_cg',request=
  return Core.buildInstruction({id:'alpha225',kind,request,storyInput,adultGatePassed,adultContextCue,targetName:'示例角色',targetForm:'默认形态',style:{positive:'game cg'},config:{format,shot,maxActors,ratio:'api'}},rules,[]);
 }
 
-test('automatic NAI framing defaults to two identifiable subjects',()=>{
+test('automatic NAI framing follows the story without a two-person cap',()=>{
  const text=prompt({maxActors:6});
- assert.match(text,/最多两位清晰主体/);
- assert.match(text,/剧情参与者超过上限时，照常选一帧并输出Scene/);
+ assert.doesNotMatch(text,/最多两位清晰主体/);
+ assert.doesNotMatch(text,/剧情参与者超过上限/);
  assert.match(text,/不建立完整人物栏、不增加人数标签/);
  assert.equal(Core.settings({maxActors:6}).maxActors,undefined);
 });
@@ -44,7 +44,7 @@ test('alpha225: scale difference is included in multi-person character design, p
  const text=prompt({kind:'character_intro',storyInput:'',request:'设计两名身高体型差异明显的角色',maxActors:2});
  assert.match(text,/身高差与体型差/);
  assert.doesNotMatch(text,/玩家角色的默认出镜策略/);
- assert.match(text,/最多两位清晰主体/);
+ assert.doesNotMatch(text,/最多两位清晰主体/);
 });
 
 test('alpha225: generic format keeps player and scale rules but not NAI cast-count preference',()=>{
@@ -101,9 +101,11 @@ test('explicit NAI group requests set the limit for that frame',()=>{
  const request={kind:'story_cg',config:{format:'nai45'}};
  const two={scene:'medium shot, 1girl, 1boy, a third participant’s hand enters at the frame edge',characters:[{},{}]};
  const three={scene:'medium shot, 2girls, 1boy',characters:[{},{},{}]};
- assert.equal(Core.validateCastLimit(two,request).allowedLimit,2);
- assert.equal(Core.validateCastLimit(three,{...request,storyInput:'三个人在房间里聊天。'}).overPreference,true);
- assert.throws(()=>Core.validateDirectorPlan(three,{...request,storyInput:'三个人在房间里聊天。'}),/超过 2 位/);
+ assert.equal(Core.validateCastLimit(two,request).allowedLimit,null);
+ assert.equal(Core.validateCastLimit(three,{...request,storyInput:'三个人在房间里聊天。'}).overPreference,false);
+ const actors=three.characters.map((_,i)=>({name:'Actor '+i,identity:'adult person',equipment:Core.Wardrobe.normalizeEquipment({})}));
+ assert.doesNotThrow(()=>Core.validateDirectorPlan({...three,characters:actors},{...request,storyInput:'三个人在房间里聊天。'}));
+ assert.equal(Core.compose({...three,characters:actors},{},request.config).sections.characters.length,3);
  assert.equal(Core.validateCastLimit(three,{...request,request:'三人清晰同框'}).allowedLimit,3);
  assert.doesNotThrow(()=>Core.validateCastLimit(two,{...request,request:'三人清晰同框'}));
  assert.equal(Core.validateCastLimit(three,{...request,config:{format:'generic'}}).applied,false);

@@ -23,6 +23,7 @@
   button.setAttribute('aria-label',label);
  }
  const tutorialIconSources={
+  profiles:['addock-characters-button','.addock-line-icon'],
   history:['addock-history-button','.addock-line-icon'],settings:['addock-config','.addock-line-icon'],
   reroll:['addock-generate','.addock-action-refresh'],add:['addock-add','.addock-line-icon'],
   tune:['addock-tune','.addock-line-icon'],register:['addock-dna-open','.addock-line-icon'],
@@ -49,7 +50,7 @@
  add('studio-style','control style-card');
  const ratio=$('studio-home-quick-size');ratio.classList.add('ratios');
  const ratioHeading=ratio.querySelector('.studio-quick-size-heading');ratioHeading.classList.add('ratio-heading');
- const ratioTitle=document.createElement('h2');ratioTitle.textContent='快捷小图比例';ratioHeading.querySelector('strong').replaceWith(ratioTitle);
+ const ratioTitle=document.createElement('h2');ratioTitle.textContent='快捷尺寸';ratioHeading.querySelector('strong').replaceWith(ratioTitle);
  const note=ratioHeading.querySelector('.city-ratio-note');if(note){const small=document.createElement('small');small.textContent=note.textContent;note.replaceWith(small);}
  ratio.querySelector('.studio-size-presets').classList.add('ratio-list');
  const shapes=['wide','portrait','square'],labels=['横图','竖图','方图'];
@@ -133,7 +134,7 @@
   ui.classList.toggle('tutorial-motion-studio',page==='tutorial-motion');
   ui.classList.toggle('size-studio',!$('studio-frame-panel').hidden);
   ui.classList.toggle('params-studio',relay.dataset.filmView==='params'&&!relay.hidden);
-  ui.classList.toggle('static-api-studio',!relay.hidden&&relay.dataset.filmView!=='params');
+  ui.classList.toggle('static-api-studio',(!relay.hidden&&relay.dataset.filmView!=='params')||$('studio-hamubox-fields')?.hidden===false);
   for(const wrap of root.querySelectorAll('.ad-profile-card-wrap:not([data-pp-ready])')){
    wrap.dataset.ppReady='true';wrap.classList.add('character-card');
    wrap.querySelector('.ad-profile-card').classList.add('character-open');

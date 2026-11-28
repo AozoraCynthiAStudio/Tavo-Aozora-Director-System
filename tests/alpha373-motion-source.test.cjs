@@ -93,3 +93,19 @@ test('a subsequent edit can address a weighted scene without losing original cha
   assert.deepEqual(next.prompt.split('|').slice(1),source.prompt.split('|').slice(1));
  }finally{f.app.close();}
 });
+
+test('a NAI 4.5 character candidate can make and replay a dynamic frame',async()=>{
+ const {f,source}=await setup();
+ try{
+  await f.store.mutateRecord(2,r=>({...r,kind:'character_intro',images:r.images.map(image=>({...image,kind:'character_intro'}))}));
+  f.tavo.generate=async()=>change();
+  await f.app.animate(2,source.id,'举起书');
+  const first=(await f.app.readRecord(2)).images.at(-1);
+  assert.equal(first.kind,'character_intro');
+  assert.equal(first.motion.sourcePointer,source.pointer);
+  await f.app.repeatMotion(2,first.id,'replace');
+  const next=await f.app.readRecord(2);
+  assert.equal(next.images[0].id,source.id);
+  assert.equal(next.images.at(-1).motion.sourcePointer,source.pointer);
+ }finally{f.app.close();}
+});

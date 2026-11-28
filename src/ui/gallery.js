@@ -152,8 +152,25 @@ window.ADirectorGallery=function(tavo,{app,openViewer,confirmManagement,containe
     (scope==='global'?openGlobal:open)().catch(error=>{status.textContent=error.message;});
     return true;
   }
+  function renderGlobalEmpty(){
+    const notice=document.createElement('div');
+    notice.className='ad-gallery-cleared';
+    const message=document.createElement('div');
+    message.setAttribute('role','status');
+    const title=document.createElement('h3');
+    title.textContent='此对话的图片已清空';
+    const detail=document.createElement('p');
+    detail.textContent='返回全局图库的对话列表，即可查看其他对话的图片。';
+    message.append(title,detail);
+    notice.append(message);
+    const action=button(notice,'返回对话列表',openGlobal,busy);
+    action.className='ad-gallery-return';
+    body.append(notice);
+  }
+
   function render(){
     viewingStory=true;reset(files.length+' 张图片');
+    if(scope==='global'&&!files.length){renderGlobalEmpty();return;}
     const tools=document.createElement('div');tools.className='ad-gallery-tools logs-toolbar';header.append(tools);
     const pages=Math.max(1,Math.ceil(files.length/pageSize));
     page=Math.max(0,Math.min(page,pages-1));

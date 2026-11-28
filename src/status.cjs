@@ -2,11 +2,13 @@
 const PHASES={ready:['待手动生成','提示词已保存，点击生成开始。',false],idle:['导演待命','设定下一轮导演后，发送消息开始。',false],pending:['下一轮已设定','发送消息后开始整理导演提示词。',false],'no-director':['未设置下一轮导演','本轮正文不会自动生成画面。',true],preparing:['整理导演提示词','与本轮文本回复同时处理，尚未提交生成任务。',true],'prompt-ready':['导演提示词已就绪','等待回复保存后提交生成。',true],queued:['等待生成','导演方案已保存，正在准备提交。',true],generating:['正在生成','收起界面后，生成仍会继续。',true],saving:['正在保存','结果已返回，正在核对文件并保存记录。',true],loading:['正在加载','正在读取已保存的结果，不会重新生成。',true],done:['生成完成','',false],failed:['生成未完成','查看运行记录后，可使用原按钮重试。',false],uncertain:['生成结果待确认','先查看记录或恢复返回结果，避免重复提交。',false],cancelled:['本轮已取消','没有自动提交新的生成任务。',false]};
 function describe(value={}){const phase=PHASES[value.phase]?value.phase:'idle',row=PHASES[phase];return {...value,phase,label:phase==='preparing'&&value.taskType?'正在准备'+(value.taskType==='申请动态'?'动态画面':value.taskType):row[0],hint:value.error||(phase==='preparing'&&value.taskType?'正在整理画面变化，收起窗口仍会继续。':row[1]),busy:row[2],tone:phase==='failed'?'error':phase==='uncertain'?'warning':phase==='done'?'success':'normal'};}
 function fromRecord(record){if(!record)return describe();const phase=record.status==='generating'?(record.generationPhase||'generating'):record.status==='done'?(record.images?.length?'done':'idle'):PHASES[record.status]?record.status:'idle';return describe({phase,messageId:String(record.messageId||''),error:record.error||'',errorCode:record.errorCode||'',statusCode:record.errorStatus||null});}
+const GPT_IMAGE_CONTENT_HINT='请查看服务商返回的原因，并按其内容要求调整画面描述。';
 function imageFailure(value){
  const message=String(value?.message||value?.error||(typeof value==='string'?value:'')).trim();
  const code=String(value?.code||value?.errorCode||'');
  const http=[value?.statusCode,value?.status,message.match(/\b(?:HTTP|status(?: code)?)\s*[:：=]?\s*([45]\d{2})\b/i)?.[1]].map(Number).find(status=>status>=400&&status<=599)||0;
  const context=[code,message].join(' ');
+ if(code==='GPT_IMAGE_CONTENT_REJECTED')return {title:'GPT Image 内容审核未通过',hint:[message,GPT_IMAGE_CONTENT_HINT].filter(Boolean).join('\n')};
  const response=hint=>({title:http?'图片服务返回 HTTP '+http:'图片服务拒绝请求',hint});
  if(code==='TEXT_MODEL_REFUSED')return {title:'文本模型拒绝请求',hint:'未返回画面方案，原图已保留，尚未提交图片生成；具体返回见运行记录。'};
  if(code==='IMAGE_DOWNLOAD_NETWORK')return {title:'读取图片结果时连接中断',hint:'请先确认服务是否已生成图片。'};
@@ -25,4 +27,4 @@ function imageFailure(value){
  return {title:'本轮画面未完成',hint:message||'可在运行记录查看本次任务。'};
 }
 function createTracker(){let serial=0;const tasks=new Map();return {update(id,value){const previous=tasks.get(id);tasks.set(id,{...previous,...value,operationId:id,order:previous?.order||++serial,updated:++serial});if(tasks.size>40){for(const [key,row]of tasks){if(!describe(row).busy&&key!==id){tasks.delete(key);if(tasks.size<=24)break;}}}return this.snapshot();},drop(id){tasks.delete(id);return this.snapshot();},dropMessage(mid){for(const [key,row]of tasks)if(String(row.messageId)===String(mid))tasks.delete(key);return this.snapshot();},snapshot(){const rows=[...tasks.values()],busy=rows.filter(r=>describe(r).busy);return describe((busy.length?busy.sort((a,b)=>a.order-b.order):rows.sort((a,b)=>a.updated-b.updated)).at(-1)||{});},reset(){tasks.clear();}};}
-module.exports={describe,fromRecord,createTracker,imageFailure};
+module.exports={describe,fromRecord,createTracker,imageFailure,GPT_IMAGE_CONTENT_HINT};

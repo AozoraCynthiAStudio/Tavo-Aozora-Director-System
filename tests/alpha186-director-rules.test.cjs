@@ -51,7 +51,7 @@ test('a static request keeps the explicit scene, shot and selected ratio',()=>{
  const r=req('story_cg','nai45','',{config:{format:'nai45',maxActors:4,shot:'full',ratio:'2:3'},request:'只画女主在图书馆窗边读书'});
  const text=Core.buildInstruction(r,rules,[]);
  assert.match(text,/只画女主在图书馆窗边读书/);
- assert.match(text,/最多两位清晰主体/);
+ assert.doesNotMatch(text,/最多两位清晰主体/);
  assert.match(text,/本轮镜头范围：全身/);
  assert.match(text,/构图参考画幅 2:3/);
  assert.match(text,/只拍摄静态画面/);

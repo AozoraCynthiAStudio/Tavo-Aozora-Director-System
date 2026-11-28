@@ -7,6 +7,9 @@ exports.read=(root,p)=>{
   const ids={meekohopanes_ru_zhai:'east',mignon_allenes:'acg',kittew:'westtoon',meekohopanes:'westreal'},covers={};
   for(const[id,key]of Object.entries(ids))covers[id]=asset('src/assets/style-cover-'+key+'.jpg');
   covers.generic_quality=asset('src/assets/style-cover-generic.svg');
+  covers.seedream_soft_portrait=asset('src/assets/style-cover-seedream.jpg');
+  covers.nai5_signature_cg=asset('src/assets/style-cover-nai5-clear-cg-v183.jpg');
+  covers.nai5_soft_gradient_anime=asset('src/assets/style-cover-nai5-soft-gradient-anime.jpg');
   s=s.replace('__AD_STUDIO_DEFAULTS__',fs.readFileSync(path.join(root,'src/assets/styles.json'),'utf8')).replace('__AD_STUDIO_COVERS__',JSON.stringify(covers));
  }
  if(p.startsWith('src/ui/')&&p.endsWith('.css'))for(const [prefix,folder]of [['PHANTOM','phantom'],['WORKBENCH','workbench']]){

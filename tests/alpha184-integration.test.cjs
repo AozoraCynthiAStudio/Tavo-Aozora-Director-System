@@ -28,9 +28,11 @@ test('v184 end-to-end: queue -> generate text with single Scene -> save image ->
  await f.app.generate(2,true,image.id);assert.equal(f.calls,2);const next=await f.app.readRecord(2);assert.equal(next.images.length,2);
  assert.ok(f.compiled.every(c=>!c.characters.some(x=>Object.hasOwn(x,'action'))));f.app.close();
 });
-test('v184 image tuning changes one full Scene and appends separate candidate without rewriting registered DNA',async()=>{
- const f=fixture(),{record}=await deliver(f,'character_intro');const source=record.images[0];
- let promptSeen='';f.setGenerate(async prompt=>{promptSeen=prompt;return JSON.stringify({scene:'medium shot, 1girl, old apartment, the woman standing next to a table, arms folded, looking at the viewer',changes:[],wardrobeUpdates:[],dnaSnapshots:[{index:0,registrationDNA:dna}]});});
+for(const [imageService,format] of [['nai5','nai45'],['nai45','nai45'],['generic','generic'],['gpt-image','generic'],['seedream','generic']])test(imageService+' tunes a character candidate without rewriting registered DNA',async()=>{
+ const f=fixture();
+ f.vars.set('chat:1:aozora_director_v1.config',{imageService,format,naiTransport:'tavo',nai5Transport:'tavo',gptImageTransport:'tavo',seedreamTransport:'tavo'});
+ const {record}=await deliver(f,'character_intro');const source=record.images[0];
+ let promptSeen='';f.setGenerate(async prompt=>{if(prompt.includes('为 NovelAI V5 设计当前角色的补充五官'))return '{}';promptSeen=prompt;return JSON.stringify({scene:'medium shot, 1girl, old apartment, the woman standing next to a table, arms folded, looking at the viewer',changes:[],wardrobeUpdates:[],dnaSnapshots:[{index:0,registrationDNA:dna}]});});
  await f.app.tune(2,source.id,'把姿势改成站在桌旁抱臂');const next=await f.app.readRecord(2);
  assert.match(promptSeen,/唯一|scene/i);assert.equal(next.images.length,2);assert.match(next.images[1].prompt,/arms folded/);assert.ok(!Object.hasOwn(next.images[1].plan.characters[0],'action'));assert.match(next.images[1].prompt,/sheer black pantyhose/);
  assert.match(next.images[1].prompt,/broad face, strong jaw/);assert.match(next.images[0].prompt,/both hands on her lap/);f.app.close();
@@ -64,4 +66,24 @@ test('v185 unregistered character candidate supports two successive DNA slot edi
  // Neither tuning operation silently registers the candidate.
  assert.deepEqual(f.app.snapshot().profiles,[]);
  f.app.close();
+});
+
+for(const [imageService,format] of [['nai45','nai45'],['seedream','generic']])test(imageService+' uses the selected character candidate as an edit reference and preserves registration DNA',async()=>{
+ const f=fixture();
+ f.vars.set('chat:1:aozora_director_v1.config',{imageService,format,naiTransport:'tavo',seedreamTransport:'tavo'});
+ try{
+  const {record}=await deliver(f,'character_intro');
+  const source=record.images[0];
+  await f.tavo.variable.set('aozora_motion_connection_v1',{provider:'official',apiKey:'local-fixture-only'},'global');
+  if(imageService==='seedream')await f.app.saveReferenceEditConnection('seedream','https://api.hamubox.com/v1/image/generations','dola-seedream-5-5-ep','fixture-edit-key');
+  f.setGenerate(async()=>JSON.stringify({dnaChanges:[{index:0,slots:{eyes:'amber eyes'}}]}));
+  await f.app.tune(2,source.id,'把眼睛改成琥珀色',{method:'img2img'});
+  const result=await f.app.readRecord(2),edited=result.images.at(-1);
+  assert.equal(result.images.length,2);
+  assert.equal(result.images[0].id,source.id);
+  assert.equal(edited.kind,'character_intro');
+  assert.match(edited.plan.characters[0].registrationDNA.slots.eyes,/amber/);
+  assert.deepEqual(f.compiled.at(-1).options.referenceImages,[source.pointer]);
+  assert.equal(edited.motion,undefined);
+ }finally{f.app.close();}
 });
